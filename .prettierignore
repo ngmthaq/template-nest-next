@@ -1,0 +1,15 @@
+# Build output
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Tooling
+.claude
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
