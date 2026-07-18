@@ -1,28 +1,18 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-  Version,
-  VERSION_NEUTRAL,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, UseGuards, VERSION_NEUTRAL } from '@nestjs/common';
 import { NonProductionGuard } from '../../shared/guards/non-production.guard';
 import { CacheEntry, CacheService } from './cache.service';
 
-@Controller({ path: 'cache' })
+@UseGuards(NonProductionGuard)
+@Controller({ path: 'cache', version: VERSION_NEUTRAL })
 export class CacheController {
-  constructor(private readonly cacheService: CacheService) {}
+  public constructor(private readonly cacheService: CacheService) {}
 
   /**
    * Search cached entries by a regular expression matched against keys.
    * `GET /cache?pattern=^user:` → array of matching `{ key, value }` entries.
    */
-  @Version(VERSION_NEUTRAL)
-  @UseGuards(NonProductionGuard)
   @Get()
-  search(@Query('pattern') pattern: string): Promise<CacheEntry[]> {
+  public search(@Query('pattern') pattern: string): Promise<CacheEntry[]> {
     return this.cacheService.search(pattern);
   }
 
@@ -30,10 +20,8 @@ export class CacheController {
    * Delete a single cache entry by its exact key.
    * `DELETE /cache/:key` → `{ key, deleted }`.
    */
-  @Version(VERSION_NEUTRAL)
-  @UseGuards(NonProductionGuard)
   @Delete(':key')
-  async remove(@Param('key') key: string): Promise<{ key: string; deleted: boolean }> {
+  public async remove(@Param('key') key: string): Promise<{ key: string; deleted: boolean }> {
     const deleted = await this.cacheService.delete(key);
     return { key, deleted };
   }

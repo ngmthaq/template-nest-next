@@ -10,9 +10,9 @@ import { ConfigService } from '@nestjs/config';
  */
 @Injectable()
 export class NonProductionGuard implements CanActivate {
-  constructor(private readonly config: ConfigService) {}
+  public constructor(private readonly config: ConfigService) {}
 
-  canActivate(): boolean {
+  public canActivate(): boolean {
     const nodeEnv = this.config.get<string>('nodeEnv', 'development');
     if (nodeEnv === 'production') {
       throw new ForbiddenException('This endpoint is not available in the production environment.');

@@ -13,13 +13,13 @@ import type { Cache } from 'cache-manager';
  */
 @Injectable()
 export class CacheService {
-  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
+  public constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   /**
    * Search cached entries whose key matches the given regular expression.
    * Returns every matching entry as a `{ key, value }` pair.
    */
-  async search(pattern: string): Promise<CacheEntry[]> {
+  public async search(pattern: string): Promise<CacheEntry[]> {
     const regex = this.compileRegex(pattern);
     const entries: CacheEntry[] = [];
     const seen = new Set<string>();
@@ -49,7 +49,7 @@ export class CacheService {
    * existence check is explicit because cache-manager's `del()` resolves to
    * `true` even for keys that were never present.
    */
-  async delete(key: string): Promise<boolean> {
+  public async delete(key: string): Promise<boolean> {
     const existed = (await this.cache.get(key)) !== undefined;
     await this.cache.del(key);
     return existed;
