@@ -9,7 +9,7 @@
 - **Package Managers**: `N/A`
 - **Key Libraries**: `N/A`
 - **Database**: `N/A`
-- **Doc Directory**: `/docs`
+- **Doc Directory**: `/.docs`
 - **Testing Workflow**: `Skip-Testing` <!-- Code-First | Test-First | Skip-Testing -->
 - **Playwright Check**: `None` <!-- Always | None | Ask-User -->
 
