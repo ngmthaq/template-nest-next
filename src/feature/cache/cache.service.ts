@@ -1,0 +1,75 @@
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import type { Cache } from 'cache-manager';
+
+/**
+ * Business logic for the cache administration endpoints.
+ *
+ * Reads and mutates the global `CACHE_MANAGER` (registered in `CoreModule`).
+ * Key enumeration is done by iterating each underlying Keyv store — the
+ * standard cache-manager interface has no `keys()` method, but every store
+ * backed by an iterable adapter (including the default in-memory store)
+ * exposes an async `iterator()` yielding `[key, value]` pairs.
+ */
+@Injectable()
+export class CacheService {
+  constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
+
+  /**
+   * Search cached entries whose key matches the given regular expression.
+   * Returns every matching entry as a `{ key, value }` pair.
+   */
+  async search(pattern: string): Promise<CacheEntry[]> {
+    const regex = this.compileRegex(pattern);
+    const entries: CacheEntry[] = [];
+    const seen = new Set<string>();
+
+    for (const store of this.cache.stores) {
+      if (typeof store.iterator !== 'function') {
+        continue;
+      }
+      for await (const [key, value] of store.iterator(undefined)) {
+        if (typeof key !== 'string' || seen.has(key)) {
+          continue;
+        }
+        if (regex.test(key)) {
+          seen.add(key);
+          entries.push({ key, value });
+        }
+      }
+    }
+
+    return entries;
+  }
+
+  /**
+   * Delete a single cache entry by its exact key.
+   *
+   * Returns `true` only when an entry actually existed and was removed. The
+   * existence check is explicit because cache-manager's `del()` resolves to
+   * `true` even for keys that were never present.
+   */
+  async delete(key: string): Promise<boolean> {
+    const existed = (await this.cache.get(key)) !== undefined;
+    await this.cache.del(key);
+    return existed;
+  }
+
+  /** Compile the user-supplied pattern into a RegExp, rejecting invalid input. */
+  private compileRegex(pattern: string): RegExp {
+    if (!pattern) {
+      throw new BadRequestException('A "pattern" query parameter is required.');
+    }
+    try {
+      return new RegExp(pattern);
+    } catch {
+      throw new BadRequestException(`Invalid regular expression: ${pattern}`);
+    }
+  }
+}
+
+/** A single cache entry returned by a search. */
+export interface CacheEntry {
+  key: string;
+  value: unknown;
+}
