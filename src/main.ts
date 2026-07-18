@@ -1,12 +1,14 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
 import { handleVersioning } from './shared/config/versioning.config';
 import { handleValidationPipe } from './shared/pipes/validation.pipe';
 
 // Bootstrap the NestJS application.
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   handleValidationPipe(app);
   handleVersioning(app);
   const config = app.get(ConfigService);

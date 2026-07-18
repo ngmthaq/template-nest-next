@@ -1,6 +1,8 @@
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WinstonModule } from 'nest-winston';
+import { createWinstonOptions } from '../shared/config/logger.config';
 import configuration from './configuration';
 
 /**
@@ -18,6 +20,11 @@ import configuration from './configuration';
  * `ttl` is expressed in milliseconds (cache-manager v7). The configured `max`
  * is not applied here because the default in-memory store in cache-manager v7
  * exposes no top-level `max` option; see `configuration.ts`.
+ *
+ * `WinstonModule` is registered globally and its options are resolved from
+ * `ConfigService`. It exposes the Nest-compatible logger provider that
+ * `main.ts` attaches via `app.useLogger`, so all framework and application
+ * logs flow through Winston.
  */
 @Module({
   imports: [
@@ -30,6 +37,10 @@ import configuration from './configuration';
         `.env.${process.env.NODE_ENV ?? 'development'}`,
         '.env',
       ],
+    }),
+    WinstonModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: createWinstonOptions,
     }),
     CacheModule.registerAsync({
       isGlobal: true,

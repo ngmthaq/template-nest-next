@@ -8,6 +8,9 @@
 export default () => ({
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: parseInt(process.env.PORT ?? '3000', 10),
+  log: {
+    level: process.env.LOG_LEVEL ?? 'debug',
+  },
   cache: {
     ttl: parseInt(process.env.CACHE_TTL ?? '3600000', 10),
     max: parseInt(process.env.CACHE_MAX ?? '100', 10),
