@@ -4,6 +4,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
+import { handleSwagger } from './shared/config/swagger.config';
 import { handleVersioning } from './shared/config/versioning.config';
 import { handleValidationPipe } from './shared/pipes/validation.pipe';
 
@@ -15,6 +16,7 @@ async function bootstrap() {
   app.use(compression());
   handleValidationPipe(app);
   handleVersioning(app);
+  handleSwagger(app);
   const config = app.get(ConfigService);
   const port = config.get<number>('port', 3000);
   await app.listen(port);
