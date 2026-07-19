@@ -21,10 +21,11 @@ import type { Server, Socket } from 'socket.io';
  * events are logged, and inbound messages are handled by `@SubscribeMessage`
  * methods. Broadcast to every connected client via the injected `server`.
  *
- * NOTE: `cors.origin` is `'*'` for local development — restrict it to your
- * trusted front-end origins before deploying to production.
+ * CORS is not configured on the decorator: it is applied at bootstrap by
+ * `ConfiguredIoAdapter` (see `websocket.adapter.ts`), which sources the same
+ * `CORS_*` settings as the REST layer so both transports share one policy.
  */
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway()
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly server!: Server;
