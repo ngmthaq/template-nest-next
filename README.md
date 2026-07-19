@@ -38,10 +38,38 @@ cp .env.example .env.development
 
 ### Available variables
 
-| Variable   | Default       | Description                             |
-| ---------- | ------------- | --------------------------------------- |
-| `NODE_ENV` | `development` | Set by the start script (not the file). |
-| `PORT`     | `3000`        | HTTP server port.                       |
+See `.env.example` for the authoritative, commented list. Every key is optional — the
+default in `src/core/configuration.ts` applies when it is unset.
+
+| Variable                | Default                                  | Description                                                                                   |
+| ----------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `NODE_ENV`              | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour. |
+| `PORT`                  | `3000`                                   | HTTP server port.                                                                             |
+| `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                  |
+| `CACHE_TTL`             | `3600000`                                | In-memory cache entry TTL, in milliseconds.                                                   |
+| `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                       |
+| `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                |
+| `HTTP_MAX_REDIRECTS`    | `5`                                      | Outbound HTTP max redirects before failing.                                                   |
+| `CORS_ORIGIN`           | `*`                                      | Allowed origins (`*` reflects any, or a comma-separated allow-list). REST + WebSocket.        |
+| `CORS_METHODS`          | `GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS` | Allowed HTTP methods.                                                                         |
+| `CORS_ALLOWED_HEADERS`  | _(empty)_                                | Allowed request headers; empty reflects the browser's requested headers.                      |
+| `CORS_CREDENTIALS`      | `false`                                  | Allow cookies/Authorization cross-origin. Cannot combine with a literal `*` origin.           |
+| `CORS_MAX_AGE`          | _(empty)_                                | Preflight cache duration in seconds.                                                          |
+| `THROTTLE_SHORT_TTL`    | `1000`                                   | Rate-limit short tier window, in milliseconds.                                                |
+| `THROTTLE_SHORT_LIMIT`  | `3`                                      | Rate-limit short tier: max requests per window.                                               |
+| `THROTTLE_MEDIUM_TTL`   | `10000`                                  | Rate-limit medium tier window, in milliseconds.                                               |
+| `THROTTLE_MEDIUM_LIMIT` | `20`                                     | Rate-limit medium tier: max requests per window.                                              |
+| `THROTTLE_LONG_TTL`     | `60000`                                  | Rate-limit long tier window, in milliseconds.                                                 |
+| `THROTTLE_LONG_LIMIT`   | `100`                                    | Rate-limit long tier: max requests per window.                                                |
+| `COOKIE_SECRET`         | _(empty)_                                | Secret to sign cookies (enables `request.signedCookies`); empty = unsigned.                   |
+| `COMPRESSION_THRESHOLD` | `1024`                                   | Minimum response size (bytes) before compressing.                                             |
+| `COMPRESSION_LEVEL`     | `-1`                                     | zlib level `0`–`9`, or `-1` for the default.                                                  |
+| `HASH_SALT_ROUNDS`      | `10`                                     | bcrypt cost factor (2^rounds) for `HashService`.                                              |
+| `ENCRYPTION_KEY`        | _(empty)_                                | Secret the AES key is derived from; required only to use `EncryptionService`.                 |
+| `ENCRYPTION_SALT`       | `salt`                                   | Salt for encryption key derivation; change per deployment.                                    |
+| `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ connection).                                                               |
+| `REDIS_PORT`            | `6379`                                   | Redis port.                                                                                   |
+| `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                               |
 
 ### Accessing config in code
 
@@ -58,3 +86,53 @@ const env = this.config.get<string>('nodeEnv');
 
 1. Add a `start:<name>` script with `cross-env NODE_ENV=<name> ...` in `package.json`.
 2. Create a matching `.env.<name>` file (git-ignored automatically).
+
+## Security & HTTP Hardening
+
+Cross-cutting middleware is applied during bootstrap in `src/main.ts`, each wrapped in a
+`handle*(app)` helper under `src/shared/config/` and driven by the `ConfigService` values
+above.
+
+| Concern           | Where                                       | Notes                                                                                                         |
+| ----------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **CORS**          | `shared/config/cors.config.ts`              | One policy shared by REST (`app.enableCors`) and WebSocket (`websocket/websocket.adapter.ts`).                |
+| **Helmet**        | `shared/config/helmet.config.ts`            | Security headers. CSP is disabled outside production (where Swagger UI is served).                            |
+| **Rate limiting** | `core/core.module.ts` (`@nestjs/throttler`) | Three tiers (`short`/`medium`/`long`) applied together via a global `ThrottlerGuard`; skipped in development. |
+| **cookie-parser** | `shared/config/cookie-parser.config.ts`     | Populates `request.cookies`; signs cookies when `COOKIE_SECRET` is set.                                       |
+| **Compression**   | `shared/config/compression.config.ts`       | gzip/deflate responses over `COMPRESSION_THRESHOLD` bytes.                                                    |
+
+Per-route rate-limit control uses the throttler decorators, e.g. `@Throttle({ long: { limit, ttl } })`
+or `@SkipThrottle({ short: true })`.
+
+### Cryptographic services
+
+`SecurityModule` (`src/core/security/`, global) provides two injectable services:
+
+- **`HashService`** — one-way bcrypt hashing for passwords: `hash(value)` and
+  `compare(value, hashed)`.
+- **`EncryptionService`** — reversible AES-256-GCM for recoverable secrets:
+  `encrypt(text)`, `decrypt(payload)`, and `compare(text, payload)`. GCM is authenticated,
+  so tampered payloads are rejected. Requires `ENCRYPTION_KEY`.
+
+```ts
+constructor(
+  private readonly hash: HashService,
+  private readonly encryption: EncryptionService,
+) {}
+
+const hashed = await this.hash.hash(password);
+const ok = await this.hash.compare(password, hashed);
+
+const token = this.encryption.encrypt(secret);
+const plain = this.encryption.decrypt(token);
+```
+
+## Build & Compilation
+
+The project compiles with **[SWC](https://docs.nestjs.com/recipes/swc)** (`builder: "swc"` in
+`nest-cli.json`) for fast builds. `typeCheck: true` keeps full TypeScript type-checking in a
+parallel process, since SWC only transpiles. The `nest build` / `nest start` scripts pick this
+up automatically.
+
+> `bcrypt` and `@swc/core` are native modules; `pnpm.onlyBuiltDependencies` in `package.json`
+> allows their install scripts to run so the native addons compile.
