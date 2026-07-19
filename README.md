@@ -127,6 +127,29 @@ const token = this.encryption.encrypt(secret);
 const plain = this.encryption.decrypt(token);
 ```
 
+## API Documentation (Swagger)
+
+Interactive [OpenAPI/Swagger](https://docs.nestjs.com/openapi/introduction) docs are configured
+in `src/shared/config/swagger.config.ts` and mounted during bootstrap:
+
+- **UI:** `GET /swagger`
+- **OpenAPI JSON:** `GET /swagger-json`
+- **OpenAPI YAML:** `GET /swagger-yaml`
+
+The document (titled _"NestJS Template API"_) is built by scanning controllers and their
+`@nestjs/swagger` decorators. The `X-API-Version` header (see header-based versioning below) is
+registered as a global parameter, so you can set the requested API version directly from the UI,
+and authorization is persisted across page reloads (`persistAuthorization`).
+
+> **Disabled in production.** When `NODE_ENV=production` the docs are not mounted, so they are
+> never exposed there. They are available in development and staging.
+
+### API versioning
+
+Routes use header-based versioning (`src/shared/config/versioning.config.ts`): clients send the
+requested version in the `X-API-Version` header (default `1`). Undecorated routes fall back to
+the default version, and handlers opt into a specific version with `@Version('2')`.
+
 ## Build & Compilation
 
 The project compiles with **[SWC](https://docs.nestjs.com/recipes/swc)** (`builder: "swc"` in

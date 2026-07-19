@@ -4,10 +4,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { API_VERSION_HEADER, DEFAULT_API_VERSION } from './versioning.config';
 
 /**
- * Path where the interactive Swagger UI is served, e.g. `GET /docs`.
+ * Path where the interactive Swagger UI is served, e.g. `GET /swagger`.
  * The raw OpenAPI JSON is available at `/{SWAGGER_PATH}-json`.
  */
-export const SWAGGER_PATH = 'docs';
+export const SWAGGER_PATH = 'swagger';
 
 /**
  * Mount the OpenAPI (Swagger) documentation for the application.
@@ -43,6 +43,8 @@ export function handleSwagger(app: INestApplication): void {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(SWAGGER_PATH, app, document, {
+    jsonDocumentUrl: `/${SWAGGER_PATH}-json`,
+    yamlDocumentUrl: `/${SWAGGER_PATH}-yaml`,
     swaggerOptions: {
       persistAuthorization: true,
     },
