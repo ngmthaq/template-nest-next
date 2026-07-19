@@ -26,12 +26,33 @@ export default () => ({
     credentials: process.env.CORS_CREDENTIALS === 'true',
     maxAge: process.env.CORS_MAX_AGE ? parseInt(process.env.CORS_MAX_AGE, 10) : undefined,
   },
+  throttle: {
+    short: {
+      ttl: parseInt(process.env.THROTTLE_SHORT_TTL ?? '1000', 10),
+      limit: parseInt(process.env.THROTTLE_SHORT_LIMIT ?? '3', 10),
+    },
+    medium: {
+      ttl: parseInt(process.env.THROTTLE_MEDIUM_TTL ?? '10000', 10),
+      limit: parseInt(process.env.THROTTLE_MEDIUM_LIMIT ?? '20', 10),
+    },
+    long: {
+      ttl: parseInt(process.env.THROTTLE_LONG_TTL ?? '60000', 10),
+      limit: parseInt(process.env.THROTTLE_LONG_LIMIT ?? '100', 10),
+    },
+  },
   cookie: {
     secret: process.env.COOKIE_SECRET || undefined,
   },
   compression: {
     threshold: parseInt(process.env.COMPRESSION_THRESHOLD ?? '1024', 10),
     level: parseInt(process.env.COMPRESSION_LEVEL ?? '-1', 10),
+  },
+  hash: {
+    saltRounds: parseInt(process.env.HASH_SALT_ROUNDS ?? '10', 10),
+  },
+  encryption: {
+    key: process.env.ENCRYPTION_KEY || undefined,
+    salt: process.env.ENCRYPTION_SALT ?? 'salt',
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
