@@ -3,6 +3,34 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import type { Cache } from 'cache-manager';
 
+/** A single cache entry returned by a search. */
+export class CacheEntry {
+  @ApiProperty({ example: 'user:42', description: 'The cache key.' })
+  key!: string;
+
+  @ApiProperty({
+    type: Object,
+    nullable: true,
+    description: 'The cached value (arbitrary JSON).',
+  })
+  value!: unknown;
+}
+
+/** Result of deleting a single cache entry by key. */
+export class CacheDeleteResult {
+  @ApiProperty({
+    example: 'user:42',
+    description: 'The key that was targeted.',
+  })
+  key!: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'True when an entry existed and was removed.',
+  })
+  deleted!: boolean;
+}
+
 /**
  * Business logic for the cache administration endpoints.
  *
@@ -67,32 +95,4 @@ export class CacheService {
       throw new BadRequestException(`Invalid regular expression: ${pattern}`);
     }
   }
-}
-
-/** A single cache entry returned by a search. */
-export class CacheEntry {
-  @ApiProperty({ example: 'user:42', description: 'The cache key.' })
-  key!: string;
-
-  @ApiProperty({
-    type: Object,
-    nullable: true,
-    description: 'The cached value (arbitrary JSON).',
-  })
-  value!: unknown;
-}
-
-/** Result of deleting a single cache entry by key. */
-export class CacheDeleteResult {
-  @ApiProperty({
-    example: 'user:42',
-    description: 'The key that was targeted.',
-  })
-  key!: string;
-
-  @ApiProperty({
-    example: true,
-    description: 'True when an entry existed and was removed.',
-  })
-  deleted!: boolean;
 }
