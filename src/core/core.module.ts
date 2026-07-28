@@ -4,6 +4,7 @@ import { CoreCacheModule } from './cache/core-cache.module';
 import { CoreConfigModule } from './config/core-config.module';
 import { CoreEventEmitterModule } from './event-emitter/core-event-emitter.module';
 import { CoreHttpModule } from './http/core-http.module';
+import { MailModule } from './mail/mail.module';
 import { CoreScheduleModule } from './schedule/core-schedule.module';
 import { SecurityModule } from './security/security.module';
 import { CoreThrottlerModule } from './throttler/core-throttler.module';
@@ -20,6 +21,7 @@ import { WebsocketModule } from './websocket/websocket.module';
  * - {@link CoreWinstonModule} — the app-wide Winston logger.
  * - {@link CoreCacheModule} — the in-memory cache (`CACHE_MANAGER`).
  * - {@link CoreHttpModule} — `HttpService` for outbound HTTP calls.
+ * - {@link MailModule} — `MailService` for sending SMTP email.
  * - {@link CoreScheduleModule} — cron/interval/timeout scheduling.
  * - {@link CoreEventEmitterModule} — the application-wide event bus.
  * - {@link CoreBullModule} — the shared BullMQ Redis connection.
@@ -33,6 +35,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     CoreWinstonModule,
     CoreCacheModule,
     CoreHttpModule,
+    MailModule,
     CoreScheduleModule,
     CoreEventEmitterModule,
     CoreBullModule,
@@ -45,6 +48,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     CoreWinstonModule,
     CoreCacheModule,
     CoreHttpModule,
+    MailModule,
     CoreScheduleModule,
     CoreEventEmitterModule,
     CoreBullModule,

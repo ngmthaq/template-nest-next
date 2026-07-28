@@ -6,6 +6,7 @@ import { handleCompression } from './shared/config/compression.config';
 import { handleCookieParser } from './shared/config/cookie-parser.config';
 import { handleCors } from './shared/config/cors.config';
 import { handleHelmet } from './shared/config/helmet.config';
+import { handleGlobalPrefix } from './shared/config/prefix.config';
 import { handleSwagger } from './shared/config/swagger.config';
 import { handleVersioning } from './shared/config/versioning.config';
 import { handleValidationPipe } from './shared/pipes/validation.pipe';
@@ -17,6 +18,7 @@ async function bootstrap() {
   handleHelmet(app);
   handleCors(app);
   handleValidationPipe(app);
+  handleGlobalPrefix(app);
   handleVersioning(app);
   handleSwagger(app);
   handleCookieParser(app);

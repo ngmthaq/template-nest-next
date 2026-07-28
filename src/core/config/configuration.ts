@@ -19,6 +19,14 @@ export default () => ({
     timeout: parseInt(process.env.HTTP_TIMEOUT ?? '60000', 10),
     maxRedirects: parseInt(process.env.HTTP_MAX_REDIRECTS ?? '5', 10),
   },
+  mail: {
+    host: process.env.MAIL_HOST ?? 'localhost',
+    port: parseInt(process.env.MAIL_PORT ?? '1025', 10),
+    secure: process.env.MAIL_SECURE === 'true',
+    user: process.env.MAIL_USER || undefined,
+    password: process.env.MAIL_PASSWORD || undefined,
+    from: process.env.MAIL_FROM ?? 'No Reply <no-reply@example.com>',
+  },
   cors: {
     origin: process.env.CORS_ORIGIN ?? '*',
     methods: process.env.CORS_METHODS ?? 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
