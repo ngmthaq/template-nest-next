@@ -37,8 +37,8 @@ export class CacheDeleteResult {
  * Reads and mutates the global `CACHE_MANAGER` (registered in `CoreModule`).
  * Key enumeration is done by iterating each underlying Keyv store — the
  * standard cache-manager interface has no `keys()` method, but every store
- * backed by an iterable adapter (including the default in-memory store)
- * exposes an async `iterator()` yielding `[key, value]` pairs.
+ * backed by an iterable adapter (including the Redis store) exposes an async
+ * `iterator()` yielding `[key, value]` pairs.
  */
 @Injectable()
 export class CacheService {

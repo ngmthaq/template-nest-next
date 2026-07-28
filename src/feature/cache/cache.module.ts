@@ -9,6 +9,8 @@ import { CacheService } from './cache.service';
  * by `CacheService`, so no cache store needs to be imported here.
  */
 @Module({
+  imports: [],
+  exports: [CacheService],
   controllers: [CacheController],
   providers: [CacheService],
 })

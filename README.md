@@ -46,7 +46,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `NODE_ENV`              | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour. |
 | `PORT`                  | `3000`                                   | HTTP server port.                                                                             |
 | `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                  |
-| `CACHE_TTL`             | `3600000`                                | In-memory cache entry TTL, in milliseconds.                                                   |
+| `CACHE_TTL`             | `3600000`                                | Redis-backed cache entry TTL, in milliseconds.                                                |
 | `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                       |
 | `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                |
 | `HTTP_MAX_REDIRECTS`    | `5`                                      | Outbound HTTP max redirects before failing.                                                   |
@@ -67,7 +67,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `HASH_SALT_ROUNDS`      | `10`                                     | bcrypt cost factor (2^rounds) for `HashService`.                                              |
 | `ENCRYPTION_KEY`        | _(empty)_                                | Secret the AES key is derived from; required only to use `EncryptionService`.                 |
 | `ENCRYPTION_SALT`       | `salt`                                   | Salt for encryption key derivation; change per deployment.                                    |
-| `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ connection).                                                               |
+| `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ queues + cache store).                                                     |
 | `REDIS_PORT`            | `6379`                                   | Redis port.                                                                                   |
 | `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                               |
 | `MYSQL_HOST`            | `localhost`                              | MySQL host (`localhost` from the host machine, `mysql` from other containers).                |

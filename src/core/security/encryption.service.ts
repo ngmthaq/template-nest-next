@@ -2,18 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 
-/** Authenticated cipher: encrypts and tamper-protects in one pass. */
-const ALGORITHM = 'aes-256-gcm';
-
-/** AES-256 key size in bytes. */
-const KEY_LENGTH = 32;
-
-/** Recommended IV size for GCM, in bytes. */
-const IV_LENGTH = 12;
-
-/** GCM authentication tag size, in bytes. */
-const AUTH_TAG_LENGTH = 16;
-
 /**
  * Two-way (reversible) encryption of data with AES-256-GCM.
  *
@@ -32,18 +20,30 @@ const AUTH_TAG_LENGTH = 16;
  */
 @Injectable()
 export class EncryptionService {
+  /** Authenticated cipher: encrypts and tamper-protects in one pass. */
+  private static readonly ALGORITHM = 'aes-256-gcm';
+
+  /** AES-256 key size in bytes. */
+  private static readonly KEY_LENGTH = 32;
+
+  /** Recommended IV size for GCM, in bytes. */
+  private static readonly IV_LENGTH = 12;
+
+  /** GCM authentication tag size, in bytes. */
+  private static readonly AUTH_TAG_LENGTH = 16;
+
   private readonly key: Buffer | null;
 
   public constructor(config: ConfigService) {
     const secret = config.get<string>('encryption.key');
     const salt = config.get<string>('encryption.salt', 'salt');
-    this.key = secret ? scryptSync(secret, salt, KEY_LENGTH) : null;
+    this.key = secret ? scryptSync(secret, salt, EncryptionService.KEY_LENGTH) : null;
   }
 
   /** Encrypt a UTF-8 string; returns base64(`iv | authTag | ciphertext`). */
   public encrypt(plaintext: string): string {
-    const iv = randomBytes(IV_LENGTH);
-    const cipher = createCipheriv(ALGORITHM, this.requireKey(), iv);
+    const iv = randomBytes(EncryptionService.IV_LENGTH);
+    const cipher = createCipheriv(EncryptionService.ALGORITHM, this.requireKey(), iv);
     const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
     const authTag = cipher.getAuthTag();
     return Buffer.concat([iv, authTag, encrypted]).toString('base64');
@@ -55,10 +55,15 @@ export class EncryptionService {
    */
   public decrypt(payload: string): string {
     const data = Buffer.from(payload, 'base64');
-    const iv = data.subarray(0, IV_LENGTH);
-    const authTag = data.subarray(IV_LENGTH, IV_LENGTH + AUTH_TAG_LENGTH);
-    const encrypted = data.subarray(IV_LENGTH + AUTH_TAG_LENGTH);
-    const decipher = createDecipheriv(ALGORITHM, this.requireKey(), iv);
+    const iv = data.subarray(0, EncryptionService.IV_LENGTH);
+    const authTag = data.subarray(
+      EncryptionService.IV_LENGTH,
+      EncryptionService.IV_LENGTH + EncryptionService.AUTH_TAG_LENGTH,
+    );
+    const encrypted = data.subarray(
+      EncryptionService.IV_LENGTH + EncryptionService.AUTH_TAG_LENGTH,
+    );
+    const decipher = createDecipheriv(EncryptionService.ALGORITHM, this.requireKey(), iv);
     decipher.setAuthTag(authTag);
     return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
   }

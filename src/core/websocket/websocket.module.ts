@@ -9,7 +9,9 @@ import { WebsocketGateway } from './websocket.gateway';
  * exporting it below.
  */
 @Module({
-  providers: [WebsocketGateway],
+  imports: [],
   exports: [WebsocketGateway],
+  controllers: [],
+  providers: [WebsocketGateway],
 })
 export class WebsocketModule {}

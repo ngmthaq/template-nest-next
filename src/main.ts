@@ -9,7 +9,7 @@ import { handleHelmet } from './shared/config/helmet.config';
 import { handleSwagger } from './shared/config/swagger.config';
 import { handleVersioning } from './shared/config/versioning.config';
 import { handleValidationPipe } from './shared/pipes/validation.pipe';
-import { ConfiguredIoAdapter } from './websocket/websocket.adapter';
+import { ConfiguredIoAdapter } from './core/websocket/websocket.adapter';
 
 // Bootstrap the NestJS application.
 async function bootstrap() {

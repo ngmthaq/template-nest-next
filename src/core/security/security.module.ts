@@ -12,7 +12,9 @@ import { HashService } from './hash.service';
  */
 @Global()
 @Module({
-  providers: [HashService, EncryptionService],
+  imports: [],
   exports: [HashService, EncryptionService],
+  controllers: [],
+  providers: [HashService, EncryptionService],
 })
 export class SecurityModule {}
