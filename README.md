@@ -70,6 +70,15 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ connection).                                                               |
 | `REDIS_PORT`            | `6379`                                   | Redis port.                                                                                   |
 | `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                               |
+| `MYSQL_HOST`            | `localhost`                              | MySQL host (`localhost` from the host machine, `mysql` from other containers).                |
+| `MYSQL_PORT`            | `3306`                                   | MySQL port.                                                                                   |
+| `MYSQL_DATABASE`        | `nestjs_template`                        | Application database name (created on the container's first start).                           |
+| `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                             |
+| `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                    |
+| `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                      |
+
+> The `MYSQL_*` keys use the official `mysql` image's own variable names, so
+> `docker-compose-infra.yml` passes the env file straight through with no remapping.
 
 ### Accessing config in code
 
@@ -86,6 +95,69 @@ const env = this.config.get<string>('nodeEnv');
 
 1. Add a `start:<name>` script with `cross-env NODE_ENV=<name> ...` in `package.json`.
 2. Create a matching `.env.<name>` file (git-ignored automatically).
+
+## Docker
+
+Two independent Compose files, both selecting their environment through `NODE_ENV` (no
+`--env-file` flag). `NODE_ENV` picks which `.env.<NODE_ENV>` file each service loads and
+defaults to `development` when unset.
+
+| File                        | Contains         | When to use                                                            |
+| --------------------------- | ---------------- | --------------------------------------------------------------------- |
+| `docker-compose-infra.yml`  | MySQL + Redis    | Local development — run these in Docker while the app runs on the host. |
+| `docker-compose.yml`        | The NestJS app   | On the server, where MySQL/Redis are managed externally.               |
+
+### Local infrastructure (MySQL + Redis)
+
+```bash
+# Start MySQL + Redis for the development environment
+NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
+
+# Stop them
+NODE_ENV=development docker compose -f docker-compose-infra.yml down
+
+# Stop and wipe all data (drops the volumes)
+NODE_ENV=development docker compose -f docker-compose-infra.yml down -v
+```
+
+Containers are named per environment (`nestjs-template-mysql-<NODE_ENV>`,
+`nestjs-template-redis-<NODE_ENV>`). The `MYSQL_*` / `REDIS_*` values come from
+`.env.<NODE_ENV>`, so the app database and user are created from that file on first start.
+
+### Application container
+
+Multi-stage `Dockerfile` (pnpm via corepack, native-module toolchain for `bcrypt`, prod-pruned
+runtime on `node:24-alpine`). MySQL/Redis are **not** included here — their hosts come from
+`.env.<NODE_ENV>`.
+
+```bash
+# Build and run the development image
+NODE_ENV=development docker compose up -d --build
+
+# Other environments
+NODE_ENV=uat        docker compose up -d --build
+NODE_ENV=production docker compose up -d --build
+
+docker compose down
+```
+
+The image tag and container name are suffixed with `NODE_ENV`
+(`nestjs-template:<NODE_ENV>`, `nestjs-template-app-<NODE_ENV>`).
+
+### Ports
+
+The app always listens on **3000 inside** the container; `PORT` sets only the **published host
+port** (default `3000`), letting environments run side by side on one host:
+
+```bash
+PORT=8080 NODE_ENV=uat docker compose up -d --build   # reachable on host :8080
+```
+
+> **Infra ports are read from your shell, not the env file.** Compose resolves the `ports:`
+> mapping before `env_file` loads, so `MYSQL_PORT` / `REDIS_PORT` in `.env.<NODE_ENV>` set where
+> the **app connects**, while the published host ports come from the shell (defaulting to
+> `3306` / `6379`). To publish a non-default port, pass it inline and keep it in sync with the
+> env file, e.g. `MYSQL_PORT=3307 NODE_ENV=development docker compose -f docker-compose-infra.yml up -d`.
 
 ## Security & HTTP Hardening
 

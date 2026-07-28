@@ -1,0 +1,68 @@
+# Infrastructure services for local development: MySQL + Redis.
+#
+# NODE_ENV selects which env file each service loads, mirroring
+# docker-compose.yml — no --env-file flag needed. The MYSQL_* names in
+# .env.<NODE_ENV> are the ones the official mysql image already expects, so
+# env_file feeds the container directly with no remapping.
+#
+# Usage:
+#   NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
+#   NODE_ENV=development docker compose -f docker-compose-infra.yml down
+#   NODE_ENV=development docker compose -f docker-compose-infra.yml down -v   # wipe data
+#
+# Defaults to `development` when NODE_ENV is unset.
+#
+# Note on ports: Compose resolves the `ports:` mapping before any env_file is
+# read, so published host ports come from your shell, not from .env.<NODE_ENV>.
+# They default to the standard 3306/6379; override inline when needed, e.g.
+#   MYSQL_PORT=3307 NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
+# Keep such an override in sync with MYSQL_PORT/REDIS_PORT in the env file,
+# since that is what the app connects to.
+
+name: nestjs-template-infra
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: nestjs-template-mysql-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    env_file:
+      - .env.${NODE_ENV:-development}
+    environment:
+      MYSQL_HOST: ""
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", 'mysqladmin ping -h localhost -p"$$MYSQL_ROOT_PASSWORD"']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: nestjs-template-redis-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    env_file:
+      - .env.${NODE_ENV:-development}
+    command: >
+      sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
+               exec redis-server --requirepass "$$REDIS_PASSWORD";
+             else
+               exec redis-server;
+             fi'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-data:
+  redis-data:

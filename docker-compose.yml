@@ -1,0 +1,33 @@
+# NestJS application container.
+#
+# Runs on the remote server, one environment at a time, selected by NODE_ENV.
+# MySQL/Redis are external (managed elsewhere) — their hosts come from the
+# per-environment env file (.env.<NODE_ENV>), NOT from this file.
+#
+# Usage (NODE_ENV drives the image tag, container name, and which env file loads):
+#   NODE_ENV=development docker compose up -d --build
+#   NODE_ENV=uat         docker compose up -d --build
+#   NODE_ENV=production  docker compose up -d --build
+#   docker compose down
+#
+# Defaults to `development` when NODE_ENV is unset. PORT sets the published host
+# port, e.g. PORT=8080 NODE_ENV=uat docker compose up -d. The app always listens
+# on 3000 inside the container.
+
+name: nestjs-template
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nestjs-template:${NODE_ENV:-development}
+    container_name: nestjs-template-app-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env.${NODE_ENV:-development}
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
