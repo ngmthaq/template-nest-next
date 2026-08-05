@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  apps/backend:
     dependencies:
       '@keyv/redis':
         specifier: ^5.1.6

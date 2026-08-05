@@ -29,12 +29,12 @@ services:
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     env_file:
-      - .env.${NODE_ENV:-development}
+      - apps/backend/.env.${NODE_ENV:-development}
     environment:
       MYSQL_HOST: ""
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./prisma/scripts:/docker-entrypoint-initdb.d:ro
+      - ./apps/backend/prisma/scripts:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", 'mysqladmin ping -h localhost -p"$$MYSQL_ROOT_PASSWORD"']
       interval: 10s
@@ -49,7 +49,7 @@ services:
     ports:
       - "${REDIS_PORT:-6379}:6379"
     env_file:
-      - .env.${NODE_ENV:-development}
+      - apps/backend/.env.${NODE_ENV:-development}
     command: >
       sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
                exec redis-server --requirepass "$$REDIS_PASSWORD";

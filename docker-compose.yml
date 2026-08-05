@@ -20,14 +20,14 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/backend/Dockerfile
     image: nestjs-template:${NODE_ENV:-development}
     container_name: nestjs-template-app-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     env_file:
-      - .env.${NODE_ENV:-development}
+      - apps/backend/.env.${NODE_ENV:-development}
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
