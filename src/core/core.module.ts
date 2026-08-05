@@ -5,6 +5,7 @@ import { CoreConfigModule } from './config/core-config.module';
 import { CoreEventEmitterModule } from './event-emitter/core-event-emitter.module';
 import { CoreHttpModule } from './http/core-http.module';
 import { MailModule } from './mail/mail.module';
+import { PrismaModule } from './prisma/prisma.module';
 import { CoreScheduleModule } from './schedule/core-schedule.module';
 import { SecurityModule } from './security/security.module';
 import { CoreThrottlerModule } from './throttler/core-throttler.module';
@@ -18,6 +19,7 @@ import { WebsocketModule } from './websocket/websocket.module';
  * `@Global` so their providers can be injected anywhere without re-importing:
  *
  * - {@link CoreConfigModule} — `@nestjs/config`, loading `.env.<NODE_ENV>`.
+ * - {@link PrismaModule} — the `PrismaService` database client.
  * - {@link CoreWinstonModule} — the app-wide Winston logger.
  * - {@link CoreCacheModule} — the in-memory cache (`CACHE_MANAGER`).
  * - {@link CoreHttpModule} — `HttpService` for outbound HTTP calls.
@@ -32,6 +34,7 @@ import { WebsocketModule } from './websocket/websocket.module';
 @Module({
   imports: [
     CoreConfigModule,
+    PrismaModule,
     CoreWinstonModule,
     CoreCacheModule,
     CoreHttpModule,
@@ -45,6 +48,7 @@ import { WebsocketModule } from './websocket/websocket.module';
   ],
   exports: [
     CoreConfigModule,
+    PrismaModule,
     CoreWinstonModule,
     CoreCacheModule,
     CoreHttpModule,

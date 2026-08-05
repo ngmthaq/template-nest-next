@@ -3,6 +3,9 @@ dist
 build
 coverage
 
+# Generated code (Prisma client)
+src/generated
+
 # Dependencies
 node_modules
 

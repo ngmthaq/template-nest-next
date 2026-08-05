@@ -34,6 +34,7 @@ services:
       MYSQL_HOST: ""
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./prisma/scripts:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", 'mysqladmin ping -h localhost -p"$$MYSQL_ROOT_PASSWORD"']
       interval: 10s
