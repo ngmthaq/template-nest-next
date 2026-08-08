@@ -99,7 +99,7 @@ const env = this.config.get<string>('nodeEnv');
 ## Docker
 
 > **Run all Compose commands from the repository root** (`../../`). Both Compose files live
-> at the monorepo root and reference this app via `apps/backend` for the build context and
+> at the monorepo root and reference this app via `apps/server` for the build context and
 > env files.
 
 Two independent Compose files, both selecting their environment through `NODE_ENV` (no

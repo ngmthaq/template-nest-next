@@ -8,9 +8,9 @@
     "node": ">=24"
   },
   "scripts": {
-    "backend": "pnpm --filter @nestjs-template/backend",
-    "backend:dev": "pnpm --filter @nestjs-template/backend start:dev",
-    "backend:build": "pnpm --filter @nestjs-template/backend build",
+    "server": "pnpm --filter @nestjs-template/server",
+    "server:dev": "pnpm --filter @nestjs-template/server start:dev",
+    "server:build": "pnpm --filter @nestjs-template/server build",
     "client": "pnpm --filter @nestjs-template/client",
     "client:dev": "pnpm --filter @nestjs-template/client dev",
     "client:build": "pnpm --filter @nestjs-template/client build",
