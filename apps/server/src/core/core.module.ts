@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+
 import { CoreBullModule } from './bull/core-bull.module';
 import { CoreCacheModule } from './cache/core-cache.module';
 import { CoreConfigModule } from './config/core-config.module';
@@ -9,8 +10,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CoreScheduleModule } from './schedule/core-schedule.module';
 import { SecurityModule } from './security/security.module';
 import { CoreThrottlerModule } from './throttler/core-throttler.module';
-import { CoreWinstonModule } from './winston/core-winston.module';
 import { WebsocketModule } from './websocket/websocket.module';
+import { CoreWinstonModule } from './winston/core-winston.module';
 
 /**
  * Core module — wires up cross-cutting, application-wide infrastructure.

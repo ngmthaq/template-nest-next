@@ -1,5 +1,6 @@
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { config as loadEnv } from 'dotenv';
+
 import { buildDatabaseUrl } from '../src/core/config/database-url';
 import { PrismaClient } from '../src/generated/prisma/client';
 

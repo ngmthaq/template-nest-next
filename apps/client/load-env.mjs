@@ -1,4 +1,4 @@
-import { config as loadEnv } from "dotenv";
+import { config as loadEnv } from 'dotenv';
 
 /**
  * Loads the per-environment .env files into process.env, mirroring apps/server.
@@ -11,8 +11,8 @@ import { config as loadEnv } from "dotenv";
  *   3. .env                   (git-ignored, local fallback)
  */
 export function loadAppEnv() {
-  const appEnv = process.env.APP_ENV ?? "development";
-  for (const path of [`.env.${appEnv}.local`, `.env.${appEnv}`, ".env"]) {
+  const appEnv = process.env.APP_ENV ?? 'development';
+  for (const path of [`.env.${appEnv}.local`, `.env.${appEnv}`, '.env']) {
     loadEnv({ path, override: false, quiet: true });
   }
 }

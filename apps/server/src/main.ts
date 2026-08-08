@@ -1,7 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+
 import { AppModule } from './app.module';
+import { ConfiguredIoAdapter } from './core/websocket/websocket.adapter';
 import { handleCompression } from './shared/config/compression.config';
 import { handleCookieParser } from './shared/config/cookie-parser.config';
 import { handleCors } from './shared/config/cors.config';
@@ -10,7 +12,6 @@ import { handleGlobalPrefix } from './shared/config/prefix.config';
 import { handleSwagger } from './shared/config/swagger.config';
 import { handleVersioning } from './shared/config/versioning.config';
 import { handleValidationPipe } from './shared/pipes/validation.pipe';
-import { ConfiguredIoAdapter } from './core/websocket/websocket.adapter';
 
 // Bootstrap the NestJS application.
 async function bootstrap() {

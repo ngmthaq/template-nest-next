@@ -11,6 +11,7 @@ import {
   ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
+
 import { HealthResult, HealthService } from './health.service';
 
 @ApiTags('Health')

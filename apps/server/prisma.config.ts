@@ -1,5 +1,6 @@
 import { config as loadEnv } from 'dotenv';
 import { defineConfig } from 'prisma/config';
+
 import { buildDatabaseUrl } from './src/core/config/database-url';
 
 // Mirror the app's env-loading order (see src/core/config/core-config.module.ts):

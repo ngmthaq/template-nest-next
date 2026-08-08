@@ -3,6 +3,7 @@ import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-option
 import { ConfigService } from '@nestjs/config';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import type { Server, ServerOptions } from 'socket.io';
+
 import { buildCorsOptions } from '../../shared/config/cors.config';
 
 /**

@@ -1,0 +1,20 @@
+# Build output
+.next
+out
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Next.js generated
+next-env.d.ts
+
+# Auto-generated agent files (next dev)
+AGENTS.md
+CLAUDE.md
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

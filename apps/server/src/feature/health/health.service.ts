@@ -2,6 +2,7 @@ import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import type { Redis } from 'ioredis';
 import type { Pool } from 'mysql2/promise';
+
 import { HEALTH_MYSQL_POOL, HEALTH_REDIS_CLIENT } from './health.constants';
 
 /** Liveness result for a single dependency. */

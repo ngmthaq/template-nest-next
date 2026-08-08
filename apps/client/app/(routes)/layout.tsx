@@ -1,7 +1,9 @@
 import '../_assets/css/globals.css';
-import type { Metadata } from 'next';
-import { fontGeistMono, fontGeistSans } from '../_theme';
+
 import clsx from 'clsx';
+import type { Metadata } from 'next';
+
+import { fontGeistMono, fontGeistSans } from '../_theme';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -15,11 +17,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={clsx([
-        fontGeistSans.variable,
-        fontGeistMono.variable,
-        'h-full antialiased',
-      ])}
+      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'h-full antialiased'])}
     >
       <body>{children}</body>
     </html>

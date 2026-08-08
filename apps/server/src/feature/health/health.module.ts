@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { createPool } from 'mysql2/promise';
-import { HealthController } from './health.controller';
+
 import { HEALTH_MYSQL_POOL, HEALTH_REDIS_CLIENT } from './health.constants';
+import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 
 /**

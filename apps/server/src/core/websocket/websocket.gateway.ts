@@ -1,16 +1,16 @@
 import { Logger } from '@nestjs/common';
+import type {
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
+  WsResponse,
+} from '@nestjs/websockets';
 import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-} from '@nestjs/websockets';
-import type {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
-  WsResponse,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
 
