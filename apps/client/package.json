@@ -6,9 +6,11 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start:dev": "cross-env APP_ENV=development node load-env-cli.mjs next dev",
+    "start:debug": "cross-env APP_ENV=development INSPECT=1 node load-env-cli.mjs next dev",
+    "start:staging": "cross-env APP_ENV=staging node load-env-cli.mjs next start",
+    "start:prod": "cross-env APP_ENV=production node load-env-cli.mjs next start",
     "lint": "eslint"
   },
   "dependencies": {
@@ -20,6 +22,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

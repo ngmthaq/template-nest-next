@@ -9,17 +9,6 @@
   },
   "scripts": {
     "server": "pnpm --filter @nestjs-template/server",
-    "server:dev": "pnpm --filter @nestjs-template/server start:dev",
-    "server:build": "pnpm --filter @nestjs-template/server build",
-    "client": "pnpm --filter @nestjs-template/client",
-    "client:dev": "pnpm --filter @nestjs-template/client dev",
-    "client:build": "pnpm --filter @nestjs-template/client build",
-    "dev": "pnpm --parallel -r --if-present dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "lint:check": "pnpm -r lint:check",
-    "format": "pnpm -r format",
-    "format:check": "pnpm -r format:check",
-    "test": "pnpm -r test"
+    "client": "pnpm --filter @nestjs-template/client"
   }
 }
