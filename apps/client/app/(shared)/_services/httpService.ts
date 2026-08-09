@@ -1,32 +1,32 @@
-export class HttpClientTimeoutError extends Error {
+export class HttpServiceTimeoutError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'HttpClientTimeoutError';
+    this.name = 'HttpServiceTimeoutError';
   }
 }
 
-export class HttpClientResponseError extends Error {
+export class HttpServiceResponseError extends Error {
   public readonly status: number;
   public readonly body: unknown;
 
   constructor(status: number, body: unknown) {
     super(`Request failed with status ${status}`);
-    this.name = 'HttpClientResponseError';
+    this.name = 'HttpServiceResponseError';
     this.status = status;
     this.body = body;
   }
 }
 
-export interface HttpClientOptions {
+export interface HttpServiceOptions {
   baseUrl?: string;
   timeout?: number;
 }
 
-export class HttpClient {
+export class HttpService {
   private baseUrl: string;
   private timeout: number;
 
-  constructor(options: HttpClientOptions = {}) {
+  constructor(options: HttpServiceOptions = {}) {
     this.baseUrl = options.baseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
     this.timeout = options.timeout ?? 60000; // Default timeout in milliseconds
   }
@@ -46,7 +46,7 @@ export class HttpClient {
     try {
       return await fetch(fullUrl, { ...options, signal: controller.signal });
     } catch (error) {
-      if (isTimedOut) throw new HttpClientTimeoutError('Request timed out');
+      if (isTimedOut) throw new HttpServiceTimeoutError('Request timed out');
       throw error;
     } finally {
       clearTimeout(timeoutId);
@@ -56,7 +56,7 @@ export class HttpClient {
   private async parse<T>(response: Response): Promise<T> {
     const text = await response.text();
     const body = text ? (JSON.parse(text) as unknown) : undefined;
-    if (!response.ok) throw new HttpClientResponseError(response.status, body);
+    if (!response.ok) throw new HttpServiceResponseError(response.status, body);
     return body as T;
   }
 
@@ -169,4 +169,4 @@ export class HttpClient {
   }
 }
 
-export const httpClient = new HttpClient();
+export const httpService = new HttpService();
