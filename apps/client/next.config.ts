@@ -7,6 +7,14 @@ import { loadAppEnv } from './load-env.mjs';
 // loaded by the time this runs, and dotenv won't override existing values.
 loadAppEnv();
 
-const nextConfig: NextConfig = {/* config options here */};
+const nextConfig: NextConfig = {
+  cacheComponents: true,
+  cacheLife: {
+    api: { stale: 60, revalidate: 300, expire: 3600 },
+    apiShort: { stale: 10, revalidate: 30, expire: 300 },
+    apiLong: { stale: 300, revalidate: 86400, expire: 604800 },
+    apiPrivate: { stale: 300 },
+  },
+};
 
 export default nextConfig;
