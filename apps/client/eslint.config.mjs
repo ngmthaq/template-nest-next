@@ -20,7 +20,7 @@ const eslintConfig = defineConfig([
       // Tailwind v4 has no JS config; point the plugin at the CSS entry so it
       // can resolve the theme and detect conflicting/duplicate classes.
       'better-tailwindcss': {
-        entryPoint: 'app/_assets/css/globals.css',
+        entryPoint: 'app/(shared)/_assets/css/globals.css',
       },
     },
     rules: {

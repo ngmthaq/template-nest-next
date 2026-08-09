@@ -1,4 +1,4 @@
-import '../_assets/css/globals.css';
+import '../(shared)/_assets/css/globals.css';
 
 import clsx from 'clsx';
 import type { Metadata } from 'next';
