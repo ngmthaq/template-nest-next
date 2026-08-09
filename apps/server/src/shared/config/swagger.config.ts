@@ -27,8 +27,8 @@ export function handleSwagger(app: INestApplication): void {
   if (nodeEnv === 'production') return;
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS Template API')
-    .setDescription('HTTP API reference for the NestJS template.')
+    .setTitle('Template Nest Next API')
+    .setDescription('HTTP API reference for the Template Nest Next server.')
     .setVersion(DEFAULT_API_VERSION)
     .addGlobalParameters({
       in: 'header',

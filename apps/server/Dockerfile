@@ -22,9 +22,9 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # ---- Build, then produce an isolated production bundle ----
 FROM deps AS build
 COPY apps/server ./apps/server
-RUN pnpm --filter @nestjs-template/server build
+RUN pnpm --filter @template-nest-next/server build
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm --filter @nestjs-template/server deploy --prod --legacy /prod/server
+    pnpm --filter @template-nest-next/server deploy --prod --legacy /prod/server
 
 # ---- Runtime ----
 FROM node:24-alpine AS runtime

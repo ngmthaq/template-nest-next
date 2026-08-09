@@ -1,4 +1,4 @@
-# nestjs-template (monorepo)
+# template-nest-next (monorepo)
 
 A [pnpm workspace](https://pnpm.io/workspaces) monorepo.
 

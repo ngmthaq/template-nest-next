@@ -14,15 +14,15 @@
 # port, e.g. PORT=8080 NODE_ENV=uat docker compose up -d. The app always listens
 # on 3000 inside the container.
 
-name: nestjs-template
+name: template-nest-next
 
 services:
   app:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: nestjs-template:${NODE_ENV:-development}
-    container_name: nestjs-template-app-${NODE_ENV:-development}
+    image: template-nest-next:${NODE_ENV:-development}
+    container_name: template-nest-next-app-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"

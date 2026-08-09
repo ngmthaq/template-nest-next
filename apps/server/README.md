@@ -1,4 +1,4 @@
-# NESTJS TEMPLATE
+# TEMPLATE NEST NEXT
 
 ## Environment Configuration
 
@@ -72,7 +72,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                               |
 | `MYSQL_HOST`            | `localhost`                              | MySQL host (`localhost` from the host machine, `mysql` from other containers).                |
 | `MYSQL_PORT`            | `3306`                                   | MySQL port.                                                                                   |
-| `MYSQL_DATABASE`        | `nestjs_template`                        | Application database name (created on the container's first start).                           |
+| `MYSQL_DATABASE`        | `template_nest_next`                     | Application database name (created on the container's first start).                           |
 | `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                             |
 | `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                    |
 | `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                       |
@@ -124,8 +124,8 @@ NODE_ENV=development docker compose -f docker-compose-infra.yml down
 NODE_ENV=development docker compose -f docker-compose-infra.yml down -v
 ```
 
-Containers are named per environment (`nestjs-template-mysql-<NODE_ENV>`,
-`nestjs-template-redis-<NODE_ENV>`). The `MYSQL_*` / `REDIS_*` values come from
+Containers are named per environment (`template-nest-next-mysql-<NODE_ENV>`,
+`template-nest-next-redis-<NODE_ENV>`). The `MYSQL_*` / `REDIS_*` values come from
 `.env.<NODE_ENV>`, so the app database and user are created from that file on first start.
 
 ### Application container
@@ -146,7 +146,7 @@ docker compose down
 ```
 
 The image tag and container name are suffixed with `NODE_ENV`
-(`nestjs-template:<NODE_ENV>`, `nestjs-template-app-<NODE_ENV>`).
+(`template-nest-next:<NODE_ENV>`, `template-nest-next-app-<NODE_ENV>`).
 
 ### Ports
 
@@ -212,7 +212,7 @@ in `src/shared/config/swagger.config.ts` and mounted during bootstrap:
 - **OpenAPI JSON:** `GET /swagger-json`
 - **OpenAPI YAML:** `GET /swagger-yaml`
 
-The document (titled _"NestJS Template API"_) is built by scanning controllers and their
+The document (titled _"Template Nest Next API"_) is built by scanning controllers and their
 `@nestjs/swagger` decorators. The `X-API-Version` header (see header-based versioning below) is
 registered as a global parameter, so you can set the requested API version directly from the UI,
 and authorization is persisted across page reloads (`persistAuthorization`).

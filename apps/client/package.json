@@ -1,5 +1,5 @@
 {
-  "name": "@nestjs-template/client",
+  "name": "@template-nest-next/client",
   "version": "0.1.0",
   "private": true,
   "engines": {

@@ -1,5 +1,5 @@
 {
-  "name": "nestjs-template",
+  "name": "template-nest-next",
   "version": "0.0.1",
   "private": true,
   "license": "UNLICENSED",
@@ -8,7 +8,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "server": "pnpm --filter @nestjs-template/server",
-    "client": "pnpm --filter @nestjs-template/client"
+    "server": "pnpm --filter @template-nest-next/server",
+    "client": "pnpm --filter @template-nest-next/client"
   }
 }

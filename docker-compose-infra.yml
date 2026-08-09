@@ -19,12 +19,12 @@
 # Keep such an override in sync with MYSQL_PORT/REDIS_PORT in the env file,
 # since that is what the app connects to.
 
-name: nestjs-template-infra
+name: template-nest-next-infra
 
 services:
   mysql:
     image: mysql:8.4
-    container_name: nestjs-template-mysql-${NODE_ENV:-development}
+    container_name: template-nest-next-mysql-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
       - "${MYSQL_PORT:-3306}:3306"
@@ -44,7 +44,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: nestjs-template-redis-${NODE_ENV:-development}
+    container_name: template-nest-next-redis-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"

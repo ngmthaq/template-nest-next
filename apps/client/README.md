@@ -1,4 +1,4 @@
-# @nestjs-template/client
+# @template-nest-next/client
 
 The [Next.js](https://nextjs.org) front-end of the monorepo, talking to the NestJS API in
 [apps/server](../server/README.md).
