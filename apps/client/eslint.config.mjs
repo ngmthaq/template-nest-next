@@ -8,8 +8,6 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Runs Prettier as an ESLint rule and disables formatting rules that conflict
-  // with it. Kept last so it wins over stylistic rules from the configs above.
   eslintPluginPrettierRecommended,
   {
     plugins: {
@@ -17,14 +15,11 @@ const eslintConfig = defineConfig([
       'better-tailwindcss': eslintPluginBetterTailwindcss,
     },
     settings: {
-      // Tailwind v4 has no JS config; point the plugin at the CSS entry so it
-      // can resolve the theme and detect conflicting/duplicate classes.
       'better-tailwindcss': {
-        entryPoint: 'app/(shared)/_assets/css/globals.css',
+        entryPoint: 'app/(shared)/_theme/globals.css',
       },
     },
     rules: {
-      // --- Common rules ---
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'no-var': 'error',
       'prefer-const': 'error',
@@ -36,13 +31,8 @@ const eslintConfig = defineConfig([
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
 
-      // --- Import ordering ---
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
-
-      // --- Tailwind CSS ---
-      // Class order is owned by prettier-plugin-tailwindcss (see .prettierrc),
-      // so the ESLint order/wrapping rules stay off to avoid fighting Prettier.
       'better-tailwindcss/enforce-consistent-class-order': 'off',
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
       'better-tailwindcss/no-duplicate-classes': 'error',
