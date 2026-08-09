@@ -3,7 +3,7 @@ import '../_assets/css/globals.css';
 import clsx from 'clsx';
 import type { Metadata } from 'next';
 
-import { fontGeistMono, fontGeistSans } from '../_theme';
+import { fontGeistMono, fontGeistSans } from '../(shared)/_theme';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

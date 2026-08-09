@@ -75,7 +75,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `MYSQL_DATABASE`        | `nestjs_template`                        | Application database name (created on the container's first start).                           |
 | `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                             |
 | `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                    |
-| `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                      |
+| `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                       |
 
 > The `MYSQL_*` keys use the official `mysql` image's own variable names, so
 > `docker-compose-infra.yml` passes the env file straight through with no remapping.
@@ -106,10 +106,10 @@ Two independent Compose files, both selecting their environment through `NODE_EN
 `--env-file` flag). `NODE_ENV` picks which `.env.<NODE_ENV>` file each service loads and
 defaults to `development` when unset.
 
-| File                        | Contains         | When to use                                                            |
-| --------------------------- | ---------------- | --------------------------------------------------------------------- |
-| `docker-compose-infra.yml`  | MySQL + Redis    | Local development — run these in Docker while the app runs on the host. |
-| `docker-compose.yml`        | The NestJS app   | On the server, where MySQL/Redis are managed externally.               |
+| File                       | Contains       | When to use                                                             |
+| -------------------------- | -------------- | ----------------------------------------------------------------------- |
+| `docker-compose-infra.yml` | MySQL + Redis  | Local development — run these in Docker while the app runs on the host. |
+| `docker-compose.yml`       | The NestJS app | On the server, where MySQL/Redis are managed externally.                |
 
 ### Local infrastructure (MySQL + Redis)
 
