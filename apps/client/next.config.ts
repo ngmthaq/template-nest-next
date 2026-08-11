@@ -6,6 +6,9 @@ import { loadAppEnv } from './load-env.mjs';
 loadAppEnv();
 
 const nextConfig: NextConfig = {
+  experimental: {
+    globalNotFound: true,
+  },
   cacheComponents: true,
   cacheLife: {
     api: { stale: 60, revalidate: 300, expire: 3600 },
