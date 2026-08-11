@@ -2,6 +2,16 @@ import type { CookiesFn, OptionsType } from 'cookies-next';
 
 import { cookieService } from './cookieService';
 
+export interface HttpServiceOptions {
+  baseUrl?: string;
+  timeout?: number;
+}
+
+export interface HttpServiceRequestOptions extends RequestInit {
+  cookies?: CookiesFn;
+  withAuth?: boolean;
+}
+
 export class HttpServiceTimeoutError extends Error {
   constructor(message: string) {
     super(message);
@@ -21,17 +31,7 @@ export class HttpServiceResponseError extends Error {
   }
 }
 
-export interface HttpServiceOptions {
-  baseUrl?: string;
-  timeout?: number;
-}
-
-export interface HttpServiceRequestOptions extends RequestInit {
-  cookies?: CookiesFn;
-  withAuth?: boolean;
-}
-
-export class HttpService {
+export class HttpServiceHelper {
   public accessTokenKey = 'access_token';
   public refreshTokenKey = 'refresh_token';
   public tokenCookieOptions: OptionsType = {
@@ -76,7 +76,7 @@ export class HttpService {
     return Object.assign({}, this.tokenCookieOptions, options ?? {});
   }
 
-  private buildUrl(url: string, params?: Record<string, string>): string {
+  protected buildUrl(url: string, params?: Record<string, string>): string {
     if (!params) return url;
     const [path, query] = url.split('?');
     const search = new URLSearchParams(query);
@@ -84,7 +84,7 @@ export class HttpService {
     return `${path}?${search.toString()}`;
   }
 
-  private async request(url: string, options: HttpServiceRequestOptions): Promise<Response> {
+  protected async request(url: string, options: HttpServiceRequestOptions): Promise<Response> {
     const { cookies, withAuth = true, ...init } = options;
     const baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const endpoint = url.startsWith('/') ? url : `/${url}`;
@@ -119,7 +119,7 @@ export class HttpService {
     }
   }
 
-  private async parse<T>(response: Response): Promise<T> {
+  protected async parse<T>(response: Response): Promise<T> {
     const text = await response.text();
 
     let body: unknown;
@@ -133,12 +133,14 @@ export class HttpService {
     return body as T;
   }
 
-  private jsonOptions(options: HttpServiceRequestOptions): HttpServiceRequestOptions {
+  protected jsonOptions(options: HttpServiceRequestOptions): HttpServiceRequestOptions {
     const headers = new Headers(options.headers);
     if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
     return { ...options, headers };
   }
+}
 
+export class HttpService extends HttpServiceHelper {
   public async get<T>(
     url: string,
     params?: Record<string, string>,
