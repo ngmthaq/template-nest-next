@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 
-import { StatusTemplate } from '@/app/(shared)/_components';
+import { AppStatusTemplate } from '@/app/(shared)/_components';
 
 export interface ErrorProps {
   error: Error & { digest?: string };
@@ -18,7 +18,7 @@ export default function Error({ error, retry }: ErrorProps) {
   }, [error]);
 
   return (
-    <StatusTemplate code={500} title={t('title')} description={t('description')}>
+    <AppStatusTemplate code={500} title={t('title')} description={t('description')}>
       <button
         type="button"
         onClick={() => retry()}
@@ -29,6 +29,6 @@ export default function Error({ error, retry }: ErrorProps) {
       {error.digest ? (
         <p className="text-xs text-zinc-400 dark:text-zinc-500">Reference: {error.digest}</p>
       ) : null}
-    </StatusTemplate>
+    </AppStatusTemplate>
   );
 }

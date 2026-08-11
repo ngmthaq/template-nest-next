@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 
-interface StatusTemplateProps {
+interface AppStatusTemplateProps {
   code: number | string;
   title: string;
   description: string;
   children?: ReactNode;
 }
 
-export function StatusTemplate({ code, title, description, children }: StatusTemplateProps) {
+export function AppStatusTemplate({ code, title, description, children }: AppStatusTemplateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-white px-16 py-32 text-center dark:bg-black">

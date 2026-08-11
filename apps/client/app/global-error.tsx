@@ -5,7 +5,7 @@ import './(shared)/_theme/globals.css';
 import clsx from 'clsx';
 import { useEffect } from 'react';
 
-import { StatusTemplate } from '@/app/(shared)/_components';
+import { AppStatusTemplate } from '@/app/(shared)/_components';
 import { fontGeistMono, fontGeistSans } from '@/app/(shared)/_theme';
 
 export interface GlobalErrorProps {
@@ -24,7 +24,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
       className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'h-full antialiased'])}
     >
       <body>
-        <StatusTemplate
+        <AppStatusTemplate
           code={500}
           title="Something went wrong"
           description="An unexpected error occurred. Please try again."
@@ -39,7 +39,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
           {error.digest ? (
             <p className="text-xs text-zinc-400 dark:text-zinc-500">Reference: {error.digest}</p>
           ) : null}
-        </StatusTemplate>
+        </AppStatusTemplate>
       </body>
     </html>
   );

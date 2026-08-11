@@ -1,1 +1,1 @@
-export * from './StatusTemplate';
+export * from './AppStatusTemplate';
