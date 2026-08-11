@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]'>)
   return (
     <html
       lang={await rootLocale()}
-      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'h-full antialiased'])}
+      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
     >
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>

@@ -1,0 +1,16 @@
+{
+  "metaData": {
+    "title": "建立 Next 應用程式",
+    "description": "由 create next app 產生"
+  },
+  "notFound": {
+    "title": "找不到頁面",
+    "description": "您所尋找的頁面不存在或已被移動。",
+    "backHome": "返回首頁"
+  },
+  "error": {
+    "title": "發生錯誤",
+    "description": "發生非預期的錯誤，請再試一次。",
+    "retry": "重新嘗試"
+  }
+}
