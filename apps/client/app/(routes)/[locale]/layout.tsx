@@ -24,9 +24,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<'/[locale]'>) {
+  const locale = await rootLocale();
+
   return (
     <html
-      lang={await rootLocale()}
+      lang={locale}
       className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
     >
       <body>

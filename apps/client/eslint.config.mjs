@@ -2,6 +2,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
+import eslintPluginJsxA11y from 'eslint-plugin-jsx-a11y';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
@@ -18,6 +19,12 @@ const eslintConfig = defineConfig([
       'better-tailwindcss': {
         entryPoint: 'app/(shared)/_theme/globals.css',
       },
+      'jsx-a11y': {
+        components: {
+          Link: 'a',
+          Image: 'img',
+        },
+      },
     },
     rules: {
       'no-console': ['warn', { allow: ['warn', 'error'] }],
@@ -33,6 +40,12 @@ const eslintConfig = defineConfig([
 
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
+
+      ...eslintPluginJsxA11y.flatConfigs.strict.rules,
+      'jsx-a11y/alt-text': ['error', { elements: ['img'], img: ['Image'] }],
+      'jsx-a11y/control-has-associated-label': 'error',
+      'jsx-a11y/lang': 'error',
+
       'better-tailwindcss/enforce-consistent-class-order': 'off',
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
       'better-tailwindcss/no-duplicate-classes': 'error',
