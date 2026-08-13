@@ -8,7 +8,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
 import { localeDirections, routing } from '../../(shared)/_i18n';
-import { fontGeistMono, fontGeistSans } from '../../(shared)/_theme';
+import { fontGeistMono, fontGeistSans, ThemeProvider } from '../../(shared)/_theme';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -33,9 +33,12 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]'>)
       lang={locale}
       dir={localeDirections[locale]}
       className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
+      suppressHydrationWarning
     >
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <ThemeProvider>
+          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
