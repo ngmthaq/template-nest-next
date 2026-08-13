@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import * as rootParams from 'next/root-params';
+import type { Locale } from 'next-intl';
 import { hasLocale } from 'next-intl';
 import { getRequestConfig } from 'next-intl/server';
 
@@ -18,11 +19,13 @@ export default getRequestConfig(async ({ locale }) => {
   };
 });
 
+const messageLoaders = {
+  en: () => import('./messages/en.json'),
+  zh: () => import('./messages/zh.json'),
+} satisfies Record<Locale, () => Promise<unknown>>;
+
 async function loadMessages(locale: string) {
-  switch (locale) {
-    case 'zh':
-      return (await import('./messages/zh.json')).default;
-    default:
-      return (await import('./messages/en.json')).default;
-  }
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  return (await messageLoaders[locale]()).default;
 }

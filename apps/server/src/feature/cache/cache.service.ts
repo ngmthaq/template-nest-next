@@ -42,20 +42,17 @@ export class CacheDeleteResult {
  */
 @Injectable()
 export class CacheService {
-  /** Maximum accepted pattern length, to bound the ReDoS blast radius. */
+  /** Maximum accepted pattern length, as a cheap bound on input size. */
   private static readonly MAX_PATTERN_LENGTH = 200;
-
-  /** Matches the start of a quantifier token: `+`, `*`, or `{n,m}`. */
-  private static readonly QUANTIFIER_START = /^(?:[+*]|\{\d*,?\d*\})/;
 
   public constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   /**
-   * Search cached entries whose key matches the given regular expression.
+   * Search cached entries whose key matches the given glob pattern.
    * Returns every matching entry as a `{ key, value }` pair.
    */
   public async search(pattern: string): Promise<CacheEntry[]> {
-    const regex = this.compileRegex(pattern);
+    const matches = this.compileMatcher(pattern);
     const entries: CacheEntry[] = [];
     const seen = new Set<string>();
 
@@ -67,7 +64,7 @@ export class CacheService {
         if (typeof key !== 'string' || seen.has(key)) {
           continue;
         }
-        if (regex.test(key)) {
+        if (matches(key)) {
           seen.add(key);
           entries.push({ key, value });
         }
@@ -91,10 +88,18 @@ export class CacheService {
   }
 
   /**
-   * Compile the user-supplied pattern into a RegExp, rejecting invalid input
-   * and patterns prone to catastrophic backtracking (ReDoS).
+   * Compile the user-supplied glob pattern into a predicate that tests a key
+   * for a full-string (anchored) match.
+   *
+   * Glob syntax: `*` matches any run of characters, including none; `?`
+   * matches exactly one character; every other character matches itself
+   * literally. There are no character classes, no brace expansion, and no
+   * escaping. Matching uses an iterative two-pointer scan with a remembered
+   * star position — the standard linear-ish wildcard algorithm — so it has
+   * no backtracking state and cannot be driven into catastrophic runtime
+   * regardless of input.
    */
-  private compileRegex(pattern: string): RegExp {
+  private compileMatcher(pattern: string): (key: string) => boolean {
     if (!pattern) {
       throw new BadRequestException('A "pattern" query parameter is required.');
     }
@@ -103,71 +108,39 @@ export class CacheService {
         `Pattern exceeds the maximum allowed length of ${CacheService.MAX_PATTERN_LENGTH} characters.`,
       );
     }
-    if (CacheService.hasNestedQuantifiers(pattern)) {
-      throw new BadRequestException(
-        'Pattern contains nested quantifiers (e.g. "(a+)+"), which risk catastrophic backtracking.',
-      );
-    }
-    try {
-      // eslint-disable-next-line security/detect-non-literal-regexp -- pattern is length-capped and checked for nested quantifiers above
-      return new RegExp(pattern);
-    } catch {
-      throw new BadRequestException(`Invalid regular expression: ${pattern}`);
-    }
-  }
 
-  /**
-   * Detect the classic catastrophic-backtracking shape: a group whose body
-   * contains a quantifier or alternation, itself repeated by a trailing
-   * quantifier — e.g. `(a+)+`, `(a*)*`, `(a|a)*`.
-   */
-  private static hasNestedQuantifiers(pattern: string): boolean {
-    const openGroupHasInnerQuantifier: boolean[] = [];
-    let inCharacterClass = false;
+    return (key: string): boolean => {
+      let patternIndex = 0;
+      let keyIndex = 0;
+      let starPatternIndex = -1;
+      let starKeyIndex = -1;
 
-    for (let i = 0; i < pattern.length; i++) {
-      const char = pattern[i];
-
-      if (char === '\\') {
-        i++;
-        continue;
-      }
-
-      if (inCharacterClass) {
-        if (char === ']') {
-          inCharacterClass = false;
-        }
-        continue;
-      }
-
-      if (char === '[') {
-        inCharacterClass = true;
-        continue;
-      }
-
-      if (char === '(') {
-        openGroupHasInnerQuantifier.push(false);
-        continue;
-      }
-
-      if (char === ')') {
-        const hadInnerQuantifier = openGroupHasInnerQuantifier.pop() ?? false;
-        if (hadInnerQuantifier && CacheService.QUANTIFIER_START.test(pattern.slice(i + 1))) {
-          return true;
-        }
-        if (hadInnerQuantifier && openGroupHasInnerQuantifier.length > 0) {
-          openGroupHasInnerQuantifier[openGroupHasInnerQuantifier.length - 1] = true;
-        }
-        continue;
-      }
-
-      if (char === '|' || char === '+' || char === '*' || char === '{') {
-        for (let depth = 0; depth < openGroupHasInnerQuantifier.length; depth++) {
-          openGroupHasInnerQuantifier[depth] = true;
+      while (keyIndex < key.length) {
+        const patternChar = pattern[patternIndex];
+        if (patternIndex < pattern.length && patternChar === '*') {
+          starPatternIndex = patternIndex;
+          starKeyIndex = keyIndex;
+          patternIndex++;
+        } else if (
+          patternIndex < pattern.length &&
+          (patternChar === '?' || patternChar === key[keyIndex])
+        ) {
+          patternIndex++;
+          keyIndex++;
+        } else if (starPatternIndex !== -1) {
+          patternIndex = starPatternIndex + 1;
+          starKeyIndex++;
+          keyIndex = starKeyIndex;
+        } else {
+          return false;
         }
       }
-    }
 
-    return false;
+      while (patternIndex < pattern.length && pattern[patternIndex] === '*') {
+        patternIndex++;
+      }
+
+      return patternIndex === pattern.length;
+    };
   }
 }

@@ -21,8 +21,8 @@ export class CacheController {
   public constructor(private readonly cacheService: CacheService) {}
 
   /**
-   * Search cached entries by a regular expression matched against keys.
-   * `GET /cache?pattern=^user:` → array of matching `{ key, value }` entries.
+   * Search cached entries by a glob pattern matched against keys.
+   * `GET /cache?pattern=user:*` → array of matching `{ key, value }` entries.
    */
   @ApiOperation({
     summary: 'Search cached entries by key pattern',
@@ -30,8 +30,10 @@ export class CacheController {
   @ApiQuery({
     name: 'pattern',
     required: true,
-    description: 'Regular expression matched against cache keys.',
-    example: '^user:',
+    description:
+      'Glob pattern matched against cache keys (anchored, full-string match). ' +
+      '`*` matches any run of characters (including none), `?` matches exactly one character, all other characters are literal.',
+    example: 'user:*',
   })
   @ApiOkResponse({
     description: 'Matching cache entries.',

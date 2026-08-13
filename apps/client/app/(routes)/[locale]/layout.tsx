@@ -2,8 +2,9 @@ import '../../(shared)/_theme/globals.css';
 
 import clsx from 'clsx';
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
-import { NextIntlClientProvider } from 'next-intl';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
 import { localeDirections, routing } from '../../(shared)/_i18n';
@@ -25,11 +26,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<'/[locale]'>) {
   const locale = await rootLocale();
+  if (!hasLocale(routing.locales, locale)) notFound();
 
   return (
     <html
       lang={locale}
-      dir={localeDirections[locale] ?? 'ltr'}
+      dir={localeDirections[locale]}
       className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
     >
       <body>
