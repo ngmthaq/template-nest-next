@@ -6,7 +6,7 @@ import { locale as rootLocale } from 'next/root-params';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { routing } from '../../(shared)/_i18n';
+import { localeDirections, routing } from '../../(shared)/_i18n';
 import { fontGeistMono, fontGeistSans } from '../../(shared)/_theme';
 
 export function generateStaticParams() {
@@ -29,6 +29,7 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]'>)
   return (
     <html
       lang={locale}
+      dir={localeDirections[locale] ?? 'ltr'}
       className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
     >
       <body>

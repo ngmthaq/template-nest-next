@@ -42,6 +42,12 @@ export class CacheDeleteResult {
  */
 @Injectable()
 export class CacheService {
+  /** Maximum accepted pattern length, to bound the ReDoS blast radius. */
+  private static readonly MAX_PATTERN_LENGTH = 200;
+
+  /** Matches the start of a quantifier token: `+`, `*`, or `{n,m}`. */
+  private static readonly QUANTIFIER_START = /^(?:[+*]|\{\d*,?\d*\})/;
+
   public constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
   /**
@@ -84,15 +90,84 @@ export class CacheService {
     return existed;
   }
 
-  /** Compile the user-supplied pattern into a RegExp, rejecting invalid input. */
+  /**
+   * Compile the user-supplied pattern into a RegExp, rejecting invalid input
+   * and patterns prone to catastrophic backtracking (ReDoS).
+   */
   private compileRegex(pattern: string): RegExp {
     if (!pattern) {
       throw new BadRequestException('A "pattern" query parameter is required.');
     }
+    if (pattern.length > CacheService.MAX_PATTERN_LENGTH) {
+      throw new BadRequestException(
+        `Pattern exceeds the maximum allowed length of ${CacheService.MAX_PATTERN_LENGTH} characters.`,
+      );
+    }
+    if (CacheService.hasNestedQuantifiers(pattern)) {
+      throw new BadRequestException(
+        'Pattern contains nested quantifiers (e.g. "(a+)+"), which risk catastrophic backtracking.',
+      );
+    }
     try {
+      // eslint-disable-next-line security/detect-non-literal-regexp -- pattern is length-capped and checked for nested quantifiers above
       return new RegExp(pattern);
     } catch {
       throw new BadRequestException(`Invalid regular expression: ${pattern}`);
     }
+  }
+
+  /**
+   * Detect the classic catastrophic-backtracking shape: a group whose body
+   * contains a quantifier or alternation, itself repeated by a trailing
+   * quantifier — e.g. `(a+)+`, `(a*)*`, `(a|a)*`.
+   */
+  private static hasNestedQuantifiers(pattern: string): boolean {
+    const openGroupHasInnerQuantifier: boolean[] = [];
+    let inCharacterClass = false;
+
+    for (let i = 0; i < pattern.length; i++) {
+      const char = pattern[i];
+
+      if (char === '\\') {
+        i++;
+        continue;
+      }
+
+      if (inCharacterClass) {
+        if (char === ']') {
+          inCharacterClass = false;
+        }
+        continue;
+      }
+
+      if (char === '[') {
+        inCharacterClass = true;
+        continue;
+      }
+
+      if (char === '(') {
+        openGroupHasInnerQuantifier.push(false);
+        continue;
+      }
+
+      if (char === ')') {
+        const hadInnerQuantifier = openGroupHasInnerQuantifier.pop() ?? false;
+        if (hadInnerQuantifier && CacheService.QUANTIFIER_START.test(pattern.slice(i + 1))) {
+          return true;
+        }
+        if (hadInnerQuantifier && openGroupHasInnerQuantifier.length > 0) {
+          openGroupHasInnerQuantifier[openGroupHasInnerQuantifier.length - 1] = true;
+        }
+        continue;
+      }
+
+      if (char === '|' || char === '+' || char === '*' || char === '{') {
+        for (let depth = 0; depth < openGroupHasInnerQuantifier.length; depth++) {
+          openGroupHasInnerQuantifier[depth] = true;
+        }
+      }
+    }
+
+    return false;
   }
 }

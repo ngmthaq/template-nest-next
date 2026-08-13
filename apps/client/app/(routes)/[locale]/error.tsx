@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { AppStatusTemplate } from '@/app/(shared)/_components';
 
@@ -12,23 +12,30 @@ export interface ErrorProps {
 
 export default function Error({ error, retry }: ErrorProps) {
   const t = useTranslations('error');
+  const announcementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     console.error(error);
   }, [error]);
 
+  useEffect(() => {
+    announcementRef.current?.focus();
+  }, [error]);
+
   return (
-    <AppStatusTemplate code={500} title={t('title')} description={t('description')}>
-      <button
-        type="button"
-        onClick={() => retry()}
-        className="bg-foreground text-background flex h-12 items-center justify-center rounded-full px-5 text-base font-medium transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
-      >
-        {t('retry')}
-      </button>
-      {error.digest ? (
-        <p className="text-xs text-zinc-400 dark:text-zinc-500">Reference: {error.digest}</p>
-      ) : null}
-    </AppStatusTemplate>
+    <div ref={announcementRef} role="alert" tabIndex={-1}>
+      <AppStatusTemplate code={500} title={t('title')} description={t('description')}>
+        <button
+          type="button"
+          onClick={() => retry()}
+          className="flex h-12 items-center justify-center rounded-full bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        >
+          {t('retry')}
+        </button>
+        {error.digest ? (
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">Reference: {error.digest}</p>
+        ) : null}
+      </AppStatusTemplate>
+    </div>
   );
 }

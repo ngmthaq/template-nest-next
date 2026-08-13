@@ -14,6 +14,15 @@ export default getRequestConfig(async ({ locale }) => {
 
   return {
     locale,
-    messages: (await import(`./messages/${locale}.json`)).default,
+    messages: await loadMessages(locale),
   };
 });
+
+async function loadMessages(locale: string) {
+  switch (locale) {
+    case 'zh':
+      return (await import('./messages/zh.json')).default;
+    default:
+      return (await import('./messages/en.json')).default;
+  }
+}

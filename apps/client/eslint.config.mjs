@@ -3,6 +3,7 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import eslintPluginBetterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import eslintPluginJsxA11y from 'eslint-plugin-jsx-a11y';
+import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
@@ -10,6 +11,7 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   eslintPluginPrettierRecommended,
+  noUnsanitized.configs.recommended,
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
@@ -45,6 +47,9 @@ const eslintConfig = defineConfig([
       'jsx-a11y/alt-text': ['error', { elements: ['img'], img: ['Image'] }],
       'jsx-a11y/control-has-associated-label': 'error',
       'jsx-a11y/lang': 'error',
+      'jsx-a11y/anchor-ambiguous-text': 'error',
+      'jsx-a11y/no-aria-hidden-on-focusable': 'error',
+      'jsx-a11y/prefer-tag-over-role': 'error',
 
       'better-tailwindcss/enforce-consistent-class-order': 'off',
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
@@ -52,6 +57,14 @@ const eslintConfig = defineConfig([
       'better-tailwindcss/no-unnecessary-whitespace': 'warn',
       'better-tailwindcss/no-conflicting-classes': 'warn',
       'better-tailwindcss/no-deprecated-classes': 'warn',
+
+      'react/no-danger': 'error',
+      'react/no-danger-with-children': 'error',
+      'react/jsx-no-target-blank': 'error',
+      'react/jsx-no-script-url': 'error',
+      'no-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
     },
   },
   globalIgnores([

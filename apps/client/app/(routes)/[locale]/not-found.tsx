@@ -10,7 +10,7 @@ export default async function NotFound() {
     <AppStatusTemplate code={404} title={t('title')} description={t('description')}>
       <Link
         href="/"
-        className="bg-foreground text-background flex h-12 items-center justify-center rounded-full px-5 text-base font-medium transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        className="flex h-12 items-center justify-center rounded-full bg-foreground px-5 text-base font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
       >
         {t('backHome')}
       </Link>

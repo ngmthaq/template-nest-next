@@ -10,7 +10,7 @@ interface AppStatusTemplateProps {
 export function AppStatusTemplate({ code, title, description, children }: AppStatusTemplateProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-white px-16 py-32 text-center dark:bg-black">
+      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-white px-6 py-12 text-center md:px-16 md:py-32 dark:bg-black">
         <p className="text-sm font-semibold tracking-widest text-zinc-500 uppercase dark:text-zinc-400">
           {code}
         </p>
