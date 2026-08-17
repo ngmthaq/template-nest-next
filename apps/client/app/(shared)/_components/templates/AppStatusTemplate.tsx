@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { Typography } from '@/app/(shared)/_components/shadcn';
+
 interface AppStatusTemplateProps {
   code: number | string;
   title: string;
@@ -9,15 +11,17 @@ interface AppStatusTemplateProps {
 
 export function AppStatusTemplate({ code, title, description, children }: AppStatusTemplateProps) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-white px-6 py-12 text-center md:px-16 md:py-32 dark:bg-black">
-        <p className="text-sm font-semibold tracking-widest text-zinc-500 uppercase dark:text-zinc-400">
+    <div className="flex flex-1 flex-col items-center justify-center bg-background font-sans">
+      <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-background px-6 py-12 text-center md:px-16 md:py-32">
+        <Typography variant="small" className="tracking-widest text-muted-foreground uppercase">
           {code}
-        </p>
-        <h1 className="max-w-xs text-3xl leading-10 font-semibold tracking-tight text-black dark:text-zinc-50">
+        </Typography>
+        <Typography variant="h1" className="max-w-xs text-3xl leading-10 tracking-tight">
           {title}
-        </h1>
-        <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">{description}</p>
+        </Typography>
+        <Typography variant="lead" className="max-w-md text-lg leading-8">
+          {description}
+        </Typography>
         {children}
       </main>
     </div>

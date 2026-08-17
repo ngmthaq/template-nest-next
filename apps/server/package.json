@@ -54,6 +54,7 @@
     "class-validator": "^0.15.1",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
+    "dayjs": "^1.11.21",
     "helmet": "^8.3.0",
     "ioredis": "^5.11.1",
     "keyv": "^5.6.0",
