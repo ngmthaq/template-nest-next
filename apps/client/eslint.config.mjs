@@ -21,7 +21,7 @@ const eslintConfig = defineConfig([
     },
     settings: {
       'better-tailwindcss': {
-        entryPoint: 'app/(shared)/_theme/globals.css',
+        entryPoint: 'app/(shared)/_assets/css/globals.css',
       },
       'jsx-a11y': {
         components: {

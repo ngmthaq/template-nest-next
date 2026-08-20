@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
 
 import { Separator } from '@/app/(shared)/_components/shadcn/separator';
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 const buttonGroupVariants = cva(
   "group/button-group flex w-fit min-w-0 items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-lg [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1",

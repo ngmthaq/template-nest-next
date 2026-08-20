@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { Input } from '@/app/(shared)/_components/shadcn/input';
 import { Textarea } from '@/app/(shared)/_components/shadcn/textarea';
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 function InputGroup({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (

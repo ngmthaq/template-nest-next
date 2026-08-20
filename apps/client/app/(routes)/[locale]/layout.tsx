@@ -1,4 +1,4 @@
-import '../../(shared)/_theme/globals.css';
+import '../../(shared)/_assets/css/globals.css';
 
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -7,9 +7,9 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
 import { Toaster } from '@/app/(shared)/_components/shadcn/sonner';
-import { localeDirections } from '@/app/(shared)/_i18n/dir';
-import { routing } from '@/app/(shared)/_i18n/routing';
-import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
+import { localeDirections } from '@/app/(shared)/_i18n/configs/dir';
+import { routing } from '@/app/(shared)/_i18n/configs/routing';
+import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -37,12 +37,12 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]'>)
       suppressHydrationWarning
     >
       <body>
-        <ThemeProvider>
+        <AppThemeProvider>
           <NextIntlClientProvider>
             {children}
             <Toaster />
           </NextIntlClientProvider>
-        </ThemeProvider>
+        </AppThemeProvider>
       </body>
     </html>
   );

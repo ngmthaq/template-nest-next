@@ -11,7 +11,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@/app/(shared)/_components/shadcn/input-group';
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 const Combobox = ComboboxPrimitive.Root;
 

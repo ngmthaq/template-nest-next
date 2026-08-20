@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
   return (

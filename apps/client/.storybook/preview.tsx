@@ -1,4 +1,4 @@
-import '../app/(shared)/_theme/globals.css';
+import '../app/(shared)/_assets/css/globals.css';
 
 import { withThemeByClassName } from '@storybook/addon-themes';
 import type { Decorator, Preview } from '@storybook/nextjs-vite';
@@ -6,7 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 
 import en from '../app/(shared)/_i18n/messages/en.json';
 import zh from '../app/(shared)/_i18n/messages/zh.json';
-import { ThemeProvider } from '../app/(shared)/_theme/ThemeProvider';
+import { AppThemeProvider } from '../app/(shared)/_providers/AppThemeProvider';
 
 const messagesByLocale = { en, zh } as const;
 type PreviewLocale = keyof typeof messagesByLocale;
@@ -57,7 +57,7 @@ const withThemeContext: Decorator = (Story, context) => {
   const theme = isPreviewTheme(context.globals.theme) ? context.globals.theme : 'light';
 
   return (
-    <ThemeProvider
+    <AppThemeProvider
       key={theme}
       attribute="data-theme"
       storageKey="storybook-theme"
@@ -66,7 +66,7 @@ const withThemeContext: Decorator = (Story, context) => {
       enableSystem={false}
     >
       <Story />
-    </ThemeProvider>
+    </AppThemeProvider>
   );
 };
 

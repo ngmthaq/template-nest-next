@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Slot } from 'radix-ui';
 import * as React from 'react';
 
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 // `outline-none` was deliberately removed from the base class below so the project's
 // global `:focus-visible` outline (globals.css) applies to Button, per WCAG 2.1 SC 1.4.11.

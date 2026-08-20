@@ -33,20 +33,21 @@ Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, 
 ## Structure
 
 ```
-proxy.ts                   # Locale negotiation, delegates to _i18n/proxy
+proxy.ts                   # Locale negotiation, delegates to _i18n/configs/proxy
 app/
 ├── (routes)/              # Route group holding the actual pages
 │   └── [locale]/          # Every page lives under a locale segment
 └── (shared)/              # Not routable — shared building blocks
+    ├── _assets/           # Static assets, e.g. css/globals.css
     ├── _components/       # Shared React components
-    ├── _i18n/             # next-intl routing, navigation, messages
-    ├── _schemas/          # Shared types / validation schemas
-    ├── _services/         # httpService, cookieService, cacheService
-    ├── _theme/            # globals.css, fonts and theme tokens
-    └── _utils/            # Helpers
+    ├── _constants/        # apiEndpoints, storageKeys
+    ├── _hooks/            # Shared client hooks
+    ├── _i18n/             # next-intl configs, types, messages
+    ├── _providers/        # AppThemeProvider and other client providers
+    └── _utils/            # tailwindUtils (cn), httpUtils, cookieUtils, cacheUtils
 ```
 
-`@/*` maps to the app root, so `@/app/(shared)/_services` resolves from anywhere.
+`@/*` maps to the app root, so `@/app/(shared)/_utils` resolves from anywhere.
 
 ## Storybook
 
@@ -62,21 +63,22 @@ pnpm client build-storybook    # static build in storybook-static/ (gitignored)
 
 Stories are colocated next to the component they document, e.g. `button.tsx` → `button.stories.tsx`.
 
-## Services
+## Utils
 
-Three services live in `app/(shared)/_services`. Each exports both its class and a ready-made
+Three utils live in `app/(shared)/_utils`. Each exports both its class and a ready-made
 singleton — use the singleton unless you need different construction options.
 
 ```ts
-import { cookieService, httpService } from '@/app/(shared)/_services';
+import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
+import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
 
-import { cacheService } from '@/app/(shared)/_services/cacheService';
+import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
 ```
 
-`cacheService` is deliberately **not** in the barrel: it imports `next/cache` and is server-only, so
-re-exporting it would break every Client Component that imports from `_services`.
+There is no barrel — import each util from its own file. `cacheUtils` in particular is server-only:
+it imports `next/cache`, so a Client Component must never pull it in.
 
-### httpService
+### httpUtils
 
 A `fetch` wrapper that prefixes `NEXT_PUBLIC_API_URL`, attaches the access token, parses JSON, throws
 on non-2xx, and times out after 60s. It runs on the server and in the browser.
@@ -84,18 +86,18 @@ on non-2xx, and times out after 60s. It runs on the server and in the browser.
 #### Requests
 
 ```ts
-import { httpService } from '@/app/(shared)/_services';
+import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
 
 // GET /items?page=2&sort=name
-const items = await httpService.get<Item[]>('/items', { page: '2', sort: 'name' });
+const items = await httpUtils.get<Item[]>('/items', { page: '2', sort: 'name' });
 
-const item = await httpService.post<Item>('/items', { name: 'Chair', price: 40 });
-const replaced = await httpService.put<Item>('/items/1', { name: 'Chair', price: 45 });
-const patched = await httpService.patch<Item>('/items/1', { price: 50 });
+const item = await httpUtils.post<Item>('/items', { name: 'Chair', price: 40 });
+const replaced = await httpUtils.put<Item>('/items/1', { name: 'Chair', price: 45 });
+const patched = await httpUtils.patch<Item>('/items/1', { price: 50 });
 
 // DELETE takes query params, not a body
-await httpService.delete<void>('/items/1');
-await httpService.delete<void>('/items', { ids: '1,2,3' });
+await httpUtils.delete<void>('/items/1');
+await httpUtils.delete<void>('/items', { ids: '1,2,3' });
 ```
 
 `get`/`delete` take `Record<string, string>` query params, which are merged into any query string
@@ -110,9 +112,9 @@ const formData = new FormData();
 formData.append('file', file);
 formData.append('title', 'Avatar');
 
-await httpService.postFormData<Upload>('/uploads', formData);
-await httpService.putFormData<Upload>('/uploads/1', formData);
-await httpService.patchFormData<Upload>('/uploads/1', formData);
+await httpUtils.postFormData<Upload>('/uploads', formData);
+await httpUtils.putFormData<Upload>('/uploads/1', formData);
+await httpUtils.patchFormData<Upload>('/uploads/1', formData);
 ```
 
 Every method takes a final options argument that extends `RequestInit`, so anything `fetch` accepts
@@ -120,10 +122,10 @@ works, plus `withAuth` and `cookies`:
 
 ```ts
 // Public endpoint — skip the cookie read entirely
-await httpService.get<Health>('/health', undefined, { withAuth: false });
+await httpUtils.get<Health>('/health', undefined, { withAuth: false });
 
 // Custom headers, plus a Next fetch option
-await httpService.get<Item[]>('/items', undefined, {
+await httpUtils.get<Item[]>('/items', undefined, {
   headers: { 'Accept-Language': 'vi' },
   cache: 'no-store',
 });
@@ -131,23 +133,23 @@ await httpService.get<Item[]>('/items', undefined, {
 
 #### Errors
 
-Failures arrive as two named error classes, both exported from the service:
+Failures arrive as two named error classes, both exported from the util:
 
 ```ts
 import {
-  httpService,
-  HttpServiceResponseError,
-  HttpServiceTimeoutError,
-} from '@/app/(shared)/_services';
+  httpUtils,
+  HttpUtilsResponseError,
+  HttpUtilsTimeoutError,
+} from '@/app/(shared)/_utils/httpUtils';
 
 try {
-  await httpService.post('/auth/login', { email, password });
+  await httpUtils.post('/auth/login', { email, password });
 } catch (error) {
-  if (error instanceof HttpServiceResponseError) {
+  if (error instanceof HttpUtilsResponseError) {
     // error.status -> 401, error.body -> parsed JSON error payload from the API
     if (error.status === 401) return { message: 'Wrong email or password' };
   }
-  if (error instanceof HttpServiceTimeoutError) {
+  if (error instanceof HttpUtilsTimeoutError) {
     return { message: 'The server took too long to respond' };
   }
   throw error;
@@ -164,16 +166,16 @@ wins:
 
 ```ts
 const controller = new AbortController();
-const promise = httpService.get<Item[]>('/items', undefined, { signal: controller.signal });
+const promise = httpUtils.get<Item[]>('/items', undefined, { signal: controller.signal });
 controller.abort();
 ```
 
 To change the 60s default or point at another API, construct your own instance:
 
 ```ts
-import { HttpService } from '@/app/(shared)/_services';
+import { HttpUtils } from '@/app/(shared)/_utils/httpUtils';
 
-export const reportService = new HttpService({
+export const reportUtils = new HttpUtils({
   baseUrl: process.env.REPORTS_API_URL,
   timeout: 5 * 60 * 1000,
 });
@@ -181,29 +183,29 @@ export const reportService = new HttpService({
 
 #### Tokens
 
-The service owns the `access_token` / `refresh_token` cookies and delegates storage to
-`cookieService`. Cookies are written with `path: '/'`, `sameSite: 'strict'`, and `secure` in
+The util owns the `access_token` / `refresh_token` cookies and delegates storage to
+`cookieUtils`. Cookies are written with `path: '/'`, `sameSite: 'strict'`, and `secure` in
 production; pass options to override per call.
 
 ```ts
 'use server';
 
-import { httpService } from '@/app/(shared)/_services';
+import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
 
 export async function login(email: string, password: string) {
-  const tokens = await httpService.post<{ accessToken: string; refreshToken: string }>(
+  const tokens = await httpUtils.post<{ accessToken: string; refreshToken: string }>(
     '/auth/login',
     { email, password },
     { withAuth: false },
   );
 
-  await httpService.setAccessToken(tokens.accessToken, { maxAge: 60 * 15 });
-  await httpService.setRefreshToken(tokens.refreshToken, { maxAge: 60 * 60 * 24 * 7 });
+  await httpUtils.setAccessToken(tokens.accessToken, { maxAge: 60 * 15 });
+  await httpUtils.setRefreshToken(tokens.refreshToken, { maxAge: 60 * 60 * 24 * 7 });
 }
 
 export async function logout() {
-  await httpService.removeAccessToken();
-  await httpService.removeRefreshToken();
+  await httpUtils.removeAccessToken();
+  await httpUtils.removeRefreshToken();
 }
 ```
 
@@ -219,34 +221,34 @@ want the read to be explicit — or when you already hold the store and want to 
 ```ts
 import { cookies } from 'next/headers';
 
-const items = await httpService.get<Item[]>('/items', undefined, { cookies });
+const items = await httpUtils.get<Item[]>('/items', undefined, { cookies });
 ```
 
-`HttpServiceRequestOptions` accepts only `cookies` (a `CookiesFn`), not `req`/`res`. Middleware,
+`HttpUtilsRequestOptions` accepts only `cookies` (a `CookiesFn`), not `req`/`res`. Middleware,
 which has no `next/headers` store, is therefore a place to build the header yourself:
 
 ```ts
-const token = await cookieService.get('access_token', { req, res });
-await httpService.get<Item[]>('/items', undefined, {
+const token = await cookieUtils.get('access_token', { req, res });
+await httpUtils.get<Item[]>('/items', undefined, {
   headers: token ? { Authorization: `Bearer ${token}` } : undefined,
 });
 ```
 
-### cookieService
+### cookieUtils
 
 A thin wrapper over [`cookies-next`](https://github.com/andreizanik/cookies-next) with one job: the
 same call works on the server and in the browser. On the server it lazily imports `next/headers` and
 injects `cookies` for you, unless you already passed a `req`/`res`/`cookies` scope.
 
 ```ts
-import { cookieService } from '@/app/(shared)/_services';
+import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
 
-await cookieService.set('locale', 'vi', { maxAge: 60 * 60 * 24 * 365, path: '/' });
-const locale = await cookieService.get('locale'); // string | undefined
+await cookieUtils.set('locale', 'vi', { maxAge: 60 * 60 * 24 * 365, path: '/' });
+const locale = await cookieUtils.get('locale'); // string | undefined
 
-await cookieService.has('locale'); // boolean
-await cookieService.remove('locale', { path: '/' });
-await cookieService.getAll(); // { locale: 'vi', access_token: '…' }
+await cookieUtils.has('locale'); // boolean
+await cookieUtils.remove('locale', { path: '/' });
+await cookieUtils.getAll(); // { locale: 'vi', access_token: '…' }
 ```
 
 Objects round-trip through the JSON helpers. `getJson` returns `undefined` rather than throwing when
@@ -255,8 +257,8 @@ the cookie is missing or is not valid JSON:
 ```ts
 type Prefs = { theme: 'light' | 'dark'; sidebar: boolean };
 
-await cookieService.setJson<Prefs>('prefs', { theme: 'dark', sidebar: true });
-const prefs = (await cookieService.getJson<Prefs>('prefs')) ?? { theme: 'light', sidebar: false };
+await cookieUtils.setJson<Prefs>('prefs', { theme: 'dark', sidebar: true });
+const prefs = (await cookieUtils.getJson<Prefs>('prefs')) ?? { theme: 'light', sidebar: false };
 ```
 
 Every method is `async` even in the browser, because the server path awaits `next/headers`. In a
@@ -267,18 +269,18 @@ Client Component that means reading cookies inside an effect or an event handler
 
 import { useEffect, useState } from 'react';
 
-import { cookieService } from '@/app/(shared)/_services';
+import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<string>();
 
   useEffect(() => {
-    cookieService.get('theme').then(setTheme);
+    cookieUtils.get('theme').then(setTheme);
   }, []);
 
   async function toggle() {
     const next = theme === 'dark' ? 'light' : 'dark';
-    await cookieService.set('theme', next, { path: '/' });
+    await cookieUtils.set('theme', next, { path: '/' });
     setTheme(next);
   }
 
@@ -294,18 +296,18 @@ explicitly:
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { cookieService } from '@/app/(shared)/_services';
+import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  if (!(await cookieService.has('session_id', { req, res }))) {
-    await cookieService.set('session_id', crypto.randomUUID(), { req, res, path: '/' });
+  if (!(await cookieUtils.has('session_id', { req, res }))) {
+    await cookieUtils.set('session_id', crypto.randomUUID(), { req, res, path: '/' });
   }
   return res;
 }
 ```
 
-### cacheService
+### cacheUtils
 
 See the next section — it is the whole caching story for this app.
 
@@ -316,16 +318,19 @@ redirects to `/en` and every route lives under `/en/…`.
 
 ```
 app/(shared)/_i18n/
-├── routing.ts        # Locales and default locale — the single source of truth
-├── navigation.ts     # Locale-aware Link, redirect, usePathname, useRouter, getPathname
-├── request.ts        # Per-request config; resolves the locale and loads messages
-├── proxy.ts          # createMiddleware(routing)
-├── i18n.d.ts         # Types `Locale` and every message key
+├── configs/
+│   ├── routing.ts    # Locales and default locale — the single source of truth
+│   ├── navigation.ts # Locale-aware Link, redirect, usePathname, useRouter, getPathname
+│   ├── request.ts    # Per-request config; resolves the locale and loads messages
+│   ├── dir.ts        # Text direction per locale
+│   └── proxy.ts      # createMiddleware(routing)
+├── types/i18n.d.ts   # Types `Locale` and every message key
 └── messages/en.json  # Translations
 ```
 
-`request.ts` and `i18n.d.ts` are deliberately **not** in the barrel — the first is server-only
-config loaded by the plugin, the second is a type augmentation the compiler picks up on its own.
+Import each module from its own file. `configs/request.ts` is server-only config loaded by the
+plugin, and `types/i18n.d.ts` is a type augmentation the compiler picks up on its own — neither is
+imported by hand.
 
 ### Writing messages
 
@@ -417,17 +422,17 @@ format.relativeTime(commentedAt);
 
 ### Linking between pages
 
-Import navigation helpers from `_i18n`, **not** from `next/link` or `next/navigation` — these keep
-the active locale in the URL for you.
+Import navigation helpers from `_i18n/configs/navigation`, **not** from `next/link` or
+`next/navigation` — these keep the active locale in the URL for you.
 
 ```tsx
-import { Link } from '@/app/(shared)/_i18n';
+import { Link } from '@/app/(shared)/_i18n/configs/navigation';
 
 <Link href="/about">About</Link>; // -> /en/about
 ```
 
-`redirect`, `usePathname`, `useRouter`, and `getPathname` are exported from the same barrel and
-behave the same way. `usePathname` returns the path _without_ the locale prefix (`/about`, not
+`redirect`, `usePathname`, `useRouter`, and `getPathname` come from the same file and behave the
+same way. `usePathname` returns the path _without_ the locale prefix (`/about`, not
 `/en/about`), which is what you want when comparing against an active route.
 
 ### Reading the locale
@@ -452,7 +457,8 @@ Re-push the current path with a different locale — the helpers rewrite the pre
 
 import { useLocale } from 'next-intl';
 
-import { routing, usePathname, useRouter } from '@/app/(shared)/_i18n';
+import { usePathname, useRouter } from '@/app/(shared)/_i18n/configs/navigation';
+import { routing } from '@/app/(shared)/_i18n/configs/routing';
 
 export function LocaleSwitcher() {
   const router = useRouter();
@@ -513,7 +519,7 @@ export async function submit(locale: string, formData: FormData) {
 
 `proxy.ts` at the app root handles locale negotiation and redirects: `/` → `/en`, and any path
 without a known locale prefix gets one. It must live beside `app/` because Next requires it there,
-so it is a thin delegate over `_i18n/proxy.ts`.
+so it is a thin delegate over `_i18n/configs/proxy.ts`.
 
 Two constraints if you edit it. The export has to be named `proxy` (or be a default _declaration_ —
 `export { default } from …` is not recognised by Next's static analysis and fails the build). And
@@ -541,15 +547,15 @@ Cache Components are enabled (`cacheComponents: true` in `next.config.ts`), so r
 default and you opt individual functions or components into caching with `use cache`. Uncached async
 work must sit under a `<Suspense>` boundary.
 
-`cacheService` layers a **path-string cache key** convention on top of Next's
+`cacheUtils` layers a **path-string cache key** convention on top of Next's
 `cacheTag`/`revalidateTag`. A path is tagged hierarchically, so revalidating a parent path
 invalidates everything beneath it:
 
-| Cached as                                 | Tags written                                  |
-| ----------------------------------------- | --------------------------------------------- |
-| `cacheService.tag('/items')`              | `path:/`, `path:/items`                       |
-| `cacheService.tag('/items/1')`            | `path:/`, `path:/items`, `path:/items/1`      |
-| `cacheService.tag('/items', { page: 2 })` | `path:/`, `path:/items`, `path:/items?page=2` |
+| Cached as                               | Tags written                                  |
+| --------------------------------------- | --------------------------------------------- |
+| `cacheUtils.tag('/items')`              | `path:/`, `path:/items`                       |
+| `cacheUtils.tag('/items/1')`            | `path:/`, `path:/items`, `path:/items/1`      |
+| `cacheUtils.tag('/items', { page: 2 })` | `path:/`, `path:/items`, `path:/items?page=2` |
 
 Revalidating `/items` therefore busts `/items/1` and `/items?page=2` too; revalidating
 `/items?page=2` busts only that entry. Query params are sorted and `null`/`undefined` values dropped,
@@ -558,9 +564,9 @@ so `{ b: 1, a: 2 }` and `{ a: 2, b: 1 }` produce the same key.
 `normalize()` and `toTag()` are public if you need the key itself rather than the side effect:
 
 ```ts
-cacheService.normalize('/items/', { b: 1, a: 2 }); // '/items?a=2&b=1'
-cacheService.toTag('/items', { page: 2 }); // 'path:/items?page=2'
-cacheService.toTags('/items/1'); // ['path:/', 'path:/items', 'path:/items/1']
+cacheUtils.normalize('/items/', { b: 1, a: 2 }); // '/items?a=2&b=1'
+cacheUtils.toTag('/items', { page: 2 }); // 'path:/items?page=2'
+cacheUtils.toTags('/items/1'); // ['path:/', 'path:/items', 'path:/items/1']
 ```
 
 ### Reading
@@ -568,15 +574,15 @@ cacheService.toTags('/items/1'); // ['path:/', 'path:/items', 'path:/items/1']
 ```ts
 import { cacheLife } from 'next/cache';
 
-import { httpService } from '@/app/(shared)/_services';
-import { cacheService } from '@/app/(shared)/_services/cacheService';
+import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
 
 export async function getItems(page: number) {
   'use cache';
   cacheLife('api');
-  cacheService.tag('/items', { page });
+  cacheUtils.tag('/items', { page });
 
-  return httpService.get<Item[]>('/items', { page: String(page) }, { withAuth: false });
+  return httpUtils.get<Item[]>('/items', { page: String(page) }, { withAuth: false });
 }
 ```
 
@@ -585,7 +591,7 @@ Pair one with every `use cache` scope.
 
 ### Authenticated endpoints
 
-A `use cache` scope cannot call `cookies()` or `headers()`, and `httpService` reads the access token
+A `use cache` scope cannot call `cookies()` or `headers()`, and `httpUtils` reads the access token
 from a cookie — so **the shared server cache only fits requests that are not authenticated per user.**
 That is the main limitation of this setup; read the table before reaching for `use cache`.
 
@@ -595,16 +601,16 @@ That is the main limitation of this setup; read the table before reaching for `u
 | Behind auth, but identical for every user | `use cache` + a server-side service token (below). Cached once, shared by all. |
 | Per-user / per-tenant                     | `'use cache: private'`, or don't cache — stream it under `<Suspense>`.         |
 
-`httpService` skips the cookie read whenever an `Authorization` header is already set, so a cached
+`httpUtils` skips the cookie read whenever an `Authorization` header is already set, so a cached
 function can authenticate with a token that does not come from the request:
 
 ```ts
 export async function getCategories() {
   'use cache';
   cacheLife('apiLong');
-  cacheService.tag('/categories');
+  cacheUtils.tag('/categories');
 
-  return httpService.get<Category[]>('/categories', undefined, {
+  return httpUtils.get<Category[]>('/categories', undefined, {
     headers: { Authorization: `Bearer ${process.env.API_SERVICE_TOKEN}` },
   });
 }
@@ -614,16 +620,16 @@ Do **not** read the user's token outside the scope and pass it in as an argument
 part of the cache key, so a rotating access token produces a fresh cache entry on every rotation
 (near-zero hit rate) while filling the shared server cache with per-user copies of the response.
 
-For per-user data, `'use cache: private'` lifts the restriction — `cookieService` and `httpService`
+For per-user data, `'use cache: private'` lifts the restriction — `cookieUtils` and `httpUtils`
 work normally inside it, with auth intact:
 
 ```ts
 export async function getProfile() {
   'use cache: private';
   cacheLife('apiPrivate');
-  cacheService.tag('/me');
+  cacheUtils.tag('/me');
 
-  return httpService.get<Profile>('/me');
+  return httpUtils.get<Profile>('/me');
 }
 ```
 
@@ -645,42 +651,42 @@ bust stay together:
 ```ts
 'use server';
 
-import { httpService } from '@/app/(shared)/_services';
-import { cacheService } from '@/app/(shared)/_services/cacheService';
+import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
 
 export async function createItem(body: ItemInput) {
-  await httpService.post('/items', body);
-  cacheService.update('/items');
+  await httpUtils.post('/items', body);
+  cacheUtils.update('/items');
 }
 
 export async function updateItem(id: string, body: ItemInput) {
-  await httpService.patch(`/items/${id}`, body);
-  cacheService.update(`/items/${id}`); // narrow: only this item's entry
-  cacheService.revalidate('/items'); // broad: the list and everything under it
+  await httpUtils.patch(`/items/${id}`, body);
+  cacheUtils.update(`/items/${id}`); // narrow: only this item's entry
+  cacheUtils.revalidate('/items'); // broad: the list and everything under it
 }
 ```
 
-| Method                           | Wraps                       | Use when                                                        |
-| -------------------------------- | --------------------------- | --------------------------------------------------------------- |
-| `cacheService.update()`          | `updateTag`                 | Read-your-own-writes. Expires immediately. Server Actions only. |
-| `cacheService.revalidate()`      | `revalidateTag(tag, 'max')` | Background refresh; stale content may be served meanwhile.      |
-| `cacheService.revalidateRoute()` | `revalidatePath`            | Invalidate a whole route by its file path, e.g. `/items/[id]`.  |
-| `cacheService.refresh()`         | `refresh`                   | Refresh client-cached dynamic data. Server Actions only.        |
+| Method                         | Wraps                       | Use when                                                        |
+| ------------------------------ | --------------------------- | --------------------------------------------------------------- |
+| `cacheUtils.update()`          | `updateTag`                 | Read-your-own-writes. Expires immediately. Server Actions only. |
+| `cacheUtils.revalidate()`      | `revalidateTag(tag, 'max')` | Background refresh; stale content may be served meanwhile.      |
+| `cacheUtils.revalidateRoute()` | `revalidatePath`            | Invalidate a whole route by its file path, e.g. `/items/[id]`.  |
+| `cacheUtils.refresh()`         | `refresh`                   | Refresh client-cached dynamic data. Server Actions only.        |
 
 `revalidate()` takes the same params plus an expiry profile:
 
 ```ts
-cacheService.revalidate('/items', { params: { page: 2 } });
-cacheService.revalidate('/items', { profile: 'apiShort' });
-cacheService.revalidateRoute('/items/[id]', 'page');
+cacheUtils.revalidate('/items', { params: { page: 2 } });
+cacheUtils.revalidate('/items', { profile: 'apiShort' });
+cacheUtils.revalidateRoute('/items/[id]', 'page');
 ```
 
 Two things to keep in mind:
 
 - `update()` and `refresh()` throw outside a Server Action. From a Route Handler or during a Server
   Component render, use `revalidate()` or `revalidateRoute()` instead.
-- `cacheService` is server-only and not exported from the `_services` barrel — import it from
-  `_services/cacheService` directly.
+- `cacheUtils` is server-only — import it from `_utils/cacheUtils` directly and never from a Client
+  Component.
 
 A Client Component cannot import `next/cache` at all, so if one needs to trigger invalidation on its
 own, give it a narrow `'use server'` function with a fixed or allowlisted path. Avoid a generic

@@ -20,7 +20,7 @@ export interface CacheRevalidateOptions {
   profile?: CacheProfile | { expire: number };
 }
 
-export class CacheService {
+export class CacheUtils {
   public tagPrefix = 'path';
   public maxTagLength = 256;
   public maxTagCount = 128;
@@ -85,4 +85,4 @@ export class CacheService {
   }
 }
 
-export const cacheService = new CacheService();
+export const cacheUtils = new CacheUtils();

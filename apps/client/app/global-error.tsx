@@ -1,13 +1,13 @@
 'use client';
 
-import './(shared)/_theme/globals.css';
+import './(shared)/_assets/css/globals.css';
 
 import { useEffect, useRef } from 'react';
 
 import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
-import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
+import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -28,7 +28,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body>
-        <ThemeProvider>
+        <AppThemeProvider>
           <div ref={announcementRef} role="alert" tabIndex={-1}>
             <AppStatusTemplate
               code={500}
@@ -45,7 +45,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
               ) : null}
             </AppStatusTemplate>
           </div>
-        </ThemeProvider>
+        </AppThemeProvider>
       </body>
     </html>
   );

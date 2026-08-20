@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "app/(shared)/_theme/globals.css",
+    "css": "app/(shared)/_assets/css/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -14,7 +14,7 @@
   "rtl": false,
   "aliases": {
     "components": "@/app/(shared)/_components",
-    "utils": "@/app/(shared)/_utils",
+    "utils": "@/app/(shared)/_utils/tailwindUtils",
     "ui": "@/app/(shared)/_components/shadcn",
     "lib": "@/app/(shared)/_utils",
     "hooks": "@/app/(shared)/_hooks"

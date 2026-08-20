@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { cn } from '@/app/(shared)/_utils/cn';
+import { cn } from '@/app/(shared)/_utils/tailwindUtils';
 
 function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
   return (

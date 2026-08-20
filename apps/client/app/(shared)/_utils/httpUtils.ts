@@ -1,37 +1,37 @@
 import type { CookiesFn, OptionsType } from 'cookies-next';
 
-import { cookieService } from './cookieService';
+import { cookieUtils } from './cookieUtils';
 
-export interface HttpServiceOptions {
+export interface HttpUtilsOptions {
   baseUrl?: string;
   timeout?: number;
 }
 
-export interface HttpServiceRequestOptions extends RequestInit {
+export interface HttpUtilsRequestOptions extends RequestInit {
   cookies?: CookiesFn;
   withAuth?: boolean;
 }
 
-export class HttpServiceTimeoutError extends Error {
+export class HttpUtilsTimeoutError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'HttpServiceTimeoutError';
+    this.name = 'HttpUtilsTimeoutError';
   }
 }
 
-export class HttpServiceResponseError extends Error {
+export class HttpUtilsResponseError extends Error {
   public readonly status: number;
   public readonly body: unknown;
 
   constructor(status: number, body: unknown) {
     super(`Request failed with status ${status}`);
-    this.name = 'HttpServiceResponseError';
+    this.name = 'HttpUtilsResponseError';
     this.status = status;
     this.body = body;
   }
 }
 
-export class HttpServiceHelper {
+export class HttpUtilsHelper {
   public accessTokenKey = 'access_token';
   public refreshTokenKey = 'refresh_token';
   public tokenCookieOptions: OptionsType = {
@@ -43,33 +43,33 @@ export class HttpServiceHelper {
   private baseUrl: string;
   private timeout: number;
 
-  constructor(options: HttpServiceOptions = {}) {
+  constructor(options: HttpUtilsOptions = {}) {
     this.baseUrl = options.baseUrl ?? process.env.NEXT_PUBLIC_API_URL ?? '';
     this.timeout = options.timeout ?? 60000; // Default timeout in milliseconds
   }
 
   public async setAccessToken(token: string, options?: OptionsType): Promise<void> {
-    await cookieService.set(this.accessTokenKey, token, this.cookieOptions(options));
+    await cookieUtils.set(this.accessTokenKey, token, this.cookieOptions(options));
   }
 
   public async getAccessToken(options?: OptionsType): Promise<string | undefined> {
-    return cookieService.get(this.accessTokenKey, options);
+    return cookieUtils.get(this.accessTokenKey, options);
   }
 
   public async removeAccessToken(options?: OptionsType): Promise<void> {
-    await cookieService.remove(this.accessTokenKey, this.cookieOptions(options));
+    await cookieUtils.remove(this.accessTokenKey, this.cookieOptions(options));
   }
 
   public async setRefreshToken(token: string, options?: OptionsType): Promise<void> {
-    await cookieService.set(this.refreshTokenKey, token, this.cookieOptions(options));
+    await cookieUtils.set(this.refreshTokenKey, token, this.cookieOptions(options));
   }
 
   public async getRefreshToken(options?: OptionsType): Promise<string | undefined> {
-    return cookieService.get(this.refreshTokenKey, options);
+    return cookieUtils.get(this.refreshTokenKey, options);
   }
 
   public async removeRefreshToken(options?: OptionsType): Promise<void> {
-    await cookieService.remove(this.refreshTokenKey, this.cookieOptions(options));
+    await cookieUtils.remove(this.refreshTokenKey, this.cookieOptions(options));
   }
 
   private cookieOptions(options?: OptionsType): OptionsType {
@@ -84,7 +84,7 @@ export class HttpServiceHelper {
     return `${path}?${search.toString()}`;
   }
 
-  protected async request(url: string, options: HttpServiceRequestOptions): Promise<Response> {
+  protected async request(url: string, options: HttpUtilsRequestOptions): Promise<Response> {
     const { cookies, withAuth = true, ...init } = options;
     const baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const endpoint = url.startsWith('/') ? url : `/${url}`;
@@ -111,7 +111,7 @@ export class HttpServiceHelper {
     try {
       return await fetch(fullUrl, { ...init, headers, signal: controller.signal });
     } catch (error) {
-      if (isTimedOut) throw new HttpServiceTimeoutError('Request timed out');
+      if (isTimedOut) throw new HttpUtilsTimeoutError('Request timed out');
       throw error;
     } finally {
       clearTimeout(timeoutId);
@@ -129,22 +129,22 @@ export class HttpServiceHelper {
       body = text;
     }
 
-    if (!response.ok) throw new HttpServiceResponseError(response.status, body);
+    if (!response.ok) throw new HttpUtilsResponseError(response.status, body);
     return body as T;
   }
 
-  protected jsonOptions(options: HttpServiceRequestOptions): HttpServiceRequestOptions {
+  protected jsonOptions(options: HttpUtilsRequestOptions): HttpUtilsRequestOptions {
     const headers = new Headers(options.headers);
     if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
     return { ...options, headers };
   }
 }
 
-export class HttpService extends HttpServiceHelper {
+export class HttpUtils extends HttpUtilsHelper {
   public async get<T>(
     url: string,
     params?: Record<string, string>,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const urlWithParams = this.buildUrl(url, params);
     const response = await this.request(urlWithParams, { ...options, method: 'GET' });
@@ -154,7 +154,7 @@ export class HttpService extends HttpServiceHelper {
   public async post<T>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...this.jsonOptions(options),
@@ -167,7 +167,7 @@ export class HttpService extends HttpServiceHelper {
   public async postFormData<T>(
     url: string,
     formData: FormData,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...options,
@@ -180,7 +180,7 @@ export class HttpService extends HttpServiceHelper {
   public async put<T>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...this.jsonOptions(options),
@@ -193,7 +193,7 @@ export class HttpService extends HttpServiceHelper {
   public async putFormData<T>(
     url: string,
     formData: FormData,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...options,
@@ -206,7 +206,7 @@ export class HttpService extends HttpServiceHelper {
   public async patch<T>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...this.jsonOptions(options),
@@ -219,7 +219,7 @@ export class HttpService extends HttpServiceHelper {
   public async patchFormData<T>(
     url: string,
     formData: FormData,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const response = await this.request(url, {
       ...options,
@@ -232,7 +232,7 @@ export class HttpService extends HttpServiceHelper {
   public async delete<T>(
     url: string,
     params?: Record<string, string>,
-    options: HttpServiceRequestOptions = {},
+    options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
     const urlWithParams = this.buildUrl(url, params);
     const response = await this.request(urlWithParams, { ...options, method: 'DELETE' });
@@ -240,4 +240,4 @@ export class HttpService extends HttpServiceHelper {
   }
 }
 
-export const httpService = new HttpService();
+export const httpUtils = new HttpUtils();

@@ -8,7 +8,7 @@ import {
   type TmpCookiesObj,
 } from 'cookies-next';
 
-export class CookieService {
+export class CookieUtils {
   public async getAll(options?: OptionsType): Promise<TmpCookiesObj> {
     return (await getCookies(await this.scope(options))) ?? {};
   }
@@ -55,4 +55,4 @@ export class CookieService {
   }
 }
 
-export const cookieService = new CookieService();
+export const cookieUtils = new CookieUtils();
