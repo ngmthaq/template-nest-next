@@ -1,16 +1,15 @@
 import '../../(shared)/_theme/globals.css';
 
-import clsx from 'clsx';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { locale as rootLocale } from 'next/root-params';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { localeDirections } from '../../(shared)/_i18n/dir';
-import { routing } from '../../(shared)/_i18n/routing';
-import { fontGeistMono, fontGeistSans } from '../../(shared)/_theme/font';
-import { ThemeProvider } from '../../(shared)/_theme/ThemeProvider';
+import { Toaster } from '@/app/(shared)/_components/shadcn/sonner';
+import { localeDirections } from '@/app/(shared)/_i18n/dir';
+import { routing } from '@/app/(shared)/_i18n/routing';
+import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -34,12 +33,15 @@ export default async function RootLayout({ children }: LayoutProps<'/[locale]'>)
     <html
       lang={locale}
       dir={localeDirections[locale]}
-      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'antialiased'])}
+      className="antialiased"
       suppressHydrationWarning
     >
       <body>
         <ThemeProvider>
-          <NextIntlClientProvider>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider>
+            {children}
+            <Toaster />
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

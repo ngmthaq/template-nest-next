@@ -48,6 +48,20 @@ app/
 
 `@/*` maps to the app root, so `@/app/(shared)/_services` resolves from anywhere.
 
+## Storybook
+
+Storybook (`@storybook/nextjs-vite`) catalogues the components under `app/(shared)/_components/`.
+Config lives in `.storybook/`; `preview.tsx` reproduces the root layout's provider tree — theme
+(`next-themes`, toggled via the toolbar), locale (`NextIntlClientProvider`, `en`/`zh`, also via the
+toolbar) and the root typography classes — so every story renders with the app's real look.
+
+```bash
+pnpm client storybook          # dev server on http://localhost:6006
+pnpm client build-storybook    # static build in storybook-static/ (gitignored)
+```
+
+Stories are colocated next to the component they document, e.g. `button.tsx` → `button.stories.tsx`.
+
 ## Services
 
 Three services live in `app/(shared)/_services`. Each exports both its class and a ready-made

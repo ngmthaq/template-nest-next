@@ -1,0 +1,11 @@
+{
+  // Tailwind v4 at-rules (@theme, @apply, @custom-variant, @custom-media, ...) are unknown to
+  // VS Code's built-in CSS language service. The Tailwind CSS IntelliSense extension understands
+  // them; this keeps the built-in linter from flagging them either way.
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+
+  // Tailwind v4 has no tailwind.config.*; point IntelliSense at the CSS entry that owns @theme.
+  "tailwindCSS.experimental.configFile": "apps/client/app/(shared)/_theme/globals.css"
+}

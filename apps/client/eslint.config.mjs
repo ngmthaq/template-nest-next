@@ -6,12 +6,14 @@ import eslintPluginJsxA11y from 'eslint-plugin-jsx-a11y';
 import noUnsanitized from 'eslint-plugin-no-unsanitized';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
+import eslintPluginStorybook from 'eslint-plugin-storybook';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   eslintPluginPrettierRecommended,
   noUnsanitized.configs.recommended,
+  ...eslintPluginStorybook.configs['flat/recommended'],
   {
     plugins: {
       'simple-import-sort': simpleImportSort,

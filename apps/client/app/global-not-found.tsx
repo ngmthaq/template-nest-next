@@ -1,12 +1,10 @@
 import './(shared)/_theme/globals.css';
 
-import clsx from 'clsx';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
-import { fontGeistMono, fontGeistSans } from '@/app/(shared)/_theme/font';
 import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
 
 export const metadata: Metadata = {
@@ -17,11 +15,7 @@ export const metadata: Metadata = {
 
 export default function GlobalNotFound() {
   return (
-    <html
-      lang="en"
-      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'h-full antialiased'])}
-      suppressHydrationWarning
-    >
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <AppStatusTemplate

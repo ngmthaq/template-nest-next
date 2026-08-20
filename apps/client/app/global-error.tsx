@@ -2,13 +2,11 @@
 
 import './(shared)/_theme/globals.css';
 
-import clsx from 'clsx';
 import { useEffect, useRef } from 'react';
 
 import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
-import { fontGeistMono, fontGeistSans } from '@/app/(shared)/_theme/font';
 import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
 
 export interface GlobalErrorProps {
@@ -28,11 +26,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
   }, [error]);
 
   return (
-    <html
-      lang="en"
-      className={clsx([fontGeistSans.variable, fontGeistMono.variable, 'h-full antialiased'])}
-      suppressHydrationWarning
-    >
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <div ref={announcementRef} role="alert" tabIndex={-1}>
