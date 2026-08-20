@@ -5,8 +5,11 @@ import './(shared)/_theme/globals.css';
 import clsx from 'clsx';
 import { useEffect, useRef } from 'react';
 
-import { AppStatusTemplate, Button, Typography } from '@/app/(shared)/_components';
-import { fontGeistMono, fontGeistSans, ThemeProvider } from '@/app/(shared)/_theme';
+import { Button } from '@/app/(shared)/_components/shadcn/button';
+import { Typography } from '@/app/(shared)/_components/shadcn/typography';
+import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { fontGeistMono, fontGeistSans } from '@/app/(shared)/_theme/font';
+import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
 
 export interface GlobalErrorProps {
   error: Error & { digest?: string };

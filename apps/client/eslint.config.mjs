@@ -53,6 +53,7 @@ const eslintConfig = defineConfig([
 
       'better-tailwindcss/enforce-consistent-class-order': 'off',
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
+      'better-tailwindcss/enforce-canonical-classes': 'error',
       'better-tailwindcss/no-duplicate-classes': 'error',
       'better-tailwindcss/no-unnecessary-whitespace': 'warn',
       'better-tailwindcss/no-conflicting-classes': 'warn',

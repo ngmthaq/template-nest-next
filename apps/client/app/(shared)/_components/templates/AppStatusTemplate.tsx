@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Typography } from '@/app/(shared)/_components/shadcn';
+import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 
 interface AppStatusTemplateProps {
   code: number | string;
@@ -16,10 +16,10 @@ export function AppStatusTemplate({ code, title, description, children }: AppSta
         <Typography variant="small" className="tracking-widest text-muted-foreground uppercase">
           {code}
         </Typography>
-        <Typography variant="h1" className="max-w-xs text-3xl leading-10 tracking-tight">
+        <Typography variant="h1" className="max-w-xs text-3xl/10 tracking-tight">
           {title}
         </Typography>
-        <Typography variant="lead" className="max-w-md text-lg leading-8">
+        <Typography variant="lead" className="max-w-md text-lg/8">
           {description}
         </Typography>
         {children}

@@ -4,8 +4,10 @@ import clsx from 'clsx';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { AppStatusTemplate, Button } from '@/app/(shared)/_components';
-import { fontGeistMono, fontGeistSans, ThemeProvider } from '@/app/(shared)/_theme';
+import { Button } from '@/app/(shared)/_components/shadcn/button';
+import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { fontGeistMono, fontGeistSans } from '@/app/(shared)/_theme/font';
+import { ThemeProvider } from '@/app/(shared)/_theme/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Page not found',

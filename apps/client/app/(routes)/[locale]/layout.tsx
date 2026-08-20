@@ -7,8 +7,10 @@ import { locale as rootLocale } from 'next/root-params';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { localeDirections, routing } from '../../(shared)/_i18n';
-import { fontGeistMono, fontGeistSans, ThemeProvider } from '../../(shared)/_theme';
+import { localeDirections } from '../../(shared)/_i18n/dir';
+import { routing } from '../../(shared)/_i18n/routing';
+import { fontGeistMono, fontGeistSans } from '../../(shared)/_theme/font';
+import { ThemeProvider } from '../../(shared)/_theme/ThemeProvider';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
