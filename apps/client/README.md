@@ -61,7 +61,13 @@ pnpm client storybook          # dev server on http://localhost:6006
 pnpm client build-storybook    # static build in storybook-static/ (gitignored)
 ```
 
-Stories are colocated next to the component they document, e.g. `button.tsx` → `button.stories.tsx`.
+Stories sit next to the component they document. Your own components are folders —
+`templates/AppStatusTemplate/index.tsx` → `templates/AppStatusTemplate/index.stories.tsx`.
+
+The `shadcn/` components stay flat instead — `button.tsx` → `button.stories.tsx` — because the
+shadcn CLI always writes `<aliases.ui>/<name>.tsx` and cannot be pointed at a folder. Given
+`button/index.tsx`, `shadcn add` would not find it, would write a fresh `button.tsx` beside it,
+and that file would win module resolution and silently shadow your version.
 
 ## Utils
 

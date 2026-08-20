@@ -5,7 +5,7 @@ import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 import { Link } from '@/app/(shared)/_i18n/configs/navigation';
 
-import { AppStatusTemplate } from './AppStatusTemplate';
+import { AppStatusTemplate } from '.';
 
 const meta = {
   title: 'Templates/AppStatusTemplate',
