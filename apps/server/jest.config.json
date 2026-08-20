@@ -1,11 +1,12 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
-  "testRegex": "__test__/.*\\.spec\\.ts$",
+  "testRegex": "src/.*\\.spec\\.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "collectCoverageFrom": ["src/**/*.(t|j)s"],
+  "collectCoverageFrom": ["src/**/*.(t|j)s", "!src/**/*.spec.ts", "!src/generated/**"],
   "coverageDirectory": "coverage",
-  "testEnvironment": "node"
+  "testEnvironment": "node",
+  "passWithNoTests": true
 }
