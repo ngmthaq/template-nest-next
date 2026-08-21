@@ -12,8 +12,6 @@
 .vscode
 .idea
 .DS_Store
-**/__test__
-**/__e2e__
 .docs
 .claude
 **/README.md
