@@ -3,9 +3,9 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
-import { Button } from '@/app/(shared)/_components/shadcn/button';
-import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
+import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
 
 export interface ErrorProps {
   error: Error & { digest?: string };

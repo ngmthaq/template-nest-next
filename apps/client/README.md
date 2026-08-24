@@ -43,8 +43,9 @@ app/
     ├── _constants/        # apiEndpoints, storageKeys
     ├── _hooks/            # Shared client hooks
     ├── _i18n/             # next-intl configs, types, messages
+    ├── _libs/             # shadcn-ui/ — vendored shadcn components, stories, and cn
     ├── _providers/        # AppThemeProvider and other client providers
-    └── _utils/            # tailwindUtils (cn), httpUtils, cookieUtils, cacheUtils
+    └── _utils/            # httpUtils, cookieUtils, cacheUtils
 ```
 
 `@/*` maps to the app root, so `@/app/(shared)/_utils` resolves from anywhere.
@@ -64,10 +65,10 @@ pnpm client build-storybook    # static build in storybook-static/ (gitignored)
 Stories sit next to the component they document. Your own components are folders —
 `templates/AppStatusTemplate/index.tsx` → `templates/AppStatusTemplate/index.stories.tsx`.
 
-The `shadcn/` components stay flat instead — `button.tsx` → `button.stories.tsx` — because the
-shadcn CLI always writes `<aliases.ui>/<name>.tsx` and cannot be pointed at a folder. Given
-`button/index.tsx`, `shadcn add` would not find it, would write a fresh `button.tsx` beside it,
-and that file would win module resolution and silently shadow your version.
+The `_libs/shadcn-ui/` components stay flat instead — `button.tsx` → `button.stories.tsx` —
+because the shadcn CLI always writes `<aliases.ui>/<name>.tsx` and cannot be pointed at a folder.
+Given `button/index.tsx`, `shadcn add` would not find it, would write a fresh `button.tsx` beside
+it, and that file would win module resolution and silently shadow your version.
 
 ## Utils
 

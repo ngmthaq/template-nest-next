@@ -1,4 +1,4 @@
-import { Typography } from '@/app/(shared)/_components/shadcn/typography';
+import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
 
 export default function Home() {
   return <Typography variant="h1">Hello World</Typography>;

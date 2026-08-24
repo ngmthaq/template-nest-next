@@ -14,9 +14,9 @@
   "rtl": false,
   "aliases": {
     "components": "@/app/(shared)/_components",
-    "utils": "@/app/(shared)/_utils/tailwindUtils",
-    "ui": "@/app/(shared)/_components/shadcn",
-    "lib": "@/app/(shared)/_utils",
+    "utils": "@/app/(shared)/_libs/shadcn-ui/cn",
+    "ui": "@/app/(shared)/_libs/shadcn-ui",
+    "lib": "@/app/(shared)/_libs/shadcn-ui",
     "hooks": "@/app/(shared)/_hooks"
   },
   "menuColor": "default",

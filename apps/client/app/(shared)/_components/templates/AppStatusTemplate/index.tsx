@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Typography } from '@/app/(shared)/_components/shadcn/typography';
+import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
 
 interface AppStatusTemplateProps {
   code: number | string;

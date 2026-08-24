@@ -3,8 +3,8 @@ import './(shared)/_assets/css/globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export const metadata: Metadata = {

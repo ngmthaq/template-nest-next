@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/app/(shared)/_components/shadcn/button';
-import { Typography } from '@/app/(shared)/_components/shadcn/typography';
 import { Link } from '@/app/(shared)/_i18n/configs/navigation';
+import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
+import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
 
 import { AppStatusTemplate } from '.';
 

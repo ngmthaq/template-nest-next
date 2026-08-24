@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server';
 
-import { Button } from '@/app/(shared)/_components/shadcn/button';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
 import { Link } from '@/app/(shared)/_i18n/configs/navigation';
+import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 
 export default async function NotFound() {
   const t = await getTranslations('notFound');

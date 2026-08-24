@@ -6,9 +6,9 @@ import { locale as rootLocale } from 'next/root-params';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { Toaster } from '@/app/(shared)/_components/shadcn/sonner';
 import { localeDirections } from '@/app/(shared)/_i18n/configs/dir';
 import { routing } from '@/app/(shared)/_i18n/configs/routing';
+import { Toaster } from '@/app/(shared)/_libs/shadcn-ui/sonner';
 import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export function generateStaticParams() {
