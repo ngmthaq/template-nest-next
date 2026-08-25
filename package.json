@@ -1,6 +1,6 @@
 {
   "name": "template-nest-next",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "license": "UNLICENSED",
   "packageManager": "pnpm@10.25.0",
@@ -8,7 +8,19 @@
     "node": ">=24"
   },
   "scripts": {
+    "prepare": "husky",
     "server": "pnpm --filter @template-nest-next/server",
-    "client": "pnpm --filter @template-nest-next/client"
+    "client": "pnpm --filter @template-nest-next/client",
+    "version:major": "pnpm version major --no-git-tag-version",
+    "version:minor": "pnpm version minor --no-git-tag-version",
+    "version:patch": "pnpm version patch --no-git-tag-version"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0"
+  },
+  "lint-staged": {
+    "apps/client/**/*.{js,jsx,ts,tsx,mjs,cjs}": "pnpm --filter @template-nest-next/client exec eslint --fix",
+    "apps/server/**/*.{js,ts}": "pnpm --filter @template-nest-next/server exec eslint --fix"
   }
 }
