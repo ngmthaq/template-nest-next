@@ -6,10 +6,10 @@ import { locale as rootLocale } from 'next/root-params';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
-import { localeDirections } from '@/app/(shared)/_i18n/configs/dir';
-import { routing } from '@/app/(shared)/_i18n/configs/routing';
+import { localeDirections } from '@/app/(shared)/_libs/next-intl/configs/dir';
+import { routing } from '@/app/(shared)/_libs/next-intl/configs/routing';
+import { AppThemeProvider } from '@/app/(shared)/_libs/next-themes/AppThemeProvider';
 import { Toaster } from '@/app/(shared)/_libs/shadcn-ui/sonner';
-import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

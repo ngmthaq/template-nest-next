@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { AppThemeProvider } from '@/app/(shared)/_libs/next-themes/AppThemeProvider';
 import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
-import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Page not found',

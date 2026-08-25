@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useTranslations } from 'next-intl';
 
-import { Link } from '@/app/(shared)/_i18n/configs/navigation';
+import { Link } from '@/app/(shared)/_libs/next-intl/configs/navigation';
 import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
 

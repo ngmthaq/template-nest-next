@@ -5,9 +5,9 @@ import './(shared)/_assets/css/globals.css';
 import { useEffect, useRef } from 'react';
 
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
+import { AppThemeProvider } from '@/app/(shared)/_libs/next-themes/AppThemeProvider';
 import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
-import { AppThemeProvider } from '@/app/(shared)/_providers/AppThemeProvider';
 
 export interface GlobalErrorProps {
   error: Error & { digest?: string };

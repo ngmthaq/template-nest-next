@@ -26,7 +26,6 @@ export default defineConfig({
         '**/*.stories.*',
         'app/(routes)/**',
         'app/(shared)/_constants/**',
-        'app/(shared)/_i18n/**',
         'app/(shared)/_libs/**',
         'app/global-error.tsx',
         'app/global-not-found.tsx',

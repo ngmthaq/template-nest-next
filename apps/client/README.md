@@ -33,7 +33,7 @@ Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, 
 ## Structure
 
 ```
-proxy.ts                   # Locale negotiation, delegates to _i18n/configs/proxy
+proxy.ts                   # Locale negotiation, delegates to _libs/next-intl/configs/proxy
 app/
 ├── (routes)/              # Route group holding the actual pages
 │   └── [locale]/          # Every page lives under a locale segment
@@ -42,9 +42,7 @@ app/
     ├── _components/       # Shared React components
     ├── _constants/        # apiEndpoints, storageKeys
     ├── _hooks/            # Shared client hooks
-    ├── _i18n/             # next-intl configs, types, messages
-    ├── _libs/             # shadcn-ui/ — vendored shadcn components, stories, and cn
-    ├── _providers/        # AppThemeProvider and other client providers
+    ├── _libs/             # Third-party integrations: shadcn-ui/, lucide/, next-intl/, next-themes/
     └── _utils/            # httpUtils, cookieUtils, cacheUtils
 ```
 
@@ -324,7 +322,7 @@ See the next section — it is the whole caching story for this app.
 redirects to `/en` and every route lives under `/en/…`.
 
 ```
-app/(shared)/_i18n/
+app/(shared)/_libs/next-intl/
 ├── configs/
 │   ├── routing.ts    # Locales and default locale — the single source of truth
 │   ├── navigation.ts # Locale-aware Link, redirect, usePathname, useRouter, getPathname
@@ -429,11 +427,11 @@ format.relativeTime(commentedAt);
 
 ### Linking between pages
 
-Import navigation helpers from `_i18n/configs/navigation`, **not** from `next/link` or
+Import navigation helpers from `_libs/next-intl/configs/navigation`, **not** from `next/link` or
 `next/navigation` — these keep the active locale in the URL for you.
 
 ```tsx
-import { Link } from '@/app/(shared)/_i18n/configs/navigation';
+import { Link } from '@/app/(shared)/_libs/next-intl/configs/navigation';
 
 <Link href="/about">About</Link>; // -> /en/about
 ```
@@ -464,8 +462,8 @@ Re-push the current path with a different locale — the helpers rewrite the pre
 
 import { useLocale } from 'next-intl';
 
-import { usePathname, useRouter } from '@/app/(shared)/_i18n/configs/navigation';
-import { routing } from '@/app/(shared)/_i18n/configs/routing';
+import { usePathname, useRouter } from '@/app/(shared)/_libs/next-intl/configs/navigation';
+import { routing } from '@/app/(shared)/_libs/next-intl/configs/routing';
 
 export function LocaleSwitcher() {
   const router = useRouter();
@@ -526,7 +524,7 @@ export async function submit(locale: string, formData: FormData) {
 
 `proxy.ts` at the app root handles locale negotiation and redirects: `/` → `/en`, and any path
 without a known locale prefix gets one. It must live beside `app/` because Next requires it there,
-so it is a thin delegate over `_i18n/configs/proxy.ts`.
+so it is a thin delegate over `_libs/next-intl/configs/proxy.ts`.
 
 Two constraints if you edit it. The export has to be named `proxy` (or be a default _declaration_ —
 `export { default } from …` is not recognised by Next's static analysis and fails the build). And
