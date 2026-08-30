@@ -11,8 +11,8 @@
 #   docker compose down
 #
 # Defaults to `development` when NODE_ENV is unset. PORT sets the published host
-# port for the server, e.g. PORT=8080 NODE_ENV=staging docker compose up -d. The app
-# always listens on 3000 inside the container.
+# port for the server, e.g. PORT=8080 NODE_ENV=staging docker compose up -d. The
+# server always listens on 3000 inside the container.
 #
 # CLIENT_PORT sets the published host port for the client (default 3001); the
 # client always listens on 3001 inside the container.
@@ -20,21 +20,21 @@
 # API_URL is a runtime env var for the client, supplied via its env_file
 # (apps/client/.env.<NODE_ENV>) like every other client variable. Since it is
 # read server-side only (see apps/client/app/(shared)/_utils/httpUtils.ts),
-# it may use a compose-internal hostname such as http://app:3000/api.
+# it may use a compose-internal hostname such as http://server:3000/api.
 #
 # LOG_LEVEL is a runtime env var for both services, supplied via their
-# respective env_file (apps/<app>/.env.<NODE_ENV>); it sets the minimum
+# respective env_file (apps/<service>/.env.<NODE_ENV>); it sets the minimum
 # console log level (error, warn, info, debug), defaulting to debug.
 
 name: template-nest-next
 
 services:
-  app:
+  server:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: template-nest-next:${NODE_ENV:-development}
-    container_name: template-nest-next-app-${NODE_ENV:-development}
+    image: template-nest-next-server:${NODE_ENV:-development}
+    container_name: template-nest-next-server-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"

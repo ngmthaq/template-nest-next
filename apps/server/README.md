@@ -106,10 +106,10 @@ Two independent Compose files, both selecting their environment through `NODE_EN
 `--env-file` flag). `NODE_ENV` picks which `.env.<NODE_ENV>` file each service loads and
 defaults to `development` when unset.
 
-| File                       | Contains       | When to use                                                             |
-| -------------------------- | -------------- | ----------------------------------------------------------------------- |
-| `docker-compose-infra.yml` | MySQL + Redis  | Local development — run these in Docker while the app runs on the host. |
-| `docker-compose.yml`       | The NestJS app | On the server, where MySQL/Redis are managed externally.                |
+| File                       | Contains            | When to use                                                             |
+| -------------------------- | ------------------- | ----------------------------------------------------------------------- |
+| `docker-compose-infra.yml` | MySQL + Redis       | Local development — run these in Docker while the app runs on the host. |
+| `docker-compose.yml`       | `server` + `client` | On the server, where MySQL/Redis are managed externally.                |
 
 ### Local infrastructure (MySQL + Redis)
 
@@ -135,26 +135,26 @@ runtime on `node:24-alpine`). MySQL/Redis are **not** included here — their ho
 `.env.<NODE_ENV>`.
 
 ```bash
-# Build and run the development image
-NODE_ENV=development docker compose up -d --build
+# Build and run the development image (omit `server` to build the client too)
+NODE_ENV=development docker compose up -d --build server
 
 # Other environments
-NODE_ENV=uat        docker compose up -d --build
-NODE_ENV=production docker compose up -d --build
+NODE_ENV=staging    docker compose up -d --build server
+NODE_ENV=production docker compose up -d --build server
 
 docker compose down
 ```
 
 The image tag and container name are suffixed with `NODE_ENV`
-(`template-nest-next:<NODE_ENV>`, `template-nest-next-app-<NODE_ENV>`).
+(`template-nest-next-server:<NODE_ENV>`, `template-nest-next-server-<NODE_ENV>`).
 
 ### Ports
 
-The app always listens on **3000 inside** the container; `PORT` sets only the **published host
-port** (default `3000`), letting environments run side by side on one host:
+The server always listens on **3000 inside** the container; `PORT` sets only the **published
+host port** (default `3000`), letting environments run side by side on one host:
 
 ```bash
-PORT=8080 NODE_ENV=uat docker compose up -d --build   # reachable on host :8080
+PORT=8080 NODE_ENV=staging docker compose up -d --build server   # reachable on host :8080
 ```
 
 > **Infra ports are read from your shell, not the env file.** Compose resolves the `ports:`
