@@ -50,7 +50,75 @@ describe('HttpUtilsHelper / HttpUtils', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     vi.useRealTimers();
+  });
+
+  describe('constructor baseUrl resolution', () => {
+    it('resolves the base URL from process.env.API_URL when no baseUrl option is given', async () => {
+      // Arrange
+      vi.stubEnv('API_URL', 'http://env.test');
+      const instance = new TestableHttp();
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(buildResponse({ text: () => Promise.resolve('') }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      // Act
+      await instance.exposedRequest('/foo', {});
+
+      // Assert
+      expect(fetchMock).toHaveBeenCalledWith('http://env.test/foo', expect.anything());
+    });
+
+    it('prefers an explicit baseUrl option over process.env.API_URL', async () => {
+      // Arrange
+      vi.stubEnv('API_URL', 'http://env.test');
+      const instance = new TestableHttp({ baseUrl: 'http://option.test' });
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(buildResponse({ text: () => Promise.resolve('') }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      // Act
+      await instance.exposedRequest('/foo', {});
+
+      // Assert
+      expect(fetchMock).toHaveBeenCalledWith('http://option.test/foo', expect.anything());
+    });
+
+    it('resolves to an empty string when neither baseUrl nor process.env.API_URL is set', async () => {
+      // Arrange
+      vi.stubEnv('API_URL', undefined);
+      const instance = new TestableHttp();
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(buildResponse({ text: () => Promise.resolve('') }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      // Act
+      await instance.exposedRequest('/foo', {});
+
+      // Assert
+      expect(fetchMock).toHaveBeenCalledWith('/foo', expect.anything());
+    });
+
+    it('ignores the legacy NEXT_PUBLIC_API_URL variable and falls back to an empty string', async () => {
+      // Arrange
+      vi.stubEnv('API_URL', undefined);
+      vi.stubEnv('NEXT_PUBLIC_API_URL', 'http://legacy.test');
+      const instance = new TestableHttp();
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(buildResponse({ text: () => Promise.resolve('') }));
+      vi.stubGlobal('fetch', fetchMock);
+
+      // Act
+      await instance.exposedRequest('/foo', {});
+
+      // Assert
+      expect(fetchMock).toHaveBeenCalledWith('/foo', expect.anything());
+    });
   });
 
   describe('buildUrl', () => {

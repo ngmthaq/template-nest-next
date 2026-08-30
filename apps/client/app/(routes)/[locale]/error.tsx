@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatusTemplate';
 import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
+import { logUtils } from '@/app/(shared)/_utils/logUtils';
 
 export interface ErrorProps {
   error: Error & { digest?: string };
@@ -17,7 +18,7 @@ export default function Error({ error, retry }: ErrorProps) {
   const announcementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.error(error);
+    logUtils.error(error);
   }, [error]);
 
   useEffect(() => {

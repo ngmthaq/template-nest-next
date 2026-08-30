@@ -8,6 +8,7 @@ import { AppStatusTemplate } from '@/app/(shared)/_components/templates/AppStatu
 import { AppThemeProvider } from '@/app/(shared)/_libs/next-themes/AppThemeProvider';
 import { Button } from '@/app/(shared)/_libs/shadcn-ui/button';
 import { Typography } from '@/app/(shared)/_libs/shadcn-ui/typography';
+import { logUtils } from '@/app/(shared)/_utils/logUtils';
 
 export interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -18,7 +19,7 @@ export default function GlobalError({ error, retry }: GlobalErrorProps) {
   const announcementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    console.error(error);
+    logUtils.error(error);
   }, [error]);
 
   useEffect(() => {

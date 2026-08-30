@@ -1,3 +1,5 @@
+import 'server-only';
+
 import type { CookiesFn, OptionsType } from 'cookies-next';
 
 import { cookieUtils } from './cookieUtils';
@@ -44,7 +46,7 @@ export class HttpUtilsHelper {
   private timeout: number;
 
   constructor(options: HttpUtilsOptions = {}) {
-    this.baseUrl = options.baseUrl ?? process.env.NEXT_PUBLIC_API_URL ?? '';
+    this.baseUrl = options.baseUrl ?? process.env.API_URL ?? '';
     this.timeout = options.timeout ?? 60000; // Default timeout in milliseconds
   }
 

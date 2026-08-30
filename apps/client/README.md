@@ -22,10 +22,10 @@ From the repo root, `pnpm client <script>` proxies to any of these.
 
 Copy `.env.example` to `.env.development` (or `.env.<APP_ENV>.local` for secrets) and set at least:
 
-| Variable              | Used for                                                     |
-| --------------------- | ------------------------------------------------------------ |
-| `PORT`                | Port the Next server listens on — read by `load-env-cli.mjs` |
-| `NEXT_PUBLIC_API_URL` | Base URL of the API, including its `/api` prefix             |
+| Variable  | Used for                                                     |
+| --------- | ------------------------------------------------------------ |
+| `PORT`    | Port the Next server listens on — read by `load-env-cli.mjs` |
+| `API_URL` | Base URL of the API, including its `/api` prefix             |
 
 Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, first match wins (see
 `load-env.mjs`).
@@ -85,8 +85,9 @@ it imports `next/cache`, so a Client Component must never pull it in.
 
 ### httpUtils
 
-A `fetch` wrapper that prefixes `NEXT_PUBLIC_API_URL`, attaches the access token, parses JSON, throws
-on non-2xx, and times out after 60s. It runs on the server and in the browser.
+A `fetch` wrapper that prefixes `API_URL`, attaches the access token, parses JSON, throws
+on non-2xx, and times out after 60s. It imports `server-only`, so it runs on the server only —
+importing it from a Client Component is a build error.
 
 #### Requests
 

@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -6,6 +8,8 @@ import { loadAppEnv } from './load-env.mjs';
 loadAppEnv();
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
+  outputFileTracingRoot: path.join(__dirname, '../../'),
   experimental: {
     globalNotFound: true,
   },

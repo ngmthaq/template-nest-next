@@ -1,4 +1,4 @@
-# NestJS application container.
+# NestJS application + Next.js client containers.
 #
 # Runs on the remote server, one environment at a time, selected by NODE_ENV.
 # MySQL/Redis are external (managed elsewhere) — their hosts come from the
@@ -6,13 +6,25 @@
 #
 # Usage (NODE_ENV drives the image tag, container name, and which env file loads):
 #   NODE_ENV=development docker compose up -d --build
-#   NODE_ENV=uat         docker compose up -d --build
+#   NODE_ENV=staging     docker compose up -d --build
 #   NODE_ENV=production  docker compose up -d --build
 #   docker compose down
 #
 # Defaults to `development` when NODE_ENV is unset. PORT sets the published host
-# port, e.g. PORT=8080 NODE_ENV=uat docker compose up -d. The app always listens
-# on 3000 inside the container.
+# port for the server, e.g. PORT=8080 NODE_ENV=staging docker compose up -d. The app
+# always listens on 3000 inside the container.
+#
+# CLIENT_PORT sets the published host port for the client (default 3001); the
+# client always listens on 3001 inside the container.
+#
+# API_URL is a runtime env var for the client, supplied via its env_file
+# (apps/client/.env.<NODE_ENV>) like every other client variable. Since it is
+# read server-side only (see apps/client/app/(shared)/_utils/httpUtils.ts),
+# it may use a compose-internal hostname such as http://app:3000/api.
+#
+# LOG_LEVEL is a runtime env var for both services, supplied via their
+# respective env_file (apps/<app>/.env.<NODE_ENV>); it sets the minimum
+# console log level (error, warn, info, debug), defaulting to debug.
 
 name: template-nest-next
 
@@ -31,3 +43,23 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3000
+
+  client:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+    image: template-nest-next-client:${NODE_ENV:-development}
+    container_name: template-nest-next-client-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-3001}:3001"
+    env_file:
+      - apps/client/.env.${NODE_ENV:-development}
+    environment:
+      # Pinned to `production` to document the value Next.js forces at runtime,
+      # not to enforce it: the standalone entrypoint hardcodes NODE_ENV=production
+      # in the generated server.js regardless of what compose passes in. NODE_ENV
+      # still drives the image tag, container name, and which env file loads above.
+      NODE_ENV: production
+      APP_ENV: ${NODE_ENV:-development}
+      PORT: 3001

@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': clientRoot,
+      'server-only': path.resolve(clientRoot, 'vitest.server-only-stub.ts'),
     },
   },
   test: {
