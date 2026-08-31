@@ -1,5 +1,7 @@
 import 'server-only';
 
+import type { AxiosError, AxiosInstance } from 'axios';
+import axios from 'axios';
 import type { CookiesFn, OptionsType } from 'cookies-next';
 
 import { cookieUtils } from './cookieUtils';
@@ -9,9 +11,10 @@ export interface HttpUtilsOptions {
   timeout?: number;
 }
 
-export interface HttpUtilsRequestOptions extends RequestInit {
+export interface HttpUtilsRequestOptions extends Omit<RequestInit, 'body'> {
   cookies?: CookiesFn;
   withAuth?: boolean;
+  body?: RequestInit['body'] | Record<string, unknown>;
 }
 
 export class HttpUtilsTimeoutError extends Error {
@@ -42,12 +45,14 @@ export class HttpUtilsHelper {
     secure: process.env.NODE_ENV === 'production',
   };
 
-  private baseUrl: string;
-  private timeout: number;
+  private readonly axiosInstance: AxiosInstance;
 
   constructor(options: HttpUtilsOptions = {}) {
-    this.baseUrl = options.baseUrl ?? process.env.API_URL ?? '';
-    this.timeout = options.timeout ?? 60000; // Default timeout in milliseconds
+    this.axiosInstance = axios.create({
+      adapter: 'fetch',
+      baseURL: options.baseUrl ?? process.env.API_URL ?? '',
+      timeout: options.timeout ?? 60000, // Default timeout in milliseconds
+    });
   }
 
   public async setAccessToken(token: string, options?: OptionsType): Promise<void> {
@@ -86,159 +91,101 @@ export class HttpUtilsHelper {
     return `${path}?${search.toString()}`;
   }
 
-  protected async request(url: string, options: HttpUtilsRequestOptions): Promise<Response> {
-    const { cookies, withAuth = true, ...init } = options;
-    const baseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
-    const endpoint = url.startsWith('/') ? url : `/${url}`;
-    const fullUrl = `${baseUrl}${endpoint}`;
-    const controller = new AbortController();
+  protected async request<T>(url: string, options: HttpUtilsRequestOptions): Promise<T> {
+    const { cookies, withAuth = true, method, body, signal, headers, ...fetchOptions } = options;
 
-    const headers = new Headers(init.headers);
-    if (withAuth && !headers.has('Authorization')) {
+    const requestHeaders = new Headers(headers);
+    if (withAuth && !requestHeaders.has('Authorization')) {
       const token = await this.getAccessToken(cookies ? { cookies } : undefined);
-      if (token) headers.set('Authorization', `Bearer ${token}`);
+      if (token) requestHeaders.set('Authorization', `Bearer ${token}`);
     }
 
-    let isTimedOut = false;
-    const timeoutId = setTimeout(() => {
-      isTimedOut = true;
-      controller.abort();
-    }, this.timeout);
-
-    const callerSignal = init.signal;
-    const onCallerAbort = () => controller.abort(callerSignal?.reason);
-    if (callerSignal?.aborted) controller.abort(callerSignal.reason);
-    else callerSignal?.addEventListener('abort', onCallerAbort, { once: true });
-
     try {
-      return await fetch(fullUrl, { ...init, headers, signal: controller.signal });
+      const response = await this.axiosInstance.request({
+        url,
+        method,
+        data: body,
+        headers: Object.fromEntries(requestHeaders.entries()),
+        signal: signal ?? undefined,
+        fetchOptions,
+      });
+      return response.data as T;
     } catch (error) {
-      if (isTimedOut) throw new HttpUtilsTimeoutError('Request timed out');
+      const axiosError = error as AxiosError;
+      if (axiosError.code === 'ECONNABORTED' || axiosError.code === 'ETIMEDOUT') {
+        throw new HttpUtilsTimeoutError('Request timed out');
+      }
+      if (axiosError.response) {
+        throw new HttpUtilsResponseError(axiosError.response.status, axiosError.response.data);
+      }
       throw error;
-    } finally {
-      clearTimeout(timeoutId);
-      callerSignal?.removeEventListener('abort', onCallerAbort);
     }
-  }
-
-  protected async parse<T>(response: Response): Promise<T> {
-    const text = await response.text();
-
-    let body: unknown;
-    try {
-      body = text ? JSON.parse(text) : undefined;
-    } catch {
-      body = text;
-    }
-
-    if (!response.ok) throw new HttpUtilsResponseError(response.status, body);
-    return body as T;
-  }
-
-  protected jsonOptions(options: HttpUtilsRequestOptions): HttpUtilsRequestOptions {
-    const headers = new Headers(options.headers);
-    if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
-    return { ...options, headers };
   }
 }
 
 export class HttpUtils extends HttpUtilsHelper {
-  public async get<T>(
+  public get<T>(
     url: string,
     params?: Record<string, string>,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const urlWithParams = this.buildUrl(url, params);
-    const response = await this.request(urlWithParams, { ...options, method: 'GET' });
-    return this.parse<T>(response);
+    return this.request<T>(this.buildUrl(url, params), { ...options, method: 'GET' });
   }
 
-  public async post<T>(
+  public post<T>(
     url: string,
     body?: Record<string, unknown>,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...this.jsonOptions(options),
-      method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'POST', body });
   }
 
-  public async postFormData<T>(
+  public postFormData<T>(
     url: string,
     formData: FormData,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...options,
-      method: 'POST',
-      body: formData,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'POST', body: formData });
   }
 
-  public async put<T>(
+  public put<T>(
     url: string,
     body?: Record<string, unknown>,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...this.jsonOptions(options),
-      method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'PUT', body });
   }
 
-  public async putFormData<T>(
+  public putFormData<T>(
     url: string,
     formData: FormData,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...options,
-      method: 'PUT',
-      body: formData,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'PUT', body: formData });
   }
 
-  public async patch<T>(
+  public patch<T>(
     url: string,
     body?: Record<string, unknown>,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...this.jsonOptions(options),
-      method: 'PATCH',
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'PATCH', body });
   }
 
-  public async patchFormData<T>(
+  public patchFormData<T>(
     url: string,
     formData: FormData,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const response = await this.request(url, {
-      ...options,
-      method: 'PATCH',
-      body: formData,
-    });
-    return this.parse<T>(response);
+    return this.request<T>(url, { ...options, method: 'PATCH', body: formData });
   }
 
-  public async delete<T>(
+  public delete<T>(
     url: string,
     params?: Record<string, string>,
     options: HttpUtilsRequestOptions = {},
   ): Promise<T> {
-    const urlWithParams = this.buildUrl(url, params);
-    const response = await this.request(urlWithParams, { ...options, method: 'DELETE' });
-    return this.parse<T>(response);
+    return this.request<T>(this.buildUrl(url, params), { ...options, method: 'DELETE' });
   }
 }
 
