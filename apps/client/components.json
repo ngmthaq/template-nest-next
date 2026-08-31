@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "app/(shared)/_assets/css/globals.css",
+    "css": "src/assets/css/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@/app/(shared)/_components",
-    "utils": "@/app/(shared)/_libs/shadcn-ui/cn",
-    "ui": "@/app/(shared)/_libs/shadcn-ui",
-    "lib": "@/app/(shared)/_libs/shadcn-ui",
-    "hooks": "@/app/(shared)/_hooks"
+    "components": "@/components",
+    "utils": "@/libs/shadcn-ui/cn",
+    "ui": "@/libs/shadcn-ui",
+    "lib": "@/libs/shadcn-ui",
+    "hooks": "@/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

@@ -7,5 +7,5 @@
   "less.lint.unknownAtRules": "ignore",
 
   // Tailwind v4 has no tailwind.config.*; point IntelliSense at the CSS entry that owns @theme.
-  "tailwindCSS.experimental.configFile": "apps/client/app/(shared)/_theme/globals.css"
+  "tailwindCSS.experimental.configFile": "apps/client/src/assets/css/globals.css"
 }

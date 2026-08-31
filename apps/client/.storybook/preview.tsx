@@ -1,12 +1,12 @@
-import '../app/(shared)/_assets/css/globals.css';
+import '../src/assets/css/globals.css';
 
 import { withThemeByClassName } from '@storybook/addon-themes';
 import type { Decorator, Preview } from '@storybook/nextjs-vite';
 import { NextIntlClientProvider } from 'next-intl';
 
-import en from '../app/(shared)/_libs/next-intl/messages/en.json';
-import zh from '../app/(shared)/_libs/next-intl/messages/zh.json';
-import { AppThemeProvider } from '../app/(shared)/_libs/next-themes/AppThemeProvider';
+import en from '../src/libs/next-intl/messages/en.json';
+import zh from '../src/libs/next-intl/messages/zh.json';
+import { AppThemeProvider } from '../src/libs/next-themes/AppThemeProvider';
 
 const messagesByLocale = { en, zh } as const;
 type PreviewLocale = keyof typeof messagesByLocale;

@@ -6,7 +6,7 @@ import type { StorybookConfig } from '@storybook/nextjs-vite';
 const clientRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 const config: StorybookConfig = {
-  stories: ['../app/**/*.stories.tsx'],
+  stories: ['../src/**/*.stories.tsx'],
   addons: ['@storybook/addon-a11y', '@storybook/addon-docs', '@storybook/addon-themes'],
   framework: {
     name: '@storybook/nextjs-vite',
@@ -17,7 +17,7 @@ const config: StorybookConfig = {
     viteConfig.resolve ??= {};
     viteConfig.resolve.alias = {
       ...viteConfig.resolve.alias,
-      '@': clientRoot,
+      '@': path.join(clientRoot, 'src'),
     };
 
     return viteConfig;

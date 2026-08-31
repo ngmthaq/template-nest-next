@@ -19,7 +19,7 @@
 #
 # API_URL is a runtime env var for the client, supplied via its env_file
 # (apps/client/.env.<NODE_ENV>) like every other client variable. Since it is
-# read server-side only (see apps/client/app/(shared)/_utils/httpUtils.ts),
+# read server-side only (see apps/client/src/utils/httpUtils.ts),
 # it may use a compose-internal hostname such as http://server:3000/api.
 #
 # LOG_LEVEL is a runtime env var for both services, supplied via their

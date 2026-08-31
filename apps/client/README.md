@@ -33,24 +33,26 @@ Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, 
 ## Structure
 
 ```
-proxy.ts                   # Locale negotiation, delegates to _libs/next-intl/configs/proxy
-app/
-├── (routes)/              # Route group holding the actual pages
-│   └── [locale]/          # Every page lives under a locale segment
-└── (shared)/              # Not routable — shared building blocks
-    ├── _assets/           # Static assets, e.g. css/globals.css
-    ├── _components/       # Shared React components
-    ├── _constants/        # apiEndpoints, storageKeys
-    ├── _hooks/            # Shared client hooks
-    ├── _libs/             # Third-party integrations: shadcn-ui/, lucide/, next-intl/, next-themes/
-    └── _utils/            # httpUtils, cookieUtils, cacheUtils
+src/
+├── app/
+│   ├── (routes)/          # Route group holding the actual pages
+│   │   └── [locale]/      # Every page lives under a locale segment
+│   ├── global-error.tsx
+│   └── global-not-found.tsx
+├── assets/                # Static assets, e.g. css/globals.css
+├── components/            # Shared React components
+├── constants/             # apiEndpoints, storageKeys
+├── hooks/                 # Shared client hooks
+├── libs/                  # Third-party integrations: shadcn-ui/, lucide/, next-intl/, next-themes/
+├── proxy.ts               # Locale negotiation, delegates to libs/next-intl/configs/proxy
+└── utils/                 # httpUtils, cookieUtils, cacheUtils
 ```
 
-`@/*` maps to the app root, so `@/app/(shared)/_utils` resolves from anywhere.
+`@/*` maps to `src/`, so `@/utils` resolves from anywhere.
 
 ## Storybook
 
-Storybook (`@storybook/nextjs-vite`) catalogues the components under `app/(shared)/_components/`.
+Storybook (`@storybook/nextjs-vite`) catalogues the components under `src/components/`.
 Config lives in `.storybook/`; `preview.tsx` reproduces the root layout's provider tree — theme
 (`next-themes`, toggled via the toolbar), locale (`NextIntlClientProvider`, `en`/`zh`, also via the
 toolbar) and the root typography classes — so every story renders with the app's real look.
@@ -63,21 +65,21 @@ pnpm client build-storybook    # static build in storybook-static/ (gitignored)
 Stories sit next to the component they document. Your own components are folders —
 `templates/AppStatusTemplate/index.tsx` → `templates/AppStatusTemplate/index.stories.tsx`.
 
-The `_libs/shadcn-ui/` components stay flat instead — `button.tsx` → `button.stories.tsx` —
+The `libs/shadcn-ui/` components stay flat instead — `button.tsx` → `button.stories.tsx` —
 because the shadcn CLI always writes `<aliases.ui>/<name>.tsx` and cannot be pointed at a folder.
 Given `button/index.tsx`, `shadcn add` would not find it, would write a fresh `button.tsx` beside
 it, and that file would win module resolution and silently shadow your version.
 
 ## Utils
 
-Three utils live in `app/(shared)/_utils`. Each exports both its class and a ready-made
+Three utils live in `src/utils`. Each exports both its class and a ready-made
 singleton — use the singleton unless you need different construction options.
 
 ```ts
-import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
-import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { cookieUtils } from '@/utils/cookieUtils';
+import { httpUtils } from '@/utils/httpUtils';
 
-import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
+import { cacheUtils } from '@/utils/cacheUtils';
 ```
 
 There is no barrel — import each util from its own file. `cacheUtils` in particular is server-only:
@@ -92,7 +94,7 @@ importing it from a Client Component is a build error.
 #### Requests
 
 ```ts
-import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { httpUtils } from '@/utils/httpUtils';
 
 // GET /items?page=2&sort=name
 const items = await httpUtils.get<Item[]>('/items', { page: '2', sort: 'name' });
@@ -146,7 +148,7 @@ import {
   httpUtils,
   HttpUtilsResponseError,
   HttpUtilsTimeoutError,
-} from '@/app/(shared)/_utils/httpUtils';
+} from '@/utils/httpUtils';
 
 try {
   await httpUtils.post('/auth/login', { email, password });
@@ -179,7 +181,7 @@ controller.abort();
 To change the 60s default or point at another API, construct your own instance:
 
 ```ts
-import { HttpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { HttpUtils } from '@/utils/httpUtils';
 
 export const reportUtils = new HttpUtils({
   baseUrl: process.env.REPORTS_API_URL,
@@ -196,7 +198,7 @@ production; pass options to override per call.
 ```ts
 'use server';
 
-import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
+import { httpUtils } from '@/utils/httpUtils';
 
 export async function login(email: string, password: string) {
   const tokens = await httpUtils.post<{ accessToken: string; refreshToken: string }>(
@@ -247,7 +249,7 @@ same call works on the server and in the browser. On the server it lazily import
 injects `cookies` for you, unless you already passed a `req`/`res`/`cookies` scope.
 
 ```ts
-import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
+import { cookieUtils } from '@/utils/cookieUtils';
 
 await cookieUtils.set('locale', 'vi', { maxAge: 60 * 60 * 24 * 365, path: '/' });
 const locale = await cookieUtils.get('locale'); // string | undefined
@@ -275,7 +277,7 @@ Client Component that means reading cookies inside an effect or an event handler
 
 import { useEffect, useState } from 'react';
 
-import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
+import { cookieUtils } from '@/utils/cookieUtils';
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<string>();
@@ -302,7 +304,7 @@ explicitly:
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { cookieUtils } from '@/app/(shared)/_utils/cookieUtils';
+import { cookieUtils } from '@/utils/cookieUtils';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -323,7 +325,7 @@ See the next section — it is the whole caching story for this app.
 redirects to `/en` and every route lives under `/en/…`.
 
 ```
-app/(shared)/_libs/next-intl/
+src/libs/next-intl/
 ├── configs/
 │   ├── routing.ts    # Locales and default locale — the single source of truth
 │   ├── navigation.ts # Locale-aware Link, redirect, usePathname, useRouter, getPathname
@@ -428,11 +430,11 @@ format.relativeTime(commentedAt);
 
 ### Linking between pages
 
-Import navigation helpers from `_libs/next-intl/configs/navigation`, **not** from `next/link` or
+Import navigation helpers from `libs/next-intl/configs/navigation`, **not** from `next/link` or
 `next/navigation` — these keep the active locale in the URL for you.
 
 ```tsx
-import { Link } from '@/app/(shared)/_libs/next-intl/configs/navigation';
+import { Link } from '@/libs/next-intl/configs/navigation';
 
 <Link href="/about">About</Link>; // -> /en/about
 ```
@@ -463,8 +465,8 @@ Re-push the current path with a different locale — the helpers rewrite the pre
 
 import { useLocale } from 'next-intl';
 
-import { usePathname, useRouter } from '@/app/(shared)/_libs/next-intl/configs/navigation';
-import { routing } from '@/app/(shared)/_libs/next-intl/configs/routing';
+import { usePathname, useRouter } from '@/libs/next-intl/configs/navigation';
+import { routing } from '@/libs/next-intl/configs/routing';
 
 export function LocaleSwitcher() {
   const router = useRouter();
@@ -523,9 +525,9 @@ export async function submit(locale: string, formData: FormData) {
 
 ### The proxy
 
-`proxy.ts` at the app root handles locale negotiation and redirects: `/` → `/en`, and any path
-without a known locale prefix gets one. It must live beside `app/` because Next requires it there,
-so it is a thin delegate over `_libs/next-intl/configs/proxy.ts`.
+`src/proxy.ts` handles locale negotiation and redirects: `/` → `/en`, and any path
+without a known locale prefix gets one. It must live beside `app/` (both under `src/`) because Next
+requires it there, so it is a thin delegate over `libs/next-intl/configs/proxy.ts`.
 
 Two constraints if you edit it. The export has to be named `proxy` (or be a default _declaration_ —
 `export { default } from …` is not recognised by Next's static analysis and fails the build). And
@@ -580,8 +582,8 @@ cacheUtils.toTags('/items/1'); // ['path:/', 'path:/items', 'path:/items/1']
 ```ts
 import { cacheLife } from 'next/cache';
 
-import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
-import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
+import { httpUtils } from '@/utils/httpUtils';
+import { cacheUtils } from '@/utils/cacheUtils';
 
 export async function getItems(page: number) {
   'use cache';
@@ -657,8 +659,8 @@ bust stay together:
 ```ts
 'use server';
 
-import { httpUtils } from '@/app/(shared)/_utils/httpUtils';
-import { cacheUtils } from '@/app/(shared)/_utils/cacheUtils';
+import { httpUtils } from '@/utils/httpUtils';
+import { cacheUtils } from '@/utils/cacheUtils';
 
 export async function createItem(body: ItemInput) {
   await httpUtils.post('/items', body);
@@ -691,7 +693,7 @@ Two things to keep in mind:
 
 - `update()` and `refresh()` throw outside a Server Action. From a Route Handler or during a Server
   Component render, use `revalidate()` or `revalidateRoute()` instead.
-- `cacheUtils` is server-only — import it from `_utils/cacheUtils` directly and never from a Client
+- `cacheUtils` is server-only — import it from `utils/cacheUtils` directly and never from a Client
   Component.
 
 A Client Component cannot import `next/cache` at all, so if one needs to trigger invalidation on its

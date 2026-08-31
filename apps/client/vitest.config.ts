@@ -8,7 +8,7 @@ const clientRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 export default defineConfig({
   resolve: {
     alias: {
-      '@': clientRoot,
+      '@': path.resolve(clientRoot, 'src'),
       'server-only': path.resolve(clientRoot, 'vitest.server-only-stub.ts'),
     },
   },
@@ -16,20 +16,20 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['app/**/*.spec.{ts,tsx}'],
+    include: ['src/**/*.spec.{ts,tsx}'],
     passWithNoTests: true,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['app/**/*.{ts,tsx}'],
+      include: ['src/**/*.{ts,tsx}'],
       exclude: [
         '**/*.spec.*',
         '**/*.stories.*',
-        'app/(routes)/**',
-        'app/(shared)/_constants/**',
-        'app/(shared)/_libs/**',
-        'app/global-error.tsx',
-        'app/global-not-found.tsx',
+        'src/app/(routes)/**',
+        'src/constants/**',
+        'src/libs/**',
+        'src/app/global-error.tsx',
+        'src/app/global-not-found.tsx',
         'vitest.config.ts',
         'vitest.setup.ts',
         'vitest.d.ts',
