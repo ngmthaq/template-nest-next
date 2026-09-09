@@ -3,14 +3,8 @@ import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-option
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Turn the configured `cors.origin` value into a value the underlying CORS
- * middleware understands.
- *
- * - `undefined`, empty, or `*` => `true`, which reflects the request's own
- *   `Origin` header. Reflecting (rather than the literal `*`) keeps CORS
- *   working even when `credentials` is enabled, since browsers reject the
- *   wildcard on credentialed requests.
- * - Anything else is treated as a comma-separated allow-list of exact origins.
+ * Turn `cors.origin` into a value the CORS middleware understands: `*`, empty, or unset
+ * become `true` (reflect the caller's `Origin`); anything else is a comma-separated allow-list.
  */
 export function parseCorsOrigin(raw?: string): CorsOptions['origin'] {
   const value = raw?.trim();
@@ -23,29 +17,31 @@ export function parseCorsOrigin(raw?: string): CorsOptions['origin'] {
 }
 
 /**
- * Build the shared {@link CorsOptions} from `ConfigService`.
- *
- * Both the REST layer (`app.enableCors`, see {@link handleCors}) and the
- * WebSocket layer (see `websocket.adapter.ts`) consume this so cross-origin
- * rules stay identical across transports and are driven from a single set of
- * `CORS_*` environment variables (see `configuration.ts`).
+ * The shared {@link CorsOptions}, consumed by both REST and WebSocket so one policy covers both.
+ * Throws when credentials meet a reflecting origin — see "CORS origins and credentials" in the README.
  */
 export function buildCorsOptions(config: ConfigService): CorsOptions {
+  const origin = parseCorsOrigin(config.get<string>('cors.origin'));
+  const credentials = config.get<boolean>('cors.credentials', false);
+
+  if (credentials && origin === true) {
+    throw new Error(
+      'CORS_CREDENTIALS=true requires an explicit CORS_ORIGIN allow-list. ' +
+        'Reflecting any origin with credentials enabled exposes authenticated ' +
+        'responses to every site; set CORS_ORIGIN to a comma-separated list of origins.',
+    );
+  }
+
   return {
-    origin: parseCorsOrigin(config.get<string>('cors.origin')),
+    origin,
     methods: config.get<string>('cors.methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS'),
     allowedHeaders: config.get<string>('cors.allowedHeaders'),
-    credentials: config.get<boolean>('cors.credentials', false),
+    credentials,
     maxAge: config.get<number>('cors.maxAge'),
   };
 }
 
-/**
- * Enable Cross-Origin Resource Sharing for the HTTP (REST) layer.
- *
- * Applies the shared {@link buildCorsOptions} so REST and WebSocket honour the
- * same origins. Call during bootstrap before `app.listen(...)`.
- */
+/** Enable CORS on the HTTP layer using the shared {@link buildCorsOptions}. */
 export function handleCors(app: INestApplication): void {
   app.enableCors(buildCorsOptions(app.get(ConfigService)));
 }

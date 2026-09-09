@@ -9,3 +9,22 @@ onlyBuiltDependencies:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+
+# Security overrides for transitive deps whose parents pin them exactly, so a parent bump cannot
+# reach the fix. Run `pnpm audit` for the details; drop an entry once its parent ships a fixed range.
+overrides:
+  multer: '>=2.3.0'
+  mariadb: '>=3.4.6'
+
+  # Build- and dev-tooling only (eslint, storybook, vitest, jest, shadcn and prisma CLIs); none
+  # reach production. Scoped per major, since consumers of these span several.
+  browserslist: '>=4.28.7'
+  fast-uri: '>=3.1.6'
+  nanoid: '>=3.3.18'
+  mysql2: '>=3.23.1'
+  deepmerge-ts: '>=8.0.0'
+  brace-expansion@1: '>=1.1.18 <2'
+  brace-expansion@2: '>=2.1.4 <3'
+  brace-expansion@>=4: '>=5.0.9'
+  js-yaml@3: '>=3.15.2 <4'
+  js-yaml@4: '>=4.3.2 <5'

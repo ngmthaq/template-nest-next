@@ -57,8 +57,11 @@ export class HttpUtilsResponseError extends Error {
 export class HttpUtilsHelper {
   public accessTokenKey = 'access_token';
   public refreshTokenKey = 'refresh_token';
+  // `httpOnly` keeps the tokens out of `document.cookie` so an XSS cannot read them; nothing
+  // in the browser needs them, since every read runs inside this server-only module.
   public tokenCookieOptions: OptionsType = {
     path: '/',
+    httpOnly: true,
     sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
   };

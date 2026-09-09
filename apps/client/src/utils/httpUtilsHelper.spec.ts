@@ -33,9 +33,8 @@ class TestableHelper extends HttpUtilsHelper {
   }
 }
 
-// axios calls `fetch(request, fetchOptions)`: [0] a real `Request`, [1] the raw options — the
-// only place Next's `next: {...}` survives, since `Request` drops it.
-// Codes: timeout 'ETIMEDOUT', abort 'ERR_CANCELED', fetch TypeError 'ERR_NETWORK'.
+// axios calls `fetch(request, fetchOptions)`; arg [1] is the only place Next's `next: {...}`
+// survives, since `Request` drops it. Codes: ETIMEDOUT, ERR_CANCELED, ERR_NETWORK.
 
 function buildResponse(
   body: string,
@@ -209,7 +208,7 @@ describe('HttpUtilsHelper', () => {
   describe('token cookie accessors', () => {
     it('writes the access token under the access token key with the default cookie options', async () => {
       // Arrange
-      const expectedOptions = { path: '/', sameSite: 'strict', secure: false };
+      const expectedOptions = { path: '/', httpOnly: true, sameSite: 'strict', secure: false };
 
       // Act
       await helper.setAccessToken('token-123');
@@ -220,7 +219,7 @@ describe('HttpUtilsHelper', () => {
 
     it('writes the refresh token under the refresh token key with the default cookie options', async () => {
       // Arrange
-      const expectedOptions = { path: '/', sameSite: 'strict', secure: false };
+      const expectedOptions = { path: '/', httpOnly: true, sameSite: 'strict', secure: false };
 
       // Act
       await helper.setRefreshToken('refresh-123');
@@ -239,6 +238,7 @@ describe('HttpUtilsHelper', () => {
       // Assert
       expect(cookieUtils.set).toHaveBeenCalledWith('access_token', 'token-123', {
         path: '/',
+        httpOnly: true,
         sameSite: 'lax',
         secure: false,
         cookies,
@@ -274,7 +274,7 @@ describe('HttpUtilsHelper', () => {
 
     it('removes each token with the default cookie options so the delete matches the write', async () => {
       // Arrange
-      const expectedOptions = { path: '/', sameSite: 'strict', secure: false };
+      const expectedOptions = { path: '/', httpOnly: true, sameSite: 'strict', secure: false };
 
       // Act
       await helper.removeAccessToken();
