@@ -75,6 +75,11 @@ export class HealthService implements OnModuleDestroy {
     return { status: healthy ? 'ok' : 'error', info };
   }
 
+  /** Release both connections when the app shuts down. */
+  public async onModuleDestroy(): Promise<void> {
+    await Promise.allSettled([this.mysql.end(), this.redis.quit()]);
+  }
+
   /** `SELECT 1` against the MySQL pool. */
   private async checkMysql(): Promise<IndicatorStatus> {
     try {
@@ -93,11 +98,6 @@ export class HealthService implements OnModuleDestroy {
     } catch (error) {
       return { status: 'down', error: this.messageOf(error) };
     }
-  }
-
-  /** Release both connections when the app shuts down. */
-  public async onModuleDestroy(): Promise<void> {
-    await Promise.allSettled([this.mysql.end(), this.redis.quit()]);
   }
 
   private messageOf(error: unknown): string {
