@@ -45,7 +45,7 @@ src/
 ├── hooks/                 # Shared client hooks
 ├── libs/                  # Third-party integrations: shadcn-ui/, lucide/, next-intl/, next-themes/
 ├── proxy.ts               # Locale negotiation, delegates to libs/next-intl/configs/proxy
-└── utils/                 # httpUtils, cookieUtils, cacheUtils
+└── utils/                 # httpUtils, httpUtilsAuth, cookieUtils, cacheUtils, logUtils
 ```
 
 `@/*` maps to `src/`, so `@/utils` resolves from anywhere.
@@ -72,24 +72,53 @@ it, and that file would win module resolution and silently shadow your version.
 
 ## Utils
 
-Three utils live in `src/utils`. Each exports both its class and a ready-made
-singleton — use the singleton unless you need different construction options.
+Each util exports both its class and a ready-made singleton — use the singleton unless you need
+different construction options.
 
 ```ts
+import { cacheUtils } from '@/utils/cacheUtils';
 import { cookieUtils } from '@/utils/cookieUtils';
 import { httpUtils } from '@/utils/httpUtils';
-
-import { cacheUtils } from '@/utils/cacheUtils';
+import { httpUtilsAuth } from '@/utils/httpUtilsAuth';
+import { logUtils } from '@/utils/logUtils';
 ```
+
+| Util            | Runs on            | Use for                                                          |
+| --------------- | ------------------ | ---------------------------------------------------------------- |
+| `httpUtilsAuth` | server only        | API calls that need the signed-in user's token — **the default** |
+| `httpUtils`     | server only        | API calls that must go out unauthenticated                       |
+| `cookieUtils`   | server and browser | Reading and writing cookies with one API on both sides           |
+| `cacheUtils`    | server only        | Tagging and invalidating cached data                             |
+| `logUtils`      | server and browser | Levelled logging instead of bare `console.*`                     |
 
 There is no barrel — import each util from its own file. `cacheUtils` in particular is server-only:
 it imports `next/cache`, so a Client Component must never pull it in.
 
-### httpUtils
+### httpUtils and httpUtilsAuth
 
-A `fetch` wrapper that prefixes `API_URL`, attaches the access token, parses JSON, throws
-on non-2xx, and times out after 60s. It imports `server-only`, so it runs on the server only —
-importing it from a Client Component is a build error.
+An HTTP client that prefixes `API_URL`, parses JSON, throws on non-2xx, and times out after 60s.
+It is built on axios with the `fetch` adapter, so Next's `fetch` extensions (`cache`, `next`,
+`revalidate`) still apply while axios handles interceptors and error normalisation. Both import
+`server-only`, so they run on the server only — importing either from a Client Component is a
+build error.
+
+**Two singletons, one difference — whether the request is authenticated:**
+
+```ts
+import { httpUtils } from '@/utils/httpUtils'; // never sends Authorization
+import { httpUtilsAuth } from '@/utils/httpUtilsAuth'; // attaches the access token
+```
+
+`httpUtilsAuth` extends `HttpUtils` with axios interceptors that read the `access_token` cookie and
+set `Authorization: Bearer <token>` on every request. `httpUtils` has no interceptor at all — it is
+the right choice for public endpoints, and for cached functions that must not touch cookies (see
+[Caching](#authenticated-endpoints)).
+
+> **Reach for `httpUtilsAuth` by default.** Calling `httpUtils` for an endpoint behind auth sends no
+> `Authorization` header and fails with a 401 — and because `withAuth` is accepted (and ignored) by
+> both, the mistake does not surface as a type error.
+
+The sections below apply to both; examples use whichever singleton fits the case.
 
 #### Requests
 
@@ -125,12 +154,17 @@ await httpUtils.putFormData<Upload>('/uploads/1', formData);
 await httpUtils.patchFormData<Upload>('/uploads/1', formData);
 ```
 
-Every method takes a final options argument that extends `RequestInit`, so anything `fetch` accepts
-works, plus `withAuth` and `cookies`:
+Every method takes a final options argument that extends `RequestInit`. Axios consumes `method`,
+`body`, `headers`, and `signal`; every other key is forwarded to the underlying `fetch`, so Next's
+own options (`cache`, `next`, `revalidate`) work as usual. `withAuth` and `cookies` are additions
+read by `httpUtilsAuth`:
 
 ```ts
-// Public endpoint — skip the cookie read entirely
-await httpUtils.get<Health>('/health', undefined, { withAuth: false });
+// Public endpoint — `httpUtils` never reads the cookie in the first place
+await httpUtils.get<Health>('/health');
+
+// Same call through the authenticated client, opting out for this request only
+await httpUtilsAuth.get<Health>('/health', undefined, { withAuth: false });
 
 // Custom headers, plus a Next fetch option
 await httpUtils.get<Item[]>('/items', undefined, {
@@ -141,14 +175,22 @@ await httpUtils.get<Item[]>('/items', undefined, {
 
 #### Errors
 
-Failures arrive as two named error classes, both exported from the util:
+Failures arrive as four named error classes, all exported from `httpUtilsHelper`:
+
+| Class                           | Raised when                                       |
+| ------------------------------- | ------------------------------------------------- |
+| `HttpUtilsResponseError`        | The API answered with a non-2xx status            |
+| `HttpUtilsTimeoutError`         | The request exceeded the configured timeout       |
+| `HttpUtilsNetworkError`         | The connection failed before any response arrived |
+| `HttpUtilsRequestCanceledError` | An `AbortSignal` cancelled the request            |
 
 ```ts
+import { httpUtils } from '@/utils/httpUtils';
 import {
-  httpUtils,
+  HttpUtilsNetworkError,
   HttpUtilsResponseError,
   HttpUtilsTimeoutError,
-} from '@/utils/httpUtils';
+} from '@/utils/httpUtilsHelper';
 
 try {
   await httpUtils.post('/auth/login', { email, password });
@@ -159,6 +201,9 @@ try {
   }
   if (error instanceof HttpUtilsTimeoutError) {
     return { message: 'The server took too long to respond' };
+  }
+  if (error instanceof HttpUtilsNetworkError) {
+    return { message: 'Could not reach the server' };
   }
   throw error;
 }
@@ -178,12 +223,13 @@ const promise = httpUtils.get<Item[]>('/items', undefined, { signal: controller.
 controller.abort();
 ```
 
-To change the 60s default or point at another API, construct your own instance:
+To change the 60s default or point at another API, construct your own instance — from `HttpUtils`
+for an unauthenticated client, or `HttpUtilsAuth` to keep the token interceptor:
 
 ```ts
-import { HttpUtils } from '@/utils/httpUtils';
+import { HttpUtilsAuth } from '@/utils/httpUtilsAuth';
 
-export const reportUtils = new HttpUtils({
+export const reportUtils = new HttpUtilsAuth({
   baseUrl: process.env.REPORTS_API_URL,
   timeout: 5 * 60 * 1000,
 });
@@ -192,35 +238,42 @@ export const reportUtils = new HttpUtils({
 #### Tokens
 
 The util owns the `access_token` / `refresh_token` cookies and delegates storage to
-`cookieUtils`. Cookies are written with `path: '/'`, `sameSite: 'strict'`, and `secure` in
-production; pass options to override per call.
+`cookieUtils`. Cookies are written with `path: '/'`, `httpOnly: true`, `sameSite: 'strict'`, and
+`secure` in production; pass options to override per call.
+
+`httpOnly` keeps both tokens out of `document.cookie`, so an XSS cannot read them — nothing in the
+browser needs them, since every read happens inside these server-only modules. Do not drop it to
+make a token readable client-side; pass the value the component needs from a Server Component
+instead.
 
 ```ts
 'use server';
 
 import { httpUtils } from '@/utils/httpUtils';
+import { httpUtilsAuth } from '@/utils/httpUtilsAuth';
 
 export async function login(email: string, password: string) {
+  // `httpUtils` — logging in is the one call that must not carry a token.
   const tokens = await httpUtils.post<{ accessToken: string; refreshToken: string }>(
     '/auth/login',
     { email, password },
-    { withAuth: false },
   );
 
-  await httpUtils.setAccessToken(tokens.accessToken, { maxAge: 60 * 15 });
-  await httpUtils.setRefreshToken(tokens.refreshToken, { maxAge: 60 * 60 * 24 * 7 });
+  await httpUtilsAuth.setAccessToken(tokens.accessToken, { maxAge: 60 * 15 });
+  await httpUtilsAuth.setRefreshToken(tokens.refreshToken, { maxAge: 60 * 60 * 24 * 7 });
 }
 
 export async function logout() {
-  await httpUtils.removeAccessToken();
-  await httpUtils.removeRefreshToken();
+  await httpUtilsAuth.removeAccessToken();
+  await httpUtilsAuth.removeRefreshToken();
 }
 ```
 
-Each request reads `getAccessToken()` and sets `Authorization: Bearer <token>` — but only when
-`withAuth` is left on **and** no `Authorization` header was supplied. Setting the header yourself
-takes precedence and skips the cookie read, which is what makes caching authenticated endpoints
-possible (see [Caching](#caching-and-revalidation)).
+`httpUtilsAuth` reads `getAccessToken()` on each request and sets `Authorization: Bearer <token>` —
+but only when `withAuth` is left on **and** no `Authorization` header was supplied. Setting the
+header yourself takes precedence and skips the cookie read, which is what makes caching
+authenticated endpoints possible (see [Caching](#caching-and-revalidation)). Plain `httpUtils` never
+performs this step at all.
 
 On the server the cookie store is resolved for you, so `cookies` is rarely needed. Pass it when you
 want the read to be explicit — or when you already hold the store and want to avoid the dynamic
@@ -229,7 +282,7 @@ want the read to be explicit — or when you already hold the store and want to 
 ```ts
 import { cookies } from 'next/headers';
 
-const items = await httpUtils.get<Item[]>('/items', undefined, { cookies });
+const items = await httpUtilsAuth.get<Item[]>('/items', undefined, { cookies });
 ```
 
 `HttpUtilsRequestOptions` accepts only `cookies` (a `CookiesFn`), not `req`/`res`. Middleware,
@@ -237,7 +290,7 @@ which has no `next/headers` store, is therefore a place to build the header your
 
 ```ts
 const token = await cookieUtils.get('access_token', { req, res });
-await httpUtils.get<Item[]>('/items', undefined, {
+await httpUtilsAuth.get<Item[]>('/items', undefined, {
   headers: token ? { Authorization: `Bearer ${token}` } : undefined,
 });
 ```
@@ -582,15 +635,15 @@ cacheUtils.toTags('/items/1'); // ['path:/', 'path:/items', 'path:/items/1']
 ```ts
 import { cacheLife } from 'next/cache';
 
-import { httpUtils } from '@/utils/httpUtils';
 import { cacheUtils } from '@/utils/cacheUtils';
+import { httpUtils } from '@/utils/httpUtils';
 
 export async function getItems(page: number) {
   'use cache';
   cacheLife('api');
   cacheUtils.tag('/items', { page });
 
-  return httpUtils.get<Item[]>('/items', { page: String(page) }, { withAuth: false });
+  return httpUtils.get<Item[]>('/items', { page: String(page) });
 }
 ```
 
@@ -599,17 +652,17 @@ Pair one with every `use cache` scope.
 
 ### Authenticated endpoints
 
-A `use cache` scope cannot call `cookies()` or `headers()`, and `httpUtils` reads the access token
-from a cookie — so **the shared server cache only fits requests that are not authenticated per user.**
+A `use cache` scope cannot call `cookies()` or `headers()`, and `httpUtilsAuth` reads the access
+token from a cookie — so **the shared server cache only fits requests that are not authenticated per user.**
 That is the main limitation of this setup; read the table before reaching for `use cache`.
 
-| Data                                      | Approach                                                                       |
-| ----------------------------------------- | ------------------------------------------------------------------------------ |
-| Public endpoints                          | `use cache` + `withAuth: false`.                                               |
-| Behind auth, but identical for every user | `use cache` + a server-side service token (below). Cached once, shared by all. |
-| Per-user / per-tenant                     | `'use cache: private'`, or don't cache — stream it under `<Suspense>`.         |
+| Data                                      | Approach                                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Public endpoints                          | `use cache` + `httpUtils`.                                                               |
+| Behind auth, but identical for every user | `use cache` + a server-side service token (below). Cached once, shared by all.           |
+| Per-user / per-tenant                     | `'use cache: private'` + `httpUtilsAuth`, or don't cache — stream it under `<Suspense>`. |
 
-`httpUtils` skips the cookie read whenever an `Authorization` header is already set, so a cached
+`httpUtilsAuth` skips the cookie read whenever an `Authorization` header is already set, so a cached
 function can authenticate with a token that does not come from the request:
 
 ```ts
@@ -618,7 +671,7 @@ export async function getCategories() {
   cacheLife('apiLong');
   cacheUtils.tag('/categories');
 
-  return httpUtils.get<Category[]>('/categories', undefined, {
+  return httpUtilsAuth.get<Category[]>('/categories', undefined, {
     headers: { Authorization: `Bearer ${process.env.API_SERVICE_TOKEN}` },
   });
 }
@@ -628,7 +681,7 @@ Do **not** read the user's token outside the scope and pass it in as an argument
 part of the cache key, so a rotating access token produces a fresh cache entry on every rotation
 (near-zero hit rate) while filling the shared server cache with per-user copies of the response.
 
-For per-user data, `'use cache: private'` lifts the restriction — `cookieUtils` and `httpUtils`
+For per-user data, `'use cache: private'` lifts the restriction — `cookieUtils` and `httpUtilsAuth`
 work normally inside it, with auth intact:
 
 ```ts
@@ -637,7 +690,7 @@ export async function getProfile() {
   cacheLife('apiPrivate');
   cacheUtils.tag('/me');
 
-  return httpUtils.get<Profile>('/me');
+  return httpUtilsAuth.get<Profile>('/me');
 }
 ```
 
@@ -659,16 +712,16 @@ bust stay together:
 ```ts
 'use server';
 
-import { httpUtils } from '@/utils/httpUtils';
 import { cacheUtils } from '@/utils/cacheUtils';
+import { httpUtilsAuth } from '@/utils/httpUtilsAuth';
 
 export async function createItem(body: ItemInput) {
-  await httpUtils.post('/items', body);
+  await httpUtilsAuth.post('/items', body);
   cacheUtils.update('/items');
 }
 
 export async function updateItem(id: string, body: ItemInput) {
-  await httpUtils.patch(`/items/${id}`, body);
+  await httpUtilsAuth.patch(`/items/${id}`, body);
   cacheUtils.update(`/items/${id}`); // narrow: only this item's entry
   cacheUtils.revalidate('/items'); // broad: the list and everything under it
 }

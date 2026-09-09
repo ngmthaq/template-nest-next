@@ -7,15 +7,14 @@ A [pnpm workspace](https://pnpm.io/workspaces) monorepo.
 ```
 .
 ├── apps/
-│   └── server/           # NestJS API (see apps/server/README.md)
+│   ├── server/           # NestJS API (see apps/server/README.md)
+│   └── client/           # Next.js front-end (see apps/client/README.md)
 ├── packages/             # Shared packages (added as needed)
 ├── docker-compose.yml        # Server + client container orchestration
 ├── docker-compose-infra.yml  # Local MySQL + Redis
 ├── pnpm-workspace.yaml
 └── package.json          # Workspace root
 ```
-
-A `apps/frontend` (Next.js) app will be added later.
 
 ## Requirements
 
@@ -27,8 +26,10 @@ A `apps/frontend` (Next.js) app will be added later.
 ```bash
 pnpm install                 # install every workspace's dependencies
 
-pnpm server:dev              # run the server in watch mode
+pnpm server start:dev        # run the API in watch mode
+pnpm client start:dev        # run the front-end in watch mode
 pnpm server <script>         # run any server package.json script, e.g. `pnpm server build`
+pnpm client <script>         # likewise for the client, e.g. `pnpm client storybook`
 
 pnpm -r build                # build every app
 pnpm -r lint                 # lint every app
@@ -36,7 +37,8 @@ pnpm -r test                 # test every app
 ```
 
 Each app is self-contained: `cd apps/server` and use its own scripts (`pnpm start:dev`,
-`pnpm db:migrate`, etc.). See [apps/server/README.md](./apps/server/README.md) for server details.
+`pnpm db:migrate`, etc.). See [apps/server/README.md](./apps/server/README.md) and
+[apps/client/README.md](./apps/client/README.md) for per-app details.
 
 ## Docker
 

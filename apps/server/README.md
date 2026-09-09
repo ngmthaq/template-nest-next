@@ -41,41 +41,41 @@ cp .env.example .env.development
 See `.env.example` for the authoritative, commented list. Every key is optional — the
 default in `src/core/configuration.ts` applies when it is unset.
 
-| Variable                | Default                                  | Description                                                                                   |
-| ----------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `NODE_ENV`              | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour. |
-| `PORT`                  | `3000`                                   | HTTP server port.                                                                             |
-| `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                  |
-| `CACHE_TTL`             | `3600000`                                | Redis-backed cache entry TTL, in milliseconds.                                                |
-| `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                       |
-| `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                |
-| `HTTP_MAX_REDIRECTS`    | `5`                                      | Outbound HTTP max redirects before failing.                                                   |
-| `CORS_ORIGIN`           | `*`                                      | Allowed origins (`*` reflects any, or a comma-separated allow-list). REST + WebSocket.        |
-| `CORS_METHODS`          | `GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS` | Allowed HTTP methods.                                                                         |
-| `CORS_ALLOWED_HEADERS`  | _(empty)_                                | Allowed request headers; empty reflects the browser's requested headers.                      |
-| `CORS_CREDENTIALS`      | `false`                                  | Allow cookies/Authorization cross-origin. Cannot combine with a literal `*` origin.           |
-| `CORS_MAX_AGE`          | _(empty)_                                | Preflight cache duration in seconds.                                                          |
-| `THROTTLE_SHORT_TTL`    | `1000`                                   | Rate-limit short tier window, in milliseconds.                                                |
-| `THROTTLE_SHORT_LIMIT`  | `3`                                      | Rate-limit short tier: max requests per window.                                               |
-| `THROTTLE_MEDIUM_TTL`   | `10000`                                  | Rate-limit medium tier window, in milliseconds.                                               |
-| `THROTTLE_MEDIUM_LIMIT` | `20`                                     | Rate-limit medium tier: max requests per window.                                              |
-| `THROTTLE_LONG_TTL`     | `60000`                                  | Rate-limit long tier window, in milliseconds.                                                 |
-| `THROTTLE_LONG_LIMIT`   | `100`                                    | Rate-limit long tier: max requests per window.                                                |
-| `COOKIE_SECRET`         | _(empty)_                                | Secret to sign cookies (enables `request.signedCookies`); empty = unsigned.                   |
-| `COMPRESSION_THRESHOLD` | `1024`                                   | Minimum response size (bytes) before compressing.                                             |
-| `COMPRESSION_LEVEL`     | `-1`                                     | zlib level `0`–`9`, or `-1` for the default.                                                  |
-| `HASH_SALT_ROUNDS`      | `10`                                     | bcrypt cost factor (2^rounds) for `HashService`.                                              |
-| `ENCRYPTION_KEY`        | _(empty)_                                | Secret the AES key is derived from; required only to use `EncryptionService`.                 |
-| `ENCRYPTION_SALT`       | `salt`                                   | Salt for encryption key derivation; change per deployment.                                    |
-| `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ queues + cache store).                                                     |
-| `REDIS_PORT`            | `6379`                                   | Redis port.                                                                                   |
-| `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                               |
-| `MYSQL_HOST`            | `localhost`                              | MySQL host (`localhost` from the host machine, `mysql` from other containers).                |
-| `MYSQL_PORT`            | `3306`                                   | MySQL port.                                                                                   |
-| `MYSQL_DATABASE`        | `template_nest_next`                     | Application database name (created on the container's first start).                           |
-| `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                             |
-| `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                    |
-| `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                       |
+| Variable                | Default                                  | Description                                                                                    |
+| ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `NODE_ENV`              | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour.  |
+| `PORT`                  | `3000`                                   | HTTP server port.                                                                              |
+| `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                   |
+| `CACHE_TTL`             | `3600000`                                | Redis-backed cache entry TTL, in milliseconds.                                                 |
+| `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                        |
+| `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                 |
+| `HTTP_MAX_REDIRECTS`    | `5`                                      | Outbound HTTP max redirects before failing.                                                    |
+| `CORS_ORIGIN`           | `*`                                      | Allowed origins (`*` reflects any, or a comma-separated allow-list). REST + WebSocket.         |
+| `CORS_METHODS`          | `GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS` | Allowed HTTP methods.                                                                          |
+| `CORS_ALLOWED_HEADERS`  | _(empty)_                                | Allowed request headers; empty reflects the browser's requested headers.                       |
+| `CORS_CREDENTIALS`      | `false`                                  | Allow cookies/Authorization cross-origin. Requires an explicit `CORS_ORIGIN` list (see below). |
+| `CORS_MAX_AGE`          | _(empty)_                                | Preflight cache duration in seconds.                                                           |
+| `THROTTLE_SHORT_TTL`    | `1000`                                   | Rate-limit short tier window, in milliseconds.                                                 |
+| `THROTTLE_SHORT_LIMIT`  | `3`                                      | Rate-limit short tier: max requests per window.                                                |
+| `THROTTLE_MEDIUM_TTL`   | `10000`                                  | Rate-limit medium tier window, in milliseconds.                                                |
+| `THROTTLE_MEDIUM_LIMIT` | `20`                                     | Rate-limit medium tier: max requests per window.                                               |
+| `THROTTLE_LONG_TTL`     | `60000`                                  | Rate-limit long tier window, in milliseconds.                                                  |
+| `THROTTLE_LONG_LIMIT`   | `100`                                    | Rate-limit long tier: max requests per window.                                                 |
+| `COOKIE_SECRET`         | _(empty)_                                | Secret to sign cookies (enables `request.signedCookies`); empty = unsigned.                    |
+| `COMPRESSION_THRESHOLD` | `1024`                                   | Minimum response size (bytes) before compressing.                                              |
+| `COMPRESSION_LEVEL`     | `-1`                                     | zlib level `0`–`9`, or `-1` for the default.                                                   |
+| `HASH_SALT_ROUNDS`      | `10`                                     | bcrypt cost factor (2^rounds) for `HashService`.                                               |
+| `ENCRYPTION_KEY`        | _(empty)_                                | Secret the AES key is derived from; required only to use `EncryptionService`.                  |
+| `ENCRYPTION_SALT`       | `salt`                                   | Salt for encryption key derivation; change per deployment.                                     |
+| `REDIS_HOST`            | `localhost`                              | Redis host (BullMQ queues + cache store).                                                      |
+| `REDIS_PORT`            | `6379`                                   | Redis port.                                                                                    |
+| `REDIS_PASSWORD`        | _(empty)_                                | Redis password (empty if none).                                                                |
+| `MYSQL_HOST`            | `localhost`                              | MySQL host (`localhost` from the host machine, `mysql` from other containers).                 |
+| `MYSQL_PORT`            | `3306`                                   | MySQL port.                                                                                    |
+| `MYSQL_DATABASE`        | `template_nest_next`                     | Application database name (created on the container's first start).                            |
+| `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                              |
+| `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                     |
+| `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                        |
 
 > The `MYSQL_*` keys use the official `mysql` image's own variable names, so
 > `docker-compose-infra.yml` passes the env file straight through with no remapping.
@@ -169,16 +169,43 @@ Cross-cutting middleware is applied during bootstrap in `src/main.ts`, each wrap
 `handle*(app)` helper under `src/shared/config/` and driven by the `ConfigService` values
 above.
 
-| Concern           | Where                                       | Notes                                                                                                         |
-| ----------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **CORS**          | `shared/config/cors.config.ts`              | One policy shared by REST (`app.enableCors`) and WebSocket (`websocket/websocket.adapter.ts`).                |
-| **Helmet**        | `shared/config/helmet.config.ts`            | Security headers. CSP is disabled outside production (where Swagger UI is served).                            |
-| **Rate limiting** | `core/core.module.ts` (`@nestjs/throttler`) | Three tiers (`short`/`medium`/`long`) applied together via a global `ThrottlerGuard`; skipped in development. |
-| **cookie-parser** | `shared/config/cookie-parser.config.ts`     | Populates `request.cookies`; signs cookies when `COOKIE_SECRET` is set.                                       |
-| **Compression**   | `shared/config/compression.config.ts`       | gzip/deflate responses over `COMPRESSION_THRESHOLD` bytes.                                                    |
+| Concern           | Where                                       | Notes                                                                                                                             |
+| ----------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **CORS**          | `shared/config/cors.config.ts`              | One policy shared by REST (`app.enableCors`) and WebSocket (`websocket/websocket.adapter.ts`). See the note below on credentials. |
+| **Helmet**        | `shared/config/helmet.config.ts`            | Security headers. CSP is disabled outside production (where Swagger UI is served).                                                |
+| **Rate limiting** | `core/core.module.ts` (`@nestjs/throttler`) | Three tiers (`short`/`medium`/`long`) applied together via a global `ThrottlerGuard`; skipped in development.                     |
+| **cookie-parser** | `shared/config/cookie-parser.config.ts`     | Populates `request.cookies`; signs cookies when `COOKIE_SECRET` is set.                                                           |
+| **Compression**   | `shared/config/compression.config.ts`       | gzip/deflate responses over `COMPRESSION_THRESHOLD` bytes.                                                                        |
 
 Per-route rate-limit control uses the throttler decorators, e.g. `@Throttle({ long: { limit, ttl } })`
 or `@SkipThrottle({ short: true })`.
+
+### CORS origins and credentials
+
+`CORS_ORIGIN` accepts either a comma-separated allow-list of exact origins, or `*`. **`*` does not
+send the literal wildcard** — it reflects the caller's own `Origin` header back, which is what keeps
+CORS working for credentialed requests that browsers would otherwise reject.
+
+That reflection is safe only while `CORS_CREDENTIALS` is `false`. Combine the two and every response
+carries `Access-Control-Allow-Origin: <whatever the caller sent>` alongside
+`Access-Control-Allow-Credentials: true` — letting any site on the internet read your authenticated
+responses. The browser's usual guard against this only catches a literal `*`, so reflection slips
+straight past it.
+
+`buildCorsOptions` therefore **refuses to start** on that combination:
+
+```
+CORS_CREDENTIALS=true requires an explicit CORS_ORIGIN allow-list. Reflecting any
+origin with credentials enabled exposes authenticated responses to every site;
+set CORS_ORIGIN to a comma-separated list of origins.
+```
+
+Enabling credentials means naming the origins:
+
+```bash
+CORS_CREDENTIALS=true
+CORS_ORIGIN=https://app.example.com,https://admin.example.com
+```
 
 ### Cryptographic services
 
