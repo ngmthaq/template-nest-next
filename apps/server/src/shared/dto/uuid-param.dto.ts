@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID } from 'class-validator';
 
-/**
- * Route-param DTO for a UUID resource id, e.g. `GET /users/:id`.
- *
- * Usage: `@Param() { id }: UuidParamDto`
- */
+/** UUID route id, e.g. `GET /users/:id`. Usage: `@Param() { id }: UuidParamDto` */
 export class UuidParamDto {
   @ApiProperty({
     format: 'uuid',

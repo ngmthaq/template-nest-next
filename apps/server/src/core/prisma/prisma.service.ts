@@ -5,16 +5,8 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { PrismaClient } from '../../generated/prisma/client';
 
 /**
- * The application's Prisma database client.
- *
- * Extends the generated {@link PrismaClient} so every model delegate
- * (`prisma.user`, ...) is available directly on the injected service. Prisma 7
- * requires a driver adapter for the connection; the MariaDB adapter (compatible
- * with MySQL) is built from the `DATABASE_URL` resolved via `ConfigService`
- * (see `configuration.ts`).
- *
- * The connection is opened on module init and closed on shutdown, so callers
- * can inject `PrismaService` and query straight away.
+ * The application's Prisma client, extended so every model delegate (`prisma.user`,
+ * …) sits on the injected service. Connects on module init, disconnects on shutdown.
  */
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

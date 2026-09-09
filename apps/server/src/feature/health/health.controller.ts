@@ -20,9 +20,8 @@ export class HealthController {
   public constructor(private readonly healthService: HealthService) {}
 
   /**
-   * Liveness/readiness probe. Reports the app plus its backing services
-   * (MySQL, Redis). Responds `200` when everything is up, `503` otherwise —
-   * either way the body is the full per-service {@link HealthResult}.
+   * Liveness/readiness probe. `200` when everything is up, `503` otherwise; either way
+   * the body is the full {@link HealthResult}.
    */
   @ApiOperation({
     summary: 'Health check (server, MySQL, Redis)',

@@ -1,12 +1,7 @@
 # syntax=docker/dockerfile:1
 #
-# Build context is the REPO ROOT (see docker-compose.yml), not apps/client,
-# because the pnpm lockfile and workspace manifest live at the root.
-#   docker build -f apps/client/Dockerfile .
-#
-# This image is environment-agnostic, like apps/server/Dockerfile: it is
-# built once and configured at container start via runtime env vars (see
-# docker-compose.yml's client.env_file), not via build args.
+# Build from the REPO ROOT (`docker build -f apps/client/Dockerfile .`), where the lockfile lives.
+# Environment-agnostic — built once, configured at container start via runtime env vars.
 
 # ---- Base: pnpm via corepack ----
 FROM node:24-alpine AS base

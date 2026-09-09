@@ -1,11 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
-/**
- * Sets up the application-wide event bus so any provider can dispatch events
- * with `EventEmitter2` and react with `@OnEvent`. Registered once here; no
- * events or listeners are defined at this layer.
- */
+/** Application-wide event bus: dispatch with `EventEmitter2`, react with `@OnEvent`. */
 @Global()
 @Module({
   imports: [EventEmitterModule.forRoot()],

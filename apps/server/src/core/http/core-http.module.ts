@@ -2,11 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-/**
- * Registers `@nestjs/axios` globally so `HttpService` can be injected anywhere
- * for outbound HTTP calls. Its Axios defaults (`timeout`, `maxRedirects`) are
- * resolved from `ConfigService`; see `configuration.ts`.
- */
+/** Global `HttpService` for outbound HTTP calls, with configured timeout and redirect limits. */
 @Global()
 @Module({
   imports: [

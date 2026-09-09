@@ -3,12 +3,8 @@ import { Type } from 'class-transformer';
 import { IsInt, IsOptional, Max, Min } from 'class-validator';
 
 /**
- * Query-param DTO for paginated list endpoints, e.g. `GET /users?page=2&limit=20`.
- *
- * Both fields are optional and fall back to sensible defaults. `limit` is
- * capped to protect the backend from oversized page requests.
- *
- * Usage: `@Query() { page, limit }: PaginationQueryDto`
+ * Paginated list query, e.g. `GET /users?page=2&limit=20`. Both fields default; `limit` is
+ * capped at 100 to keep oversized pages off the backend. Usage: `@Query() { page, limit }`
  */
 export class PaginationQueryDto {
   @ApiPropertyOptional({

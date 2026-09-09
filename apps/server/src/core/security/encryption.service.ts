@@ -3,20 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 
 /**
- * Two-way (reversible) encryption of data with AES-256-GCM.
- *
- * Unlike `HashService`, this is reversible — use it for data you must recover
- * later (e.g. third-party tokens at rest), never for passwords. GCM is
- * authenticated, so {@link decrypt} throws if the ciphertext was tampered with.
- *
- * The 256-bit key is derived once (via scrypt) from `ENCRYPTION_KEY` and
- * `ENCRYPTION_SALT` (see `configuration.ts`). `ENCRYPTION_KEY` is optional at
- * boot so the app runs without it; calling encrypt/decrypt without it throws a
- * clear error rather than failing silently.
- *
- * {@link encrypt} returns a single base64 string packing `iv | authTag |
- * ciphertext`; {@link decrypt} reverses exactly that layout. A random IV per
- * call means encrypting the same input twice yields different outputs.
+ * Reversible AES-256-GCM for data you must recover later — never passwords, which belong in
+ * `HashService`. Key derived via scrypt from `ENCRYPTION_KEY`; encrypt/decrypt throw without it.
  */
 @Injectable()
 export class EncryptionService {
@@ -50,8 +38,8 @@ export class EncryptionService {
   }
 
   /**
-   * Decrypt a payload produced by {@link encrypt}. Throws if the key is wrong
-   * or the ciphertext (or its auth tag) has been altered.
+   * Decrypt a payload from {@link encrypt}. Throws if the key is wrong or the
+   * ciphertext or its auth tag was altered.
    */
   public decrypt(payload: string): string {
     const data = Buffer.from(payload, 'base64');
@@ -69,12 +57,8 @@ export class EncryptionService {
   }
 
   /**
-   * Check whether an encrypted `payload` decrypts to `plaintext`.
-   *
-   * Ciphertexts can't be compared directly (a random IV makes each encryption
-   * of the same value unique), so the payload is decrypted and matched against
-   * the candidate in constant time. Returns `false` — never throws — if the
-   * payload is malformed, tampered with, or encrypted under a different key.
+   * Whether `payload` decrypts to `plaintext`, compared in constant time. A random
+   * IV makes ciphertexts incomparable directly. Returns `false` rather than throwing.
    */
   public compare(plaintext: string, payload: string): boolean {
     let decrypted: Buffer;

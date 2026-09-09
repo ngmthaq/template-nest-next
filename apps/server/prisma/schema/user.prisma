@@ -1,4 +1,4 @@
-// Temporary placeholder model — replace with the real domain schema.
+// Placeholder model — replace with the real domain schema.
 
 model User {
   id        Int      @id @default(autoincrement())

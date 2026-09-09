@@ -14,23 +14,8 @@ import { WebsocketModule } from './websocket/websocket.module';
 import { CoreWinstonModule } from './winston/core-winston.module';
 
 /**
- * Core module — wires up cross-cutting, application-wide infrastructure.
- *
- * Each concern lives in its own `Core*Module` under `src/core/`, all marked
- * `@Global` so their providers can be injected anywhere without re-importing:
- *
- * - {@link CoreConfigModule} — `@nestjs/config`, loading `.env.<NODE_ENV>`.
- * - {@link PrismaModule} — the `PrismaService` database client.
- * - {@link CoreWinstonModule} — the app-wide Winston logger.
- * - {@link CoreCacheModule} — the in-memory cache (`CACHE_MANAGER`).
- * - {@link CoreHttpModule} — `HttpService` for outbound HTTP calls.
- * - {@link MailModule} — `MailService` for sending SMTP email.
- * - {@link CoreScheduleModule} — cron/interval/timeout scheduling.
- * - {@link CoreEventEmitterModule} — the application-wide event bus.
- * - {@link CoreBullModule} — the shared BullMQ Redis connection.
- * - {@link CoreThrottlerModule} — request rate limiting + global guard.
- * - {@link SecurityModule} — the `HashService` / `EncryptionService` crypto.
- * - {@link WebsocketModule} — the Socket.IO gateway for real-time features.
+ * Aggregates every cross-cutting `Core*Module`. All are `@Global`, so their
+ * providers inject anywhere without re-importing this module.
  */
 @Module({
   imports: [

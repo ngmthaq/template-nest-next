@@ -5,10 +5,7 @@ import { CacheModule } from './cache/cache.module';
 import { HealthModule } from './health/health.module';
 import { UserModule } from './user/user.module';
 
-/**
- * Aggregates all feature modules behind a single import for `AppModule`.
- * Add new feature modules to the `imports` array as the application grows.
- */
+/** Aggregates every feature module behind a single import for `AppModule`. */
 @Module({
   imports: [UserModule, AuthModule, CacheModule, HealthModule],
   exports: [UserModule, AuthModule, CacheModule, HealthModule],

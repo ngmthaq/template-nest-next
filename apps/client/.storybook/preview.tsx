@@ -38,20 +38,8 @@ const withIntl: Decorator = (Story, context) => {
 };
 
 /**
- * Supplies real next-themes context so `useTheme()` consumers (e.g. sonner's `Toaster`
- * in `shadcn/sonner.tsx`) follow the same `theme` toolbar global that `withThemeByClassName`
- * reads below, instead of next-themes' context-less no-op fallback.
- *
- * `withThemeByClassName` remains the *only* writer of the `dark` class on `<html>` — this
- * provider is pointed at `data-theme` (via `attribute`) so it never touches `class` at all,
- * which rules out any fight over that attribute by construction rather than by convention.
- *
- * `forcedTheme` alone would only force the DOM attribute write; next-themes' `theme` /
- * `resolvedTheme` fields returned by `useTheme()` come from its *internal* state, which is
- * seeded once from `defaultTheme` (or a stored `storageKey`) on mount and is not updated by
- * a `forcedTheme` prop change. Remounting via `key={theme}` re-seeds that internal state to
- * the toolbar's value on every toggle, and a Storybook-only `storageKey` keeps that from ever
- * being shadowed by a persisted preference.
+ * Real next-themes context for `useTheme()` consumers, keyed on the toolbar theme so its internal
+ * state re-seeds per toggle. Writes `data-theme`, leaving `withThemeByClassName` to own `class`.
  */
 const withThemeContext: Decorator = (Story, context) => {
   const theme = isPreviewTheme(context.globals.theme) ? context.globals.theme : 'light';

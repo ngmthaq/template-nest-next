@@ -48,13 +48,8 @@ export class HealthResult {
 }
 
 /**
- * Probes the app's own liveness plus its backing services (MySQL, Redis) and
- * aggregates them into a single {@link HealthResult}. Each dependency is
- * checked with a cheap, well-bounded query (`SELECT 1` / `PING`) so a hung or
- * unreachable service surfaces as `down` rather than blocking the request.
- *
- * The MySQL pool and Redis client are owned by this service and closed on
- * shutdown (see {@link onModuleDestroy}).
+ * Probes the app plus MySQL and Redis, each with a cheap bounded query (`SELECT 1` / `PING`)
+ * so a hung service reports `down` instead of blocking. Owns both connections and closes them.
  */
 @Injectable()
 export class HealthService implements OnModuleDestroy {
@@ -75,7 +70,7 @@ export class HealthService implements OnModuleDestroy {
     return { status: healthy ? 'ok' : 'error', info };
   }
 
-  /** Release both connections when the app shuts down. */
+  /** Release both connections on shutdown. */
   public async onModuleDestroy(): Promise<void> {
     await Promise.allSettled([this.mysql.end(), this.redis.quit()]);
   }

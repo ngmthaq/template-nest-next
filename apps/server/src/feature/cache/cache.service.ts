@@ -32,13 +32,8 @@ export class CacheDeleteResult {
 }
 
 /**
- * Business logic for the cache administration endpoints.
- *
- * Reads and mutates the global `CACHE_MANAGER` (registered in `CoreModule`).
- * Key enumeration is done by iterating each underlying Keyv store — the
- * standard cache-manager interface has no `keys()` method, but every store
- * backed by an iterable adapter (including the Redis store) exposes an async
- * `iterator()` yielding `[key, value]` pairs.
+ * Cache administration behind the `/cache` endpoints. Enumerates keys by iterating each
+ * Keyv store's async `iterator()`, since cache-manager itself exposes no `keys()`.
  */
 @Injectable()
 export class CacheService {
@@ -47,10 +42,7 @@ export class CacheService {
 
   public constructor(@Inject(CACHE_MANAGER) private readonly cache: Cache) {}
 
-  /**
-   * Search cached entries whose key matches the given glob pattern.
-   * Returns every matching entry as a `{ key, value }` pair.
-   */
+  /** Every cached entry whose key matches the glob `pattern`. */
   public async search(pattern: string): Promise<CacheEntry[]> {
     const matches = this.compileMatcher(pattern);
     const entries: CacheEntry[] = [];
@@ -75,11 +67,8 @@ export class CacheService {
   }
 
   /**
-   * Delete a single cache entry by its exact key.
-   *
-   * Returns `true` only when an entry actually existed and was removed. The
-   * existence check is explicit because cache-manager's `del()` resolves to
-   * `true` even for keys that were never present.
+   * Delete one entry by exact key. Returns `true` only if it existed — cache-manager's
+   * `del()` resolves `true` even for keys that were never present.
    */
   public async delete(key: string): Promise<boolean> {
     const existed = (await this.cache.get(key)) !== undefined;
@@ -88,16 +77,8 @@ export class CacheService {
   }
 
   /**
-   * Compile the user-supplied glob pattern into a predicate that tests a key
-   * for a full-string (anchored) match.
-   *
-   * Glob syntax: `*` matches any run of characters, including none; `?`
-   * matches exactly one character; every other character matches itself
-   * literally. There are no character classes, no brace expansion, and no
-   * escaping. Matching uses an iterative two-pointer scan with a remembered
-   * star position — the standard linear-ish wildcard algorithm — so it has
-   * no backtracking state and cannot be driven into catastrophic runtime
-   * regardless of input.
+   * Compile a glob (`*` any run, `?` one char, everything else literal) into an anchored
+   * predicate. Two-pointer scan with a remembered star — no backtracking, so no ReDoS.
    */
   private compileMatcher(pattern: string): (key: string) => boolean {
     if (!pattern) {

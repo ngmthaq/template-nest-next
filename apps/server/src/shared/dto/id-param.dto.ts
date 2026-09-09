@@ -2,11 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsInt, Min } from 'class-validator';
 
-/**
- * Route-param DTO for a numeric resource id, e.g. `GET /users/:id`.
- *
- * Usage: `@Param() { id }: IdParamDto`
- */
+/** Numeric route id, e.g. `GET /users/:id`. Usage: `@Param() { id }: IdParamDto` */
 export class IdParamDto {
   @ApiProperty({
     minimum: 1,

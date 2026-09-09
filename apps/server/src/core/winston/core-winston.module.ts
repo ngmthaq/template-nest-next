@@ -4,15 +4,8 @@ import { utilities as nestWinstonUtilities, WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 
 /**
- * Registers Winston as the application-wide logger, its options resolved from
- * `ConfigService`. Exposes the Nest-compatible logger provider that `main.ts`
- * attaches via `app.useLogger`, so all framework and application logs flow
- * through Winston.
- *
- * The minimum level is read from `ConfigService` (`log.level`, default `debug`).
- * Non-production environments get a human-readable, colorized console format
- * that mirrors NestJS's native output (timestamp + context + level); production
- * emits structured JSON so logs can be shipped and parsed by log aggregators.
+ * Application-wide Winston logger, attached in `main.ts` via `app.useLogger`.
+ * Production emits structured JSON for aggregators; elsewhere, colorized console.
  */
 @Global()
 @Module({

@@ -4,20 +4,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 /**
- * Sets up application-wide request rate limiting with three named tiers —
- * `short`, `medium`, and `long` — each a `limit` of requests per `ttl` window
- * (milliseconds), resolved from `ConfigService`; see `configuration.ts`. All
- * tiers apply together, so a request must satisfy every one (e.g. burst
- * protection via `short` plus a sustained cap via `long`).
- *
- * `ThrottlerGuard` is registered as a global `APP_GUARD` so every HTTP route is
- * throttled by default. Opt routes out with `@SkipThrottle()` (optionally per
- * tier, e.g. `@SkipThrottle({ short: true })`) or override a tier with
- * `@Throttle({ long: { limit, ttl } })`. Rate limiting is skipped entirely in
- * local development (`nodeEnv === 'development'`) via `skipIf`, and active in
- * every other environment. The default in-memory store is per-instance; back
- * it with a shared store (e.g. Redis) if running multiple instances behind a
- * load balancer.
+ * Global `ThrottlerGuard`; three tiers (`short`/`medium`/`long`) all apply at once, skipped in
+ * development. The in-memory store is per-instance — back it with Redis before running replicas.
  */
 @Global()
 @Module({

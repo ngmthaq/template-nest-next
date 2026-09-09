@@ -3,10 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-/**
- * Options accepted by {@link MailService.send}. A thin projection of
- * nodemailer's message fields, exposing only what the app commonly needs.
- */
+/** Options for {@link MailService.send} — a thin projection of nodemailer's message fields. */
 export interface SendMailOptions {
   /** Recipient address(es). */
   to: string | string[];
@@ -34,13 +31,8 @@ export interface SendMailOptions {
 }
 
 /**
- * Sends transactional email over SMTP via nodemailer.
- *
- * A single reusable transporter is created from `ConfigService` (see
- * `configuration.ts`) and pooled for the process lifetime. Point the SMTP
- * settings at a real provider in production, or at a local catcher (e.g.
- * Mailpit/MailHog on port 1025) during development. Use {@link send} to
- * dispatch a message; the default sender is applied when none is given.
+ * Sends transactional email over SMTP via a pooled nodemailer transporter.
+ * Point it at a real provider in production, or a local catcher (Mailpit) in dev.
  */
 @Injectable()
 export class MailService {
@@ -60,11 +52,7 @@ export class MailService {
     });
   }
 
-  /**
-   * Send an email. Resolves with nodemailer's send result on success and
-   * rejects if the transport fails, so callers can await delivery or catch
-   * errors (e.g. to retry via a queue).
-   */
+  /** Send an email, applying the default sender when none is given. Rejects if the transport fails. */
   public async send(options: SendMailOptions): Promise<SMTPTransport.SentMessageInfo> {
     const info = await this.transporter.sendMail({
       from: options.from ?? this.defaultFrom,
@@ -80,10 +68,7 @@ export class MailService {
     return info;
   }
 
-  /**
-   * Verify the SMTP connection and credentials without sending a message.
-   * Useful for a health check or a startup sanity probe.
-   */
+  /** Verify the SMTP connection and credentials without sending anything. */
   public verify(): Promise<true> {
     return this.transporter.verify();
   }

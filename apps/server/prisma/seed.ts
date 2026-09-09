@@ -4,15 +4,13 @@ import { config as loadEnv } from 'dotenv';
 import { buildDatabaseUrl } from '../src/core/config/database-url';
 import { PrismaClient } from '../src/generated/prisma/client';
 
-// Load env the same way the app does, so the seed can also be run directly
-// (e.g. `tsx prisma/seed.ts`), not only via `prisma db seed`.
+// Load env as the app does, so this also runs directly via `tsx prisma/seed.ts`.
 const nodeEnv = process.env.NODE_ENV ?? 'development';
 loadEnv({ path: [`.env.${nodeEnv}.local`, `.env.${nodeEnv}`, '.env'] });
 
 const prisma = new PrismaClient({ adapter: new PrismaMariaDb(buildDatabaseUrl()) });
 
-// Sample data. `upsert` keyed on the unique email makes the seed idempotent,
-// so it can be re-run without creating duplicates.
+// `upsert` on the unique email keeps the seed idempotent across re-runs.
 const users = [
   { email: 'alice@example.com', name: 'Alice' },
   { email: 'bob@example.com', name: 'Bob' },

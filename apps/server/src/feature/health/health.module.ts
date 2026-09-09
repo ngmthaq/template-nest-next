@@ -8,13 +8,8 @@ import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
 
 /**
- * Feature module exposing the `GET /health` probe.
- *
- * Provides {@link HealthService} together with the dedicated MySQL pool and
- * Redis client it checks. Both clients are configured to fail fast — small
- * connection limits and no offline queue — so an unreachable dependency turns
- * into a `down` indicator quickly instead of hanging the request. Connection
- * settings come from `mysql.*` / `redis.*` in `configuration.ts`.
+ * Exposes `GET /health`. Its MySQL pool and Redis client are configured to fail fast —
+ * small limits, no offline queue — so an unreachable dependency reports `down` quickly.
  */
 @Module({
   controllers: [HealthController],
@@ -42,9 +37,8 @@ import { HealthService } from './health.service';
           host: config.get<string>('redis.host', 'localhost'),
           port: config.get<number>('redis.port', 6379),
           password: config.get<string>('redis.password'),
-          // Connect eagerly so the first PING has a live socket; commands fail
-          // fast (rather than queue) whenever the connection is down, keeping a
-          // dead Redis from hanging the health request.
+          // Connect eagerly and fail fast rather than queue, so a dead Redis
+          // reports `down` instead of hanging the health request.
           enableOfflineQueue: false,
           maxRetriesPerRequest: 1,
           connectTimeout: 3000,

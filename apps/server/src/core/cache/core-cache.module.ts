@@ -5,13 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { Keyv } from 'keyv';
 
 /**
- * Registers the cache as a global module, backed by Redis via a Keyv store
- * (cache-manager v7's store interface). Its options are resolved asynchronously
- * from `ConfigService` so the `CACHE_MANAGER` provider can be injected anywhere
- * for manual caching. `ttl` is expressed in milliseconds. The Redis connection
- * reuses the same `redis.*` settings as BullMQ; keys are namespaced under
- * `cache` to keep them separate from other Redis users. Requires a running
- * Redis instance (see `configuration.ts`).
+ * Redis-backed `CACHE_MANAGER` via a Keyv store, `ttl` in milliseconds. Keys are
+ * namespaced under `cache` to stay clear of other users of the same Redis.
  */
 @Global()
 @Module({

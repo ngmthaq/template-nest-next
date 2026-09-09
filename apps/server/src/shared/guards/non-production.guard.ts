@@ -2,11 +2,8 @@ import { CanActivate, ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Blocks access whenever the application runs in the production environment.
- *
- * Attach with `@UseGuards(NonProductionGuard)` to routes that must never be
- * reachable in production — e.g. cache inspection/administration endpoints.
- * The active environment is read from `ConfigService` (`nodeEnv`).
+ * Blocks the route whenever `nodeEnv` is production. Attach with `@UseGuards(NonProductionGuard)`
+ * to anything that must never be reachable there, e.g. cache administration.
  */
 @Injectable()
 export class NonProductionGuard implements CanActivate {

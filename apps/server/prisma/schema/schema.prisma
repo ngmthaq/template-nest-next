@@ -1,9 +1,5 @@
-// Prisma datasource + generator configuration.
-//
-// Models live in sibling `*.prisma` files within this `prisma/schema/` folder
-// (multi-file schema); one model per file. In Prisma 7 the connection URL lives
-// in `prisma.config.ts` (which loads the project's `.env.<NODE_ENV>` files),
-// not here.
+// Datasource and generator only. Models live one-per-file in sibling `*.prisma` files;
+// the connection URL lives in `prisma.config.ts`, not here (Prisma 7).
 
 generator client {
   provider     = "prisma-client"

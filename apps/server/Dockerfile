@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:1
 #
-# Build context is the REPO ROOT (see docker-compose.yml), not apps/server,
-# because the pnpm lockfile and workspace manifest live at the root.
-#   docker build -f apps/server/Dockerfile .
+# Build from the REPO ROOT (`docker build -f apps/server/Dockerfile .`), where the lockfile lives.
 
 # ---- Base: pnpm via corepack ----
 FROM node:24-alpine AS base

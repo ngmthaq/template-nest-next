@@ -3,12 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import compression from 'compression';
 
 /**
- * Enable gzip/deflate response compression.
- *
- * Responses at or above `threshold` bytes are compressed at the given zlib
- * `level` (0–9, or `-1` for zlib's default). Both are resolved from the
- * `COMPRESSION_*` environment variables (see `configuration.ts`) and default
- * to the `compression` library's own defaults (1 KB threshold, default level).
+ * gzip/deflate responses at or above `threshold` bytes, at the configured zlib `level`
+ * (0–9, or `-1` for zlib's default).
  */
 export function handleCompression(app: INestApplication): void {
   const config = app.get(ConfigService);

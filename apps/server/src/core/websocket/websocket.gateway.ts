@@ -15,15 +15,8 @@ import {
 import type { Server, Socket } from 'socket.io';
 
 /**
- * Application WebSocket gateway (Socket.IO).
- *
- * Attaches to the same HTTP server the app listens on. Connection lifecycle
- * events are logged, and inbound messages are handled by `@SubscribeMessage`
- * methods. Broadcast to every connected client via the injected `server`.
- *
- * CORS is not configured on the decorator: it is applied at bootstrap by
- * `ConfiguredIoAdapter` (see `websocket.adapter.ts`), which sources the same
- * `CORS_*` settings as the REST layer so both transports share one policy.
+ * Application Socket.IO gateway, attached to the app's HTTP server. CORS comes from
+ * `ConfiguredIoAdapter` at bootstrap, not the decorator, so both transports share one policy.
  */
 @WebSocketGateway()
 export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -44,50 +37,32 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  /**
-   * Broadcast an event and payload to every connected client. Prefer calling
-   * this over reaching into `server` directly from other providers.
-   */
+  /** Broadcast to every connected client. Prefer this over reaching into `server`. */
   public broadcast<T>(event: string, data: T): void {
     this.server.emit(event, data);
   }
 
-  /**
-   * Broadcast to every connected client except one. A socket auto-joins a room
-   * named after its own id, so excluding that id excludes just that client —
-   * the server-side equivalent of `client.broadcast.emit(...)`.
-   */
+  /** Broadcast to everyone but one client — a socket auto-joins a room named after its own id. */
   public broadcastExcept<T>(socketId: string, event: string, data: T): void {
     this.server.except(socketId).emit(event, data);
   }
 
-  /**
-   * Emit an event to every client that has joined the given room. Clients join
-   * rooms via the `room:join` message (see {@link handleJoinRoom}).
-   */
+  /** Emit to every client that joined `room` via {@link handleJoinRoom}. */
   public emitToRoom<T>(room: string, event: string, data: T): void {
     this.server.to(room).emit(event, data);
   }
 
-  /**
-   * Emit an event to every client in `room` except the one with `socketId` —
-   * e.g. notify a room of an action without echoing it back to its author.
-   */
+  /** Emit to a room except one client — e.g. notify others without echoing to the author. */
   public emitToRoomExcept<T>(room: string, socketId: string, event: string, data: T): void {
     this.server.to(room).except(socketId).emit(event, data);
   }
 
-  /**
-   * Emit an event to a single client by its socket id.
-   */
+  /** Emit to a single client by socket id. */
   public emitToClient<T>(socketId: string, event: string, data: T): void {
     this.server.to(socketId).emit(event, data);
   }
 
-  /**
-   * Health-check message. A client emitting `ping` receives a `pong` back
-   * carrying the same payload — useful for verifying the connection.
-   */
+  /** Health check: a client emitting `ping` gets the same payload back as `pong`. */
   @SubscribeMessage('ping')
   public handlePing(
     @MessageBody() payload: unknown,
@@ -97,10 +72,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     return { event: 'pong', data: payload };
   }
 
-  /**
-   * Add the calling client to a room. Joining is client-initiated because it
-   * needs the client's own socket, so it cannot be driven from the event bus.
-   */
+  /** Add the calling client to a room. Client-initiated, since it needs the client's own socket. */
   @SubscribeMessage('room:join')
   public handleJoinRoom(
     @MessageBody() room: string,
@@ -111,9 +83,7 @@ export class WebsocketGateway implements OnGatewayInit, OnGatewayConnection, OnG
     return { event: 'room:joined', data: room };
   }
 
-  /**
-   * Remove the calling client from a room.
-   */
+  /** Remove the calling client from a room. */
   @SubscribeMessage('room:leave')
   public handleLeaveRoom(
     @MessageBody() room: string,

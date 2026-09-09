@@ -3,11 +3,8 @@ import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 /**
- * Establishes the shared BullMQ Redis connection used by every queue in the
- * app, its connection settings resolved from `ConfigService` (see
- * `configuration.ts`). Individual queues are registered per-feature with
- * `BullModule.registerQueue(...)`; none are defined here. Requires a running
- * Redis instance.
+ * Shared BullMQ Redis connection. Queues are registered per-feature with
+ * `BullModule.registerQueue(...)`; none are defined here.
  */
 @Global()
 @Module({

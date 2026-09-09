@@ -1,8 +1,6 @@
 /**
- * Build the MySQL connection string Prisma needs from the individual `MYSQL_*`
- * environment variables, keeping them the single source of truth for the
- * database credentials (no separate `DATABASE_URL`). User and password are
- * URL-encoded so special characters survive.
+ * Compose Prisma's MySQL connection string from the `MYSQL_*` variables, keeping them the
+ * single source of truth (no separate `DATABASE_URL`). User and password are URL-encoded.
  */
 export function buildDatabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
   const host = env.MYSQL_HOST ?? 'localhost';

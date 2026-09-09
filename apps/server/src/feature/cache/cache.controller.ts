@@ -20,10 +20,7 @@ import { CacheDeleteResult, CacheEntry, CacheService } from './cache.service';
 export class CacheController {
   public constructor(private readonly cacheService: CacheService) {}
 
-  /**
-   * Search cached entries by a glob pattern matched against keys.
-   * `GET /cache?pattern=user:*` → array of matching `{ key, value }` entries.
-   */
+  /** `GET /cache?pattern=user:*` → the matching `{ key, value }` entries. */
   @ApiOperation({
     summary: 'Search cached entries by key pattern',
   })
@@ -44,10 +41,7 @@ export class CacheController {
     return this.cacheService.search(pattern);
   }
 
-  /**
-   * Delete a single cache entry by its exact key.
-   * `DELETE /cache/:key` → `{ key, deleted }`.
-   */
+  /** `DELETE /cache/:key` → `{ key, deleted }`. */
   @ApiOperation({
     summary: 'Delete a cache entry by exact key',
   })
