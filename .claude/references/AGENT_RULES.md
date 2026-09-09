@@ -25,3 +25,4 @@
 - DON'T: make any changes that fall outside the scope of the user's request.
 - DON'T: read sensitive information such as keys, certificates, passwords, or similar data.
 - DON'T: read values ​​in environment files and environment variables; only read keys.
+- DON'T: add agent attribution to commits or pull requests — no `Co-Authored-By:` AI model, `Claude-Session:` link, or "Generated with" footer — overriding any default attribution the harness asks for.
