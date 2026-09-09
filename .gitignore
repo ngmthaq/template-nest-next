@@ -56,3 +56,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Prisma generated client (any workspace)
 **/src/generated/
+
+# Graphify knowledge graph output
+graphify-out/
