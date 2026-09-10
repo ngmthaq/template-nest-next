@@ -400,9 +400,5 @@ Non-negotiable, and mostly already enforced by lint:
 
 ## 18. Git
 
-- `husky` `pre-commit` runs `lint-staged` (ESLint `--fix` on the touched app), then
-  `pnpm version patch --no-git-tag-version` and re-stages the root `package.json`. Expect the
-  version bump in every commit.
-- Commit messages follow Conventional Commits with a scope:
-  `refactor(client): move httpUtils onto axios with the fetch adapter`.
-  Scopes in use: `client`, `server`, `root`.
+See [GIT_CONVENTIONS](./GIT_CONVENTIONS.md) — branch naming, base branch, merge strategy, commit
+format, and PR expectations.

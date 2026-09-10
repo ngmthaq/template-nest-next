@@ -16,6 +16,13 @@ This section will describe the programming conventions for the project. If agent
 
 ---
 
+## GIT CONVENTIONS
+
+This section covers branch naming, base branch, merge strategy, commit message format, and PR
+expectations - see [GIT_CONVENTIONS](./references/GIT_CONVENTIONS.md).
+
+---
+
 ## AGENT RULES
 
 This section provides information on "DO" and "DO NOT" clauses. Agents should refer to these items to prioritize tasks when receiving assignments from users or to avoid following them when receiving assignments from users - see [AGENT_RULES](./references/AGENT_RULES.md)

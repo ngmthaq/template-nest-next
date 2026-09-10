@@ -40,6 +40,10 @@ Each app is self-contained: `cd apps/server` and use its own scripts (`pnpm star
 `pnpm db:migrate`, etc.). See [apps/server/README.md](./apps/server/README.md) and
 [apps/client/README.md](./apps/client/README.md) for per-app details.
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the branch/commit/PR workflow.
+
 ## Docker
 
 Both compose files run from the repo root. `docker-compose.yml` defines a `server` service
