@@ -17,6 +17,7 @@
     "db:seed": "prisma db seed",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",

@@ -1,6 +1,6 @@
 # Git Conventions
 
-> **Terminology:** "PR" below means pull request on GitHub, merge request on GitLab.
+> **Terminology:** "MR" below means merge request.
 
 ---
 
@@ -29,10 +29,28 @@ does not follow the `<type>/<kebab-slug>` pattern.
 
 ---
 
-## 2. Base branch and merge strategy
+## 2. Branches and promotion
 
-- **Base branch:** `main`. Every branch forks from `main`; every PR targets `main`.
-- **Merge strategy:** squash-merge into `main`. Delete the branch immediately after merge.
+Three long-lived branches, each tied to a deploy environment (`NODE_ENV`/`APP_ENV`, matching the
+`start:dev` / `start:staging` / `start:prod` scripts):
+
+| Branch    | Environment | Script          |
+| --------- | ----------- | ---------------- |
+| `dev`     | development | `start:dev`      |
+| `staging` | staging     | `start:staging`  |
+| `main`    | production  | `start:prod`     |
+
+**Feature work** (`feat/*`, `fix/*`, etc.):
+
+- **Base branch:** `dev`. Every feature branch forks from `dev`; every feature MR targets `dev`.
+- **Merge strategy:** squash-merge into `dev`. Delete the branch immediately after merge.
+
+**Promotion** (`dev` → `staging` → `main`):
+
+- Merged with a **regular merge commit** — **never squashed** — and the source branch is never
+  deleted.
+- **Why:** squashing a promotion rewrites its commits into one that doesn't exist on the source
+  branch, so the branches diverge permanently and every later promotion conflicts.
 
 ---
 
@@ -63,14 +81,15 @@ Expect a version bump in every commit — it is automatic, not something to undo
 
 ## 4. No agent attribution
 
-Commits and PRs never carry AI attribution: no `Co-Authored-By:` AI model, no session link, no
+Commits and MRs never carry AI attribution: no `Co-Authored-By:` AI model, no session link, no
 "Generated with…" footer — regardless of what a tool's default template asks for. This mirrors
 [AGENT_RULES.md](./AGENT_RULES.md) line 28.
 
 ---
 
-## 5. PR expectations
+## 5. MR expectations
 
-- The repo's PR template is filled out, not left as placeholder text.
-- Base branch is `main`.
+- The repo's MR template is filled out, not left as placeholder text.
+- Base branch depends on the MR kind: `dev` for feature MRs, `staging`/`main` for promotion MRs
+  (§2).
 - No agent attribution (§4).

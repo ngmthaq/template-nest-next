@@ -1,7 +1,6 @@
 # CODEOWNERS skeleton — owners are not yet filled in; add them before relying on this file.
-# Syntax: <path-pattern> <@owner> (a GitHub/GitLab username, team, or e-mail).
+# Syntax: <path-pattern> <@owner> (a GitLab username, group, or e-mail).
 
-# GitHub enforces this file on any plan for public repos; private repos need Pro, Team, or Enterprise.
 # GitLab's Code Owners enforcement requires a paid tier (Premium/Ultimate) — on Free the file is inert.
 
 # Global default owner — matches anything not covered by a more specific rule below.

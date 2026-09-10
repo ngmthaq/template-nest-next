@@ -1,0 +1,79 @@
+stages:
+  - lint
+  - typecheck
+  - test
+  - build
+
+image: node:24
+
+variables:
+  PNPM_STORE_DIR: '${CI_PROJECT_DIR}/.pnpm-store'
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /^(main|dev|staging)$/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# Shared setup: enable pnpm via corepack (root package.json pins the version), then
+# install deps and generate the Prisma client the server needs for typecheck/test/build.
+.setup: &setup
+  before_script:
+    - corepack enable
+    - corepack prepare --activate
+    - pnpm config set store-dir "${PNPM_STORE_DIR}"
+    - pnpm install --frozen-lockfile
+    - pnpm --filter @template-nest-next/server exec prisma generate
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+
+lint:server:
+  stage: lint
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/server exec eslint .
+
+lint:client:
+  stage: lint
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/client exec eslint
+
+typecheck:server:
+  stage: typecheck
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/server exec tsc --noEmit
+
+typecheck:client:
+  stage: typecheck
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/client exec tsc --noEmit --incremental false
+
+test:server:
+  stage: test
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/server exec jest
+
+test:client:
+  stage: test
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/client exec vitest run
+
+build:server:
+  stage: build
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/server exec nest build
+
+build:client:
+  stage: build
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/client exec next build

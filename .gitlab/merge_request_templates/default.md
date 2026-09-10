@@ -1,5 +1,3 @@
-<!-- Mirror of .github/pull_request_template.md — keep both in sync. -->
-
 ## Description
 
 <!-- Provide a clear summary of what this change does and why. -->

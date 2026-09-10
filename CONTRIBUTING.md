@@ -15,13 +15,19 @@ See [README.md](./README.md) for install and run instructions. In short: Node.js
 
 ## Contribution workflow
 
-1. Branch from `main` using `<type>/<kebab-slug>` (see
+1. Branch from `dev` using `<type>/<kebab-slug>` (see
    [GIT_CONVENTIONS.md](./.claude/references/GIT_CONVENTIONS.md#1-branch-naming)).
 2. Commit using Conventional Commits with a scope (see
    [GIT_CONVENTIONS.md](./.claude/references/GIT_CONVENTIONS.md#3-commit-messages)).
-3. Open a PR against `main`, with the PR template filled out (see
-   [GIT_CONVENTIONS.md](./.claude/references/GIT_CONVENTIONS.md#5-pr-expectations)).
-4. Once approved, it is squash-merged into `main` and the branch is deleted.
+3. Open an MR against `dev`, with the MR template filled out (see
+   [GIT_CONVENTIONS.md](./.claude/references/GIT_CONVENTIONS.md#5-mr-expectations)).
+4. Once approved, it is squash-merged into `dev` and the branch is deleted.
+
+### Getting to production
+
+Work reaches production by promotion: `dev` → `staging` → `main`, each step a regular merge
+commit — never squashed. See [GIT_CONVENTIONS.md §2](./.claude/references/GIT_CONVENTIONS.md#2-branches-and-promotion)
+for the full rule and why squashing a promotion is a mistake.
 
 ### The pre-commit version-bump gotcha
 
@@ -33,25 +39,31 @@ mechanics: [GIT_CONVENTIONS.md §3](./.claude/references/GIT_CONVENTIONS.md#3-co
 
 ---
 
+## CI configuration path
+
+The pipeline config lives at `.gitlab/ci.yml`, not the repo root, so GitLab won't find it
+automatically. Set **Settings → CI/CD → General pipelines → CI/CD configuration file** to
+`.gitlab/ci.yml` by hand. Skip this and GitLab runs **no pipelines at all, with no error** —
+do it before relying on any of the branch protection steps below.
+
 ## Branch protection
 
-Not yet configured in this repo — apply by hand once a hosting platform is chosen. CI status
-checks will be added here once D-02 (CI pipeline) lands.
+Not yet applied in this repo — set the following by hand in GitLab, per branch, in
+**Settings → Repository → Protected branches**:
 
-### GitHub
+| Branch    | Allowed to push | Allowed to merge         | Approvals |
+| --------- | --------------- | ------------------------- | --------- |
+| `main`    | No one          | Maintainers                | 1         |
+| `staging` | No one          | Developers + Maintainers   | 1         |
+| `dev`     | No one          | Developers                 | 0         |
 
-1. Settings → Branches → Add branch protection rule, pattern `main`.
-2. Require a pull request before merging.
-3. Require at least one approval.
-4. Disallow direct pushes to `main` (no bypass for anyone, including admins, if possible).
-5. Settings → General → Pull Requests: allow **squash merging** only; disable merge commits and
-   rebase merging.
+In **Settings → Merge requests**:
 
-### GitLab
-
-1. Settings → Repository → Protected branches: protect `main`, set "Allowed to push" to **No one**
-   and "Allowed to merge" to Maintainers (or your reviewer role).
-2. Settings → Merge requests: require approval (set the approval count), and enable
-   "Pipelines must succeed" once CI exists.
-3. Settings → Merge requests → Merge method: set to **Squash commits when merging** (or enforce
-   "Squash commits" as required, not just offered) as the only option.
+- Require the approval counts above (per-branch approval rules, or a single rule set to the
+  highest count with per-branch overrides), and enable **"Pipelines must succeed"** once CI
+  exists.
+- Merge method: **Squash commits when merging** as the default for feature MRs into `dev`. Do
+  **not** enable it repo-wide as a forced/required setting — that would also force-squash
+  `dev`→`staging`→`main` promotion MRs, which is exactly the mistake
+  [GIT_CONVENTIONS.md §2](./.claude/references/GIT_CONVENTIONS.md#2-branches-and-promotion) warns
+  against. Leave squash as an option, defaulted on, and uncheck it on every promotion MR.

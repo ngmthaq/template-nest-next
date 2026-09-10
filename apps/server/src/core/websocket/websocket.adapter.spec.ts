@@ -1,6 +1,7 @@
 import type { INestApplicationContext } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import type { ServerOptions } from 'socket.io';
 
 import { buildCorsOptions } from '../../shared/config/cors.config';
 import { ConfiguredIoAdapter } from './websocket.adapter';
@@ -41,9 +42,10 @@ describe('ConfiguredIoAdapter', () => {
     const app = createAppContext(configService);
     const adapter = new ConfiguredIoAdapter(app);
     const expectedCorsOptions = buildCorsOptions(configService);
+    const passedOptions: Partial<ServerOptions> = { transports: ['websocket'] };
 
     // Act
-    adapter.createIOServer(3000, { transports: ['websocket'] });
+    adapter.createIOServer(3000, passedOptions as ServerOptions);
 
     // Assert
     expect(createIOServerSpy).toHaveBeenCalledWith(3000, {
