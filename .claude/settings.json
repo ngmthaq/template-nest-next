@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.nestjs.com)",
+      "WebFetch(domain:nextjs.org)",
+      "WebFetch(domain:react.dev)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
