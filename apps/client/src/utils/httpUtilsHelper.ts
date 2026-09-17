@@ -111,11 +111,19 @@ export class HttpUtilsHelper {
   protected async request<T>(url: string, options: HttpUtilsRequestOptions): Promise<T> {
     const { cookies, withAuth, method, body, signal, headers, ...fetchOptions } = options;
 
+    const requestHeaders: Record<string, string | null> = Object.fromEntries(
+      new Headers(headers).entries(),
+    );
+
+    if (body instanceof FormData && !requestHeaders['content-type']) {
+      requestHeaders['content-type'] = null;
+    }
+
     const config: AxiosRequestConfig & HttpUtilsAuthOptions = {
       url,
       method,
       data: body,
-      headers: Object.fromEntries(new Headers(headers).entries()),
+      headers: requestHeaders,
       signal: signal ?? undefined,
       fetchOptions,
       withAuth,
