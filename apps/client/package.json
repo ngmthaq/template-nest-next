@@ -13,7 +13,7 @@
     "start:prod": "cross-env APP_ENV=production node load-env-cli.mjs next start",
     "lint": "eslint --fix",
     "lint:check": "eslint",
-    "typecheck": "tsc --noEmit --incremental false",
+    "typecheck": "next typegen && tsc --noEmit --incremental false",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "shadcn-ui:add": "pnpm dlx shadcn@latest add",

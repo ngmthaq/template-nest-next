@@ -36,9 +36,9 @@ jobs:
       matrix:
         include:
           - app: server
-            command: pnpm --filter @template-nest-next/server exec tsc --noEmit
+            command: pnpm --filter @template-nest-next/server run typecheck
           - app: client
-            command: pnpm --filter @template-nest-next/client exec tsc --noEmit --incremental false
+            command: pnpm --filter @template-nest-next/client run typecheck
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
