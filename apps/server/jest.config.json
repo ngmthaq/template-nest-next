@@ -5,7 +5,12 @@
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },
-  "collectCoverageFrom": ["src/**/*.(t|j)s", "!src/**/*.spec.ts", "!src/generated/**"],
+  "collectCoverageFrom": [
+    "src/**/*.(t|j)s",
+    "!src/**/*.spec.ts",
+    "!src/generated/**",
+    "!src/shared/config/**"
+  ],
   "coverageDirectory": "coverage",
   "testEnvironment": "node",
   "passWithNoTests": true
