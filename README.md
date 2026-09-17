@@ -60,3 +60,8 @@ NODE_ENV=development docker compose up -d --build
 # One service only
 NODE_ENV=development docker compose up -d --build client
 ```
+
+Interactive alternative: `pnpm infra` / `pnpm deploy` (or `bash scripts/01_run_docker_infra.sh` /
+`bash scripts/02_deploy_docker_vm.sh`) prompt for the target and environment, including a full VM
+deploy over SSH. See the Docker section of [apps/server/README.md](./apps/server/README.md) for
+prerequisites, image tags, and rollback.

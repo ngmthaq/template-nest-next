@@ -1,6 +1,6 @@
 {
   "name": "template-nest-next",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "private": true,
   "license": "UNLICENSED",
   "packageManager": "pnpm@10.25.0",
@@ -11,6 +11,8 @@
     "prepare": "husky",
     "server": "pnpm --filter @template-nest-next/server",
     "client": "pnpm --filter @template-nest-next/client",
+    "infra": "bash scripts/01_run_docker_infra.sh",
+    "deploy": "bash scripts/02_deploy_docker_vm.sh",
     "version:major": "pnpm version major --no-git-tag-version",
     "version:minor": "pnpm version minor --no-git-tag-version",
     "version:patch": "pnpm version patch --no-git-tag-version"

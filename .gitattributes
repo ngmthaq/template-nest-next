@@ -1,0 +1,22 @@
+# Git for Windows defaults to autocrlf=true, which turns LF into CRLF and
+# breaks shell shebangs (`bad interpreter: ...^M`).
+* text=auto
+
+# Load-bearing: scripts must stay LF so bash can run them on any platform.
+*.sh text eol=lf
+
+# Compose files are parsed by Docker inside Linux containers.
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary assets — never let Git normalise or diff these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Generated lockfile: keep it LF but out of diffs and language stats.
+pnpm-lock.yaml -diff linguist-generated=true

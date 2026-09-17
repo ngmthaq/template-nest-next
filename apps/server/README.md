@@ -111,6 +111,35 @@ defaults to `development` when unset.
 | `docker-compose-infra.yml` | MySQL + Redis       | Local development — run these in Docker while the app runs on the host. |
 | `docker-compose.yml`       | `server` + `client` | On the server, where MySQL/Redis are managed externally.                |
 
+### Prerequisites
+
+- **Bash 4.3+.** macOS ships bash 3.2, which cannot run either script; install a modern one with
+  `brew install bash` and re-run the script — the interactive scripts below resolve `bash` from
+  `PATH`, so Homebrew's bash is picked up automatically. Linux and WSL already ship 4.3+. On
+  Windows, run under WSL or Git Bash.
+- **Env files are hand-authored — the scripts never create or edit them.** Before running either
+  script, copy `apps/server/.env.example` to `apps/server/.env.<NODE_ENV>` and fill it in; for a
+  deploy, also copy `apps/client/.env.example` to `apps/client/.env.<NODE_ENV>`. Each script fails
+  fast with the missing path and a pointer to the matching `.env.example` if the file isn't there.
+
+### Interactive scripts
+
+Two dependency-free bash TUIs under `scripts/` wrap the Compose commands below with prompts,
+preflight checks, and a confirmation gate. Run them from the repository root with `pnpm infra` /
+`pnpm deploy`, or directly with `bash scripts/01_run_docker_infra.sh` / `bash scripts/02_deploy_docker_vm.sh`.
+
+- **`scripts/01_run_docker_infra.sh`** — prompts for target (local or remote over SSH) and
+  environment, then brings up MySQL + Redis for that environment. Remote mode only runs
+  `docker compose` on the VM over SSH; it does **not** transfer the repository, so the VM must
+  already have it (run script 02 first).
+- **`scripts/02_deploy_docker_vm.sh`** — prompts for the SSH connection, environment, and the
+  published host ports for the server and client, then: transfers the working tree to the VM
+  (`rsync`, falling back to `tar` over `ssh` when `rsync` is unavailable, as on Git Bash), builds
+  and starts `server` + `client` there with `docker compose up -d --build`, retags the freshly
+  built images, and tails the last 50 log lines. The transfer **does** carry `apps/server/.env.*`
+  and `apps/client/.env.*`, so the laptop's env files overwrite the VM's copies — the script's
+  summary names both files before you confirm.
+
 ### Local infrastructure (MySQL + Redis)
 
 ```bash
@@ -145,8 +174,33 @@ NODE_ENV=production docker compose up -d --build server
 docker compose down
 ```
 
-The image tag and container name are suffixed with `NODE_ENV`
-(`template-nest-next-server:<NODE_ENV>`, `template-nest-next-server-<NODE_ENV>`).
+### Image tags & rollback
+
+The container name is still suffixed with `NODE_ENV` alone (`template-nest-next-server-<NODE_ENV>`),
+but the **image tag** now also carries the app version (from the root `package.json`):
+`template-nest-next-server:<version>-<NODE_ENV>` and `template-nest-next-client:<version>-<NODE_ENV>`
+(default `0.0.0-development` when `APP_VERSION`/`NODE_ENV` are unset). After a build,
+`scripts/02_deploy_docker_vm.sh` also retags a moving `:<NODE_ENV>` pointer (e.g. `:production`)
+onto the version just built. That pointer is a human-facing marker of which version is currently
+live — handy for `docker images` or a manual `docker run` — but **`docker-compose.yml` never reads
+it**; `image:` there resolves from `APP_VERSION`/`NODE_ENV` directly, so Compose ignores the moving
+tag entirely. The versioned tag itself is never overwritten. Running Compose by hand only produces
+the versioned tag, not the moving one.
+
+**Rollback: re-run Compose against the old version, without letting it rebuild:**
+
+```bash
+APP_VERSION=0.0.21 NODE_ENV=production docker compose up -d --no-build
+```
+
+Both parts matter: `APP_VERSION=0.0.21` is what makes `image:` resolve to the older,
+already-built tag instead of the current `0.0.0-<NODE_ENV>` default — without it, Compose falls
+back to `0.0.0-production`, an image that doesn't exist. `--no-build` matters because the service
+also has a `build:` section: if the resolved image is missing, Compose silently rebuilds from
+whatever is currently checked out, deploying the exact code you were trying to roll back away
+from, instead of failing. With `--no-build`, a missing image is a hard error. If non-default host
+ports are in use, pass `PORT=<port>` / `CLIENT_PORT=<port>` alongside `APP_VERSION`/`NODE_ENV` the
+same way, since those also come from the shell rather than the env file.
 
 ### Ports
 

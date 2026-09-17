@@ -1,5 +1,5 @@
-# Server + client containers, one environment at a time via NODE_ENV (default `development`), which
-# picks the image tag, container name, and env file. See apps/server/README.md for usage and ports.
+# Server + client containers, one environment at a time via NODE_ENV; image tags carry APP_VERSION.
+# See apps/server/README.md for usage, ports, and rollback-by-retag.
 
 name: template-nest-next
 
@@ -8,7 +8,7 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: template-nest-next-server:${NODE_ENV:-development}
+    image: template-nest-next-server:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
     container_name: template-nest-next-server-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: apps/client/Dockerfile
-    image: template-nest-next-client:${NODE_ENV:-development}
+    image: template-nest-next-client:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
     container_name: template-nest-next-client-${NODE_ENV:-development}
     restart: unless-stopped
     ports:
