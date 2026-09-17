@@ -15,7 +15,8 @@ export interface GlobalErrorProps {
   retry: () => void;
 }
 
-export default function GlobalError({ error, retry }: GlobalErrorProps) {
+export default function GlobalError(props: GlobalErrorProps) {
+  const { error, retry } = props;
   const announcementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

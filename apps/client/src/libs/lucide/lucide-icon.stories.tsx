@@ -14,12 +14,8 @@ type LucideIconGalleryProps = {
   iconClassName?: string;
 };
 
-function LucideIconGallery({
-  query = '',
-  size = 24,
-  strokeWidth = 2,
-  iconClassName,
-}: LucideIconGalleryProps) {
+function LucideIconGallery(props: LucideIconGalleryProps) {
+  const { query = '', size = 24, strokeWidth = 2, iconClassName } = props;
   const [search, setSearch] = useState(query);
   const [copiedName, setCopiedName] = useState<string | null>(null);
   const deferredSearch = useDeferredValue(search);

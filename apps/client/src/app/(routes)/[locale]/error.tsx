@@ -13,7 +13,8 @@ export interface ErrorProps {
   retry: () => void;
 }
 
-export default function Error({ error, retry }: ErrorProps) {
+export default function Error(props: ErrorProps) {
+  const { error, retry } = props;
   const t = useTranslations('error');
   const announcementRef = useRef<HTMLDivElement>(null);
 

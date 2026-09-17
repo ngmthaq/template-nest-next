@@ -7,11 +7,13 @@ import { AppStatusTemplate } from '@/components/templates/AppStatusTemplate';
 import { AppThemeProvider } from '@/libs/next-themes/AppThemeProvider';
 import { Button } from '@/libs/shadcn-ui/button';
 
-export const metadata: Metadata = {
-  title: 'Page not found',
-  description: "The page you are looking for doesn't exist or has been moved.",
-  icons: { icon: '/favicon.ico' },
-};
+export function generateMetadata(): Metadata {
+  return {
+    title: 'Page not found',
+    description: "The page you are looking for doesn't exist or has been moved.",
+    icons: { icon: '/favicon.ico' },
+  };
+}
 
 export default function GlobalNotFound() {
   return (

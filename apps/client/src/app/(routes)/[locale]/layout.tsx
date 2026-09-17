@@ -25,7 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: LayoutProps<'/[locale]'>) {
+export default async function RootLayout(props: LayoutProps<'/[locale]'>) {
+  const { children } = props;
   const locale = await rootLocale();
   if (!hasLocale(routing.locales, locale)) notFound();
 

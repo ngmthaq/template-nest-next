@@ -9,7 +9,9 @@ interface AppStatusTemplateProps {
   children?: ReactNode;
 }
 
-export function AppStatusTemplate({ code, title, description, children }: AppStatusTemplateProps) {
+export function AppStatusTemplate(props: AppStatusTemplateProps) {
+  const { code, title, description, children } = props;
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center bg-background font-sans">
       <main className="flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-6 bg-background px-6 py-12 text-center md:px-16 md:py-32">
