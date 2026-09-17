@@ -1,0 +1,33 @@
+name: Setup
+description: Node + pnpm with a warm store, dependencies installed, and the Prisma client generated.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    # Root package.json pins the pnpm version via packageManager.
+    - shell: bash
+      run: |
+        corepack enable
+        corepack prepare --activate
+
+    - id: store
+      shell: bash
+      run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/cache@v4
+      with:
+        path: ${{ steps.store.outputs.path }}
+        key: pnpm-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: pnpm-${{ runner.os }}-
+
+    - shell: bash
+      run: pnpm install --frozen-lockfile
+
+    # src/generated is git-ignored, so a clean runner has no client and would fail
+    # typecheck, test and build without this.
+    - shell: bash
+      run: pnpm --filter @template-nest-next/server exec prisma generate

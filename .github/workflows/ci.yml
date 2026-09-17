@@ -1,0 +1,79 @@
+# Mirror of .gitlab/ci.yml — keep both in sync.
+name: CI
+
+on:
+  push:
+    branches: [main, dev, staging]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: server
+            command: pnpm --filter @template-nest-next/server exec eslint .
+          - app: client
+            command: pnpm --filter @template-nest-next/client exec eslint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: ${{ matrix.command }}
+
+  typecheck:
+    name: typecheck (${{ matrix.app }})
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: server
+            command: pnpm --filter @template-nest-next/server exec tsc --noEmit
+          - app: client
+            command: pnpm --filter @template-nest-next/client exec tsc --noEmit --incremental false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: ${{ matrix.command }}
+
+  test:
+    name: test (${{ matrix.app }})
+    needs: typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: server
+            command: pnpm --filter @template-nest-next/server exec jest
+          - app: client
+            command: pnpm --filter @template-nest-next/client exec vitest run
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: ${{ matrix.command }}
+
+  build:
+    name: build (${{ matrix.app }})
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: server
+            command: pnpm --filter @template-nest-next/server exec nest build
+          - app: client
+            command: pnpm --filter @template-nest-next/client exec next build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: ${{ matrix.command }}
