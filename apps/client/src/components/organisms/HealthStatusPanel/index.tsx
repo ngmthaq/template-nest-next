@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 import { Badge } from '@/libs/shadcn-ui/badge';
 import {
@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/libs/shadcn-ui/table';
 import { Typography } from '@/libs/shadcn-ui/typography';
+import { timeUtils } from '@/utils/timeUtils';
 
 /** Liveness result for a single dependency, as returned by `GET /health`. */
 export interface IndicatorStatus {
@@ -32,6 +33,7 @@ export interface HealthStatusPanelProps {
 export function HealthStatusPanel(props: HealthStatusPanelProps) {
   const { report } = props;
   const t = useTranslations('health');
+  const locale = useLocale();
 
   if (!report) {
     return (
@@ -80,7 +82,7 @@ export function HealthStatusPanel(props: HealthStatusPanelProps) {
                 </TableCell>
                 <TableCell>
                   {typeof indicator.uptime === 'number'
-                    ? t('uptimeValue', { seconds: Math.round(indicator.uptime) })
+                    ? timeUtils.formatSeconds(indicator.uptime, locale)
                     : t('notAvailable')}
                 </TableCell>
                 <TableCell>{indicator.error ?? t('notAvailable')}</TableCell>

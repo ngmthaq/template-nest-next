@@ -29,7 +29,6 @@
     "indicatorsServer": "Server",
     "indicatorsMysql": "MySQL",
     "indicatorsRedis": "Redis",
-    "uptimeValue": "{seconds}s",
     "notAvailable": "—"
   },
   "cache": {

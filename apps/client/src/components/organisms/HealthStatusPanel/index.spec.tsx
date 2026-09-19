@@ -27,7 +27,7 @@ describe('HealthStatusPanel', () => {
     expect(screen.getAllByText('Up')).toHaveLength(2);
   });
 
-  it('rounds the server uptime seconds', () => {
+  it('shows the server uptime as a human-readable duration', () => {
     // Arrange
     const report: HealthResult = {
       status: 'ok',
@@ -38,7 +38,7 @@ describe('HealthStatusPanel', () => {
     renderPanel(report);
 
     // Assert
-    expect(screen.getByText('123s')).toBeInTheDocument();
+    expect(screen.getByText('2 minutes 3 seconds')).toBeInTheDocument();
   });
 
   it('shows the overall error badge, a down row, and the error message for an error report', () => {
