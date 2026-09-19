@@ -221,6 +221,12 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 - Workflow: Code-First. Add or update tests for every change.
 - Test files sit next to the source file: `x.service.spec.ts`, `useX.spec.ts`, `Component/index.spec.tsx`.
 - Server: Jest + `@nestjs/testing` (`Test.createTestingModule`). Mock deps with `useValue`. No e2e tests.
+- Server: every `*.module.ts` gets a `*.module.spec.ts` next to it. Pick the test style by module kind:
+  - Factory modules (`useFactory`, `forRootAsync`, `registerAsync`): check the options built from config, including the defaults. Feed config with `ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, load: [() => config] })`.
+  - Provider modules: compile with `Test.createTestingModule` and check that the exported providers and controllers resolve. Call `close()` on the module after each test.
+  - Aggregate modules (modules that only import and re-export other modules, e.g. `AppModule`, `CoreModule`, `FeatureModule`): check `imports`/`exports` with `Reflect.getMetadata`. Do not compile them.
+  - All module tests must mock external clients (Redis, MySQL, Prisma, mail) with `jest.mock`. No test may open a real connection.
+  - Reference example: `core-winston.module.spec.ts`.
 - Client: Vitest + Testing Library (`render`, `renderHook`, `userEvent`). Use `vi.fn()` and `vi.useFakeTimers()`.
 - Client components that read translations: render with `renderWithIntl(ui)` from `@vitest-helpers` (`apps/client/vitest.helpers.tsx`). Do not wrap `NextIntlClientProvider` in each spec.
 - Client env: mock env with `vi.stubEnv` and reset it with `vi.unstubAllEnvs`. Specs that use `next/server` (e.g. `proxy.spec.ts`) add `// @vitest-environment node` at the top.
