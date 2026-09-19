@@ -1,6 +1,6 @@
 # Report Format
 
-Emit sections in this order. Lead with the summary — never with the first finding.
+Write the sections in this order. Start with the summary — never with the first finding.
 
 ---
 
@@ -54,9 +54,9 @@ Field rules:
 - **Severity** — CRITICAL / HIGH / MEDIUM / LOW / INFO / NEEDS MANUAL REVIEW.
 - **Confidence** — High / Medium / Low. Required on every finding.
 - **Location** — file path and line number, always. A range for multi-line findings.
-- **Impact** — plain English: what does the attacker actually achieve? Not a CWE restatement.
-- **Evidence** — the exact vulnerable snippet, trimmed to the relevant lines. Mask any secret.
-- **Effort** — Low / Medium / High, for remediation planning.
+- **Impact** — plain English: what can the attacker really do? Do not just repeat the CWE name.
+- **Evidence** — the exact unsafe code, cut down to the lines that matter. Mask any secret.
+- **Effort** — Low / Medium / High, to help plan the fix.
 
 For data-flow findings, add a trace line:
 
@@ -120,9 +120,9 @@ Changed : String concatenation replaced with a bound parameter.
 Verify  : Send an email value of `' OR 1=1 --` and confirm zero rows are returned.
 ````
 
-Preserve the original code style, variable names, and structure. Add a short inline comment
-explaining the fix.
+Keep the original code style, variable names, and structure. Add a short inline comment
+that explains the fix.
 
-Close the section with, verbatim:
+End the section with this exact text:
 
 > **Review each patch before applying. Nothing has been changed yet.**

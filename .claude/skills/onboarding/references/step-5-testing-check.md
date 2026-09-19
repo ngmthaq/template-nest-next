@@ -1,10 +1,10 @@
-# Step 6 — Testing Audit
+# Step 5 — Testing Check
 
 This step is optional.
 
 Ask the user:
 
-> "Would you like to audit the test files for AAA (Arrange-Act-Assert) structure and coverage? (yes/no)"
+> "Do you want to check the test files for AAA (Arrange-Act-Assert) structure and coverage? (yes/no)"
 
 If the user approves:
 

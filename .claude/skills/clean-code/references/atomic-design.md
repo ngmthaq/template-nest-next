@@ -1,10 +1,10 @@
 # Atomic Design
 
-Organize all UI components into five levels based on complexity and composition.
+Put all UI components into five levels, based on how complex they are and what they are made of.
 
 ## Atoms
 
-Smallest, indivisible elements. Context-agnostic, fully reusable.
+The smallest elements. They cannot be split further. They work in any context and are fully reusable.
 
 ```javascript
 function Button({ label, variant, onClick, disabled }) {
@@ -18,7 +18,7 @@ function Button({ label, variant, onClick, disabled }) {
 
 ## Molecules
 
-Small groups of atoms functioning as a unit. Single clear purpose, minimal internal state.
+Small groups of atoms that work together as one unit. One clear purpose, very little internal state.
 
 ```javascript
 function SearchField({ onSearch }) {
@@ -34,7 +34,7 @@ function SearchField({ onSearch }) {
 
 ## Organisms
 
-Complex UI sections composed of molecules and/or atoms. May contain business logic or state.
+Larger UI sections made of molecules and/or atoms. They may have business logic or state.
 
 ```javascript
 function Header({ user, onSearch, onLogout }) {
@@ -51,7 +51,7 @@ function Header({ user, onSearch, onLogout }) {
 
 ## Templates
 
-Page-level layout structures. Accept content via props/slots — no real data, no data fetching.
+Page layouts. They get content through props/slots — no real data, no data fetching.
 
 ```javascript
 function DashboardTemplate({ sidebar, header, mainContent, footer }) {
@@ -70,7 +70,7 @@ function DashboardTemplate({ sidebar, header, mainContent, footer }) {
 
 ## Pages
 
-Specific instances of templates with real data, API connections, routing, and side effects.
+Templates filled with real data, API calls, routing, and side effects.
 
 ```javascript
 function DashboardPage() {
@@ -98,11 +98,11 @@ components/
 └── pages/         # HomePage, UserProfilePage
 ```
 
-## Atomic Design Enforcement Rules
+## Atomic Design Rules
 
-1. Before creating a component, determine its level: "Does it compose other components? Which level are those?"
+1. Before you create a component, find its level: "Is it built from other components? Which level are they?"
 2. Atoms must never import other components from the same design system.
-3. Molecules compose atoms — never duplicate atom logic inline.
-4. Templates accept content via props/slots/children — never fetch data or hardcode organisms.
-5. Pages are the **only** level that connects to routing, data fetching, and global state.
-6. Flag misplacements: "This molecule imports an organism — hierarchy inversion."
+3. Molecules are built from atoms — never copy atom logic inline.
+4. Templates get content through props/slots/children — never fetch data or hardcode organisms.
+5. Pages are the **only** level that uses routing, data fetching, and global state.
+6. Flag wrong levels: "This molecule imports an organism — the levels are upside down."

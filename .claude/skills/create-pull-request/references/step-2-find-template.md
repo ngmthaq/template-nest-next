@@ -1,6 +1,6 @@
 # Step 2 — Find the PR Template
 
-Search for a template based on the detected platform:
+Look for a template based on the platform you found:
 
 | Platform      | Template location(s)                                                     |
 | ------------- | ------------------------------------------------------------------------ |

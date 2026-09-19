@@ -1,6 +1,6 @@
 # Step 1 — Detect the Remote Platform
 
-Run the following and inspect the remote URL to determine the platform:
+Run this command and look at the remote URL to find the platform:
 
 ```bash
 git remote get-url origin

@@ -1,10 +1,10 @@
 # Step 3 — Fetch the Code Diff
 
-Retrieve the full diff / file-level changes for the PR using the access method chosen in Step 1.
+Get the full diff / file changes for the PR with the access method chosen in Step 1.
 
 ## Using MCP
 
-Use the available MCP tool to retrieve the diff / file-level changes.
+Use the MCP tool to get the diff / file changes.
 
 ## Using the CLI
 
@@ -14,12 +14,12 @@ Use the available MCP tool to retrieve the diff / file-level changes.
 | GitLab    | `glab mr diff <number-or-url>`            |
 | Bitbucket | `bb pr diff <number>` (flags vary by CLI) |
 
-**Large diffs (>400 changed lines):** Summarize by file/module instead of line-by-line.
+**Large diffs (>400 changed lines):** Sum up by file/module instead of line by line.
 
-Identify from the diff:
+From the diff, find:
 
-- Which files are modified/added/deleted
+- Which files are changed/added/deleted
 - Whether any test files are present (e.g., `*.test.*`, `*.spec.*`, `*_test.*`, files under `tests/`, `__tests__/`, `spec/`)
-- Language(s) and framework(s) in use
+- Language(s) and framework(s) used
 
-> Capture the diff hunks with their line numbers — Step 10 posts comments anchored to specific files and lines, so you need the post-change line numbers for each finding.
+> Save the diff hunks with their line numbers. Step 10 posts comments on exact files and lines, so you need the new line numbers for each finding.

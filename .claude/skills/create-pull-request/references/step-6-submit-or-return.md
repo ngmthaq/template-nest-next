@@ -1,14 +1,14 @@
 # Step 6 — Submit or Return
 
-Submit the PR/MR using the best available method, in this order of preference:
+Create the PR/MR with the best method you have, in this order:
 
-1. **Platform MCP** (preferred — richest integration)
-2. **Platform CLI** (fallback when no MCP)
+1. **Platform MCP** (best — most features)
+2. **Platform CLI** (backup when there is no MCP)
 3. **Manual copy-paste** (last resort)
 
-## Tier 1 — Platform MCP (preferred)
+## Tier 1 — Platform MCP (best)
 
-Check whether an MCP integration is available for the detected platform:
+Check if an MCP is available for the platform:
 
 | Platform  | MCP tool to check                                                  |
 | --------- | ------------------------------------------------------------------ |
@@ -20,12 +20,12 @@ If MCP is available:
 
 1. Show the user the filled template for review.
 2. Ask: _"Should I create this pull request now using the [Platform] integration?"_
-3. If confirmed, invoke the MCP tool to create the PR/MR targeting `<target-branch>` with the filled description.
-4. Report the PR/MR URL back to the user.
+3. If the user says yes, call the MCP tool to create the PR/MR targeting `<target-branch>` with the filled description.
+4. Send the PR/MR URL to the user.
 
-## Tier 2 — Platform CLI (fallback)
+## Tier 2 — Platform CLI (backup)
 
-If no MCP is available, check whether the platform's CLI (matching the platform detected in [Step 1](./step-1-detect-platform.md)) is installed and authenticated:
+If no MCP is available, check if the platform's CLI (for the platform found in [Step 1](./step-1-detect-platform.md)) is installed and logged in:
 
 | Remote pattern  | Platform  | CLI    | Availability check                                 | Auth check         |
 | --------------- | --------- | ------ | -------------------------------------------------- | ------------------ |
@@ -33,11 +33,11 @@ If no MCP is available, check whether the platform's CLI (matching the platform 
 | `gitlab.*`      | GitLab    | `glab` | `command -v glab`                                  | `glab auth status` |
 | `bitbucket.org` | Bitbucket | `bb`   | `command -v bb` (or other installed Bitbucket CLI) | per-CLI            |
 
-If the CLI is available and authenticated:
+If the CLI is installed and logged in:
 
 1. Show the user the filled template for review.
 2. Ask: _"Should I create this pull request now using `<cli>`?"_
-3. If confirmed, write the filled description to a temporary file (avoids shell-escaping issues with multi-line Markdown) and run the create command targeting `<target-branch>`:
+3. If the user says yes, write the filled description to a temporary file (this avoids shell quoting problems with multi-line Markdown). Then run the create command for `<target-branch>`:
 
    **GitHub**
 
@@ -51,19 +51,19 @@ If the CLI is available and authenticated:
    glab mr create --target-branch <target-branch> --title "<title>" --description "$(cat <tmpfile>)"
    ```
 
-   **Bitbucket** — use the installed CLI's create command (flags vary by tool); for the common `bb` CLI:
+   **Bitbucket** — use the installed CLI's create command (flags are different for each tool). For the common `bb` CLI:
 
    ```bash
    bb pr create --target <target-branch> --title "<title>" --description "$(cat <tmpfile>)"
    ```
 
-4. Clean up the temporary file.
-5. Report the PR/MR URL printed by the CLI back to the user.
+4. Delete the temporary file.
+5. Send the PR/MR URL that the CLI prints to the user.
 
-If the CLI exists but is **not authenticated**, tell the user how to authenticate (e.g. `gh auth login`, `glab auth login`) and offer to fall back to Tier 3.
+If the CLI is installed but **not logged in**, tell the user how to log in (e.g. `gh auth login`, `glab auth login`) and offer to use Tier 3 instead.
 
-## Tier 3 — Manual copy-paste (last resort)
+## Tier 3 — Manual copy-paste (last option)
 
 If neither MCP nor a CLI is available:
 
-- Return the fully filled PR description as a fenced Markdown block so the user can copy-paste it directly into their platform.
+- Return the fully filled PR description in a Markdown code block, so the user can copy and paste it into their platform.

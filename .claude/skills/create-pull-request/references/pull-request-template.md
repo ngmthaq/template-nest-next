@@ -13,7 +13,7 @@
 
 ## Changes Made
 
-<!-- List the specific changes. Be precise. -->
+<!-- List the exact changes. -->
 
 -
 -
@@ -21,7 +21,7 @@
 
 ## How to Test
 
-<!-- Step-by-step instructions for reviewers to verify this works. -->
+<!-- Step-by-step instructions so reviewers can check that this works. -->
 
 1.
 2.
@@ -29,12 +29,12 @@
 
 ## Checklist
 
-- [ ] Code follows the project's style guidelines
-- [ ] Self-reviewed the code for obvious errors
-- [ ] Added or updated tests where applicable
+- [ ] Code follows the project's style rules
+- [ ] Checked my own code for clear errors
+- [ ] Added or updated tests where needed
 - [ ] Existing tests pass locally
 - [ ] Updated documentation if needed
-- [ ] No new warnings or console errors introduced
+- [ ] No new warnings or console errors
 
 ## Related Issues
 
@@ -42,4 +42,4 @@
 
 ## Screenshots
 
-<!-- If applicable, add screenshots, GIF or screen recordings. -->
+<!-- If needed, add screenshots, GIFs, or screen recordings. -->

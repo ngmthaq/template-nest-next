@@ -1,19 +1,21 @@
 ---
 name: aaa-testing
-description: "AAA (Arrange-Act-Assert) — Enforces the Arrange-Act-Assert pattern for writing clear, structured, and maintainable tests. Use when writing, reviewing, or refactoring any unit or integration tests that are hard to read, mix setup with assertions, have unclear intent, or lack a consistent structure. Applies to any language and any testing framework (Jest, PyTest, JUnit, RSpec, Go testing, etc.)."
+description: "AAA (Arrange-Act-Assert) — Makes tests follow the Arrange-Act-Assert pattern so they are clear, well structured, and easy to maintain. Use when writing, reviewing, or refactoring any unit or integration tests that are hard to read, mix setup with assertions, have an unclear goal, or do not follow one structure. Applies to any language and any testing framework (Jest, PyTest, JUnit, RSpec, Go testing, etc.)."
 ---
 
 # AAA — Arrange, Act, Assert
 
+> **Writing style:** Follow [WRITING_STYLE](../../references/WRITING_STYLE.md) for all text you write — chat messages, questions, plans, reports, and generated docs.
+
 ## The Pattern
 
-Every test has exactly three phases:
+Every test has exactly three parts (phases):
 
-| Phase       | Question                              | What belongs here                                  |
-| ----------- | ------------------------------------- | -------------------------------------------------- |
-| **Arrange** | What is the world before this action? | Object creation, mocks, test data                  |
-| **Act**     | What is being tested?                 | The single method call or event under test         |
-| **Assert**  | Did it do the right thing?            | Expectations on return values, state, side effects |
+| Phase       | Question                              | What belongs here                            |
+| ----------- | ------------------------------------- | -------------------------------------------- |
+| **Arrange** | What is the world before this action? | Object creation, mocks, test data            |
+| **Act**     | What is being tested?                 | The single method call or event under test   |
+| **Assert**  | Did it do the right thing?            | Checks on return values, state, side effects |
 
 ```javascript
 it("applies 10% discount when order exceeds $100", () => {
@@ -32,12 +34,12 @@ it("applies 10% discount when order exceeds $100", () => {
 
 ## Common Violations
 
-**1. No phase separation — multiple acts/asserts collapsed into one test.**
-Split into one test per behavior. When a test fails, you must know exactly what broke.
+**1. Phases are not split — many acts/asserts are packed into one test.**
+Write one test per behavior. When a test fails, you must know exactly what broke.
 
-**2. Assertions in Arrange.** Trust your fixtures. If you need to verify fixture state, write a separate test for it.
+**2. Assertions in Arrange.** Trust your fixtures (shared test setup). If you need to check fixture state, write a separate test for it.
 
-**3. Act buried in Arrange.** The thing being tested must be on its own line in the Act phase.
+**3. Act hidden in Arrange.** The thing you test must be on its own line in the Act phase.
 
 ```python
 # Bad — register() is the Act, hidden in Arrange
@@ -48,11 +50,11 @@ service = UserService(mailer=mailer)   # Arrange
 service.register(payload)              # Act
 ```
 
-**4. Asserting too much.** Assert only what the test is _about_. Unrelated assertions make tests fragile and failure messages misleading.
+**4. Asserting too much.** Assert only what the test is _about_. Extra assertions make tests break easily and make failure messages confusing.
 
 ## Shared Arrange
 
-Extract repeated setup into `beforeEach`/fixtures, but keep Act and Assert in each test:
+Move repeated setup into `beforeEach`/fixtures, but keep Act and Assert inside each test:
 
 ```javascript
 describe("Cart", () => {
@@ -83,12 +85,12 @@ Name tests after behavior: **`[unit]_[scenario]_[expected outcome]`** or plain p
 | `test_login` | `returns auth token when credentials are valid` |
 | `test_error` | `throws ValidationError when email is missing`  |
 
-## Enforcement Rules
+## Rules
 
-1. **All three phases must be present** — no Act = not testing anything; no Assert = test can never fail.
+1. **All three phases must be present** — no Act = the test checks nothing; no Assert = the test can never fail.
 2. **One Act per test** — two method calls under test means two tests.
-3. **No assertions in Arrange** — verify fixture correctness in a separate test.
-4. **Assert only what the test is about** — omit unrelated field checks.
-5. **Name tests after behavior**, not implementation.
+3. **No assertions in Arrange** — check that fixtures are correct in a separate test.
+4. **Assert only what the test is about** — leave out checks on unrelated fields.
+5. **Name tests after behavior**, not after how the code works inside.
 6. **Shared setup in `beforeEach`/fixtures** — never repeat Arrange, but keep Act+Assert per test.
 7. **In code review**, flag as: "AAA violation: [phase] is [missing/mixed/bloated]."

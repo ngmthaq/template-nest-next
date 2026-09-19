@@ -1,28 +1,28 @@
 # Step 4 — Delegation to Sub-Agents
 
-The Root Agent reads the approved plan and spawns the appropriate sub-agent(s) — **developer** and **tester** are the only sub-agent roles (each loaded with the matching role reference from [sub-agents](./sub-agents.md)).
+The Root Agent reads the approved plan and starts the right sub-agent(s). **Developer** and **tester** are the only sub-agent roles here (each one gets its matching role file from [sub-agents](./sub-agents.md)).
 
-> **ALWAYS** spawn a sub-agent; **DO NOT** modify code directly.
-> Spawn both developer and tester sub-agents on the latest **Sonnet** model to reduce token usage — not Opus or Fable.
+> **ALWAYS** start a sub-agent; **DO NOT** change code yourself.
+> Start both developer and tester sub-agents on the latest **Sonnet** model to use fewer tokens — not Opus or Fable.
 
-## Spawn the developer sub-agent
+## Start the developer sub-agent
 
-Use when delegating implementation tasks from an approved plan; pass the developer skill inline.
+Use this to hand out coding tasks from an approved plan. Pass the developer role file inline.
 
 > Prompt template: [developer → Delegation Prompt Template](./developer.md#delegation-prompt-template)
 > Role skill: [developer](./developer.md)
 
-## Spawn the tester sub-agent
+## Start the tester sub-agent
 
-Use when delegating test-writing tasks from an approved plan; pass the tester skill inline.
+Use this to hand out test-writing tasks from an approved plan. Pass the tester role file inline.
 
 > Prompt template: [tester → Delegation Prompt Template](./tester.md#delegation-prompt-template)
 > Role skill: [tester](./tester.md)
 
 ## Running in parallel
 
-When developer and tester scopes do not overlap (or when the project's `Testing Workflow` is `Test-First`), the Root Agent **must** spawn both sub-agents in the **same tool turn** (multiple tool calls in one message) so they execute concurrently. Otherwise spawn them sequentially: developer first, then tester.
+When the developer and tester work does not overlap (or when the project's `Testing Workflow` is `Test-First`), the Root Agent **must** start both sub-agents in the **same tool turn** (many tool calls in one message) so they run at the same time. If not, start them one after the other: developer first, then tester.
 
 ## Re-delegation
 
-When the Root Agent's review (Step 6) finds the output not fully qualified, re-spawn the sub-agent flagged in each issue's `Responsible Role` with the review feedback pasted into the delegation's `Review Feedback` section.
+When the Root Agent's review (Step 6) finds that the work is not good enough, start again the sub-agent named in each issue's `Responsible Role`. Paste the review feedback into the delegation's `Review Feedback` section.

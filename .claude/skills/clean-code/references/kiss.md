@@ -1,6 +1,6 @@
 # KISS — Keep It Simple, Stupid
 
-Solutions should be **as simple as possible** to fulfill their requirements — no simpler, no more complex.
+A solution should be **as simple as possible** while still meeting its requirements — not simpler, not more complex.
 
 ```javascript
 // Bad — factory for something that only needs a function
@@ -18,7 +18,7 @@ async function fetchData(url) {
 ```
 
 ```python
-# Bad — clever one-liner that requires study to understand
+# Bad — clever one-liner that is hard to understand
 result = [x for x in data if x % 2 == 0 and x > 0 and x < 100 and x not in seen and not seen.add(x)]
 
 # Good — readable loop
@@ -51,10 +51,10 @@ function processOrder(order) {
 }
 ```
 
-## KISS Enforcement Rules
+## KISS Rules
 
-1. Before adding an abstraction, ask: "What problem does this solve today?" If none, skip it.
+1. Before you add an abstraction, ask: "What problem does this solve today?" If none, do not add it.
 2. When nesting more than 2 levels deep, use guard clauses or early returns.
-3. Prefer language builtins over custom implementations.
-4. Ask: "Would a competent developer unfamiliar with this codebase understand this in 30 seconds?" If no, simplify.
+3. Use built-in language features instead of writing your own.
+4. Ask: "Could a good developer who is new to this codebase understand this in 30 seconds?" If no, make it simpler.
 5. Flag complexity with: "KISS violation: can this be simplified to `[simpler form]`?"

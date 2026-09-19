@@ -1,28 +1,28 @@
 # Step 4 — Triage and Group Comments
 
-Turn the raw comments from Step 3 into a clean list of **actionable tasks**. This list becomes the requirement handed to party-mode in Step 5.
+Turn the raw comments from Step 3 into a clean list of **tasks**. This list is the requirement you give to party-mode in Step 5.
 
-## Filter out non-actionable comments
+## Remove comments that need no work
 
-Skip a comment (and record the reason for the Step 7 report) when it is:
+Skip a comment (and write down the reason for the Step 7 report) when it is:
 
-- **Already resolved** or **outdated** (anchored to a line that no longer exists).
-- **Pure praise or acknowledgement** ("nice", "LGTM", "thanks").
-- **A question with no requested change** — instead, draft a reply for Step 6 rather than a code change.
+- **Already resolved** or **outdated** (attached to a line that no longer exists).
+- **Only praise or a thank-you** ("nice", "LGTM", "thanks").
+- **A question that asks for no change** — write a reply for Step 6 instead of a code change.
 - **Out of scope** for this PR (e.g. "we should refactor the whole module someday").
-- **Vague / not actionable** — cannot be tied to a concrete change. Note it for the user instead of guessing.
+- **Unclear** — you cannot link it to a real change. Note it for the user instead of guessing.
 
-Never invent the reviewer's intent. If a comment is ambiguous but clearly expects a change, carry it forward as an **open question** for party-mode's brainstorming step rather than guessing the fix.
+Never make up what the reviewer wants. If a comment is unclear but clearly asks for a change, pass it on as an **open question** for party-mode's brainstorming step. Do not guess the fix.
 
-## Classify each actionable comment
+## Classify each comment that needs work
 
-Tag each as `bug` (something incorrect/broken the reviewer flagged) or `feature` (a requested improvement, refactor, naming, or behaviour change). This classification feeds party-mode's intent classification.
+Mark each one as `bug` (something wrong or broken the reviewer found) or `feature` (an asked-for improvement, refactor, naming, or behaviour change). Party-mode uses this to classify the intent.
 
 ## Group related comments
 
-Cluster comments that touch the same file, function, or concern into a single task so one delegation can address them together. Keep the originating comment IDs attached to each task — Step 6 needs them to reply and resolve.
+Put comments about the same file, function, or topic into one task, so one delegation can fix them together. Keep the original comment IDs with each task — Step 6 needs them to reply and resolve.
 
-## Produce the triage table
+## Write the triage table
 
 ```markdown
 | #   | File        | Line | Author    | Request (summary)                        | Class   | Action      | Comment IDs |
@@ -33,4 +33,4 @@ Cluster comments that touch the same file, function, or concern into a single ta
 | 4   | `api.ts`    | 5    | @reviewer | "could we cache this?" (question)        | —       | reply-only  | 1237        |
 ```
 
-Present this table to the user before proceeding, so they can confirm the triage. The `resolve` rows are the work; `reply-only` rows get a reply in Step 6; `skip-*` rows are reported in Step 7.
+Show this table to the user before you go on, so they can confirm it. The `resolve` rows are the work. `reply-only` rows get a reply in Step 6. `skip-*` rows are listed in the Step 7 report.

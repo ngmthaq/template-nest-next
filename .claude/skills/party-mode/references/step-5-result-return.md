@@ -1,8 +1,8 @@
 # Step 5 — Sub-Agent Result Return
 
-Developer and tester sub-agents return results using the **sub-agent result template** below.
+Developer and tester sub-agents return their results with the **sub-agent result template** below.
 
-A sub-agent that cannot proceed without clarification does not guess — it returns the result with its `Open Questions` section populated. The Root Agent answers from the approved plan and brainstorming context, or asks the user when the answer is not on record, then re-delegates with the answers included.
+If a sub-agent cannot continue without more information, it does not guess. It returns the result with its `Open Questions` section filled in. The Root Agent answers from the approved plan and brainstorming notes, or asks the user when the answer is not written down. Then it delegates again with the answers.
 
 ---
 
@@ -14,13 +14,13 @@ A sub-agent that cannot proceed without clarification does not guess — it retu
 - From: developer | tester (sub-agent loaded with the matching role skill)
 - To: Root Agent
 - Classification: feature | bug
-- Description: {one sentence summarising what was completed or why it is incomplete}
+- Description: {one sentence about what was done or why it is not finished}
 
 ---
 
 ## Goal
 
-- {Restate the objective this delegation targeted, so the result reads standalone.}
+- {Repeat the goal of this delegation, so the result makes sense on its own.}
 
 ## Status
 
@@ -29,7 +29,7 @@ A sub-agent that cannot proceed without clarification does not guess — it retu
 
 ## Work Summary
 
-{2–4 sentences describing what was done. Be specific — reference function names, file paths, test names.}
+{2–4 sentences about what was done. Be specific — name functions, file paths, tests.}
 
 ## Files Changed
 
@@ -68,29 +68,29 @@ A sub-agent that cannot proceed without clarification does not guess — it retu
 
 ## Open Questions
 
-{List every question that must be answered by the Root Agent (or the user) before the affected tasks can proceed. Be direct and specific — name the task, the decision needed, and the options if any. Never guess instead of asking.}
+{List every question the Root Agent (or the user) must answer before the affected tasks can continue. Be direct and specific — name the task, the decision needed, and the options if any. Never guess instead of asking.}
 
 - Leave empty if none.
 
 ## Blockers / Missing Requirements
 
-{List anything that prevented full completion. Be precise — vague blockers cause unnecessary re-planning loops.}
+{List anything that stopped you from finishing. Be exact — unclear blockers cause extra re-planning rounds.}
 
 - Leave empty if status is complete.
 
 ## Notes for Root Agent
 
-{Optional: any observations, risks, or follow-up recommendations the root agent should know about.}
+{Optional: anything you noticed, risks, or next steps the Root Agent should know about.}
 ```
 
 ---
 
 ## Usage Notes
 
-- Status must be set explicitly — `complete` or `incomplete`. No ambiguous states.
-- If `incomplete`, the `Blockers` section is mandatory. Root Agent uses this to build the re-delegation or re-planning context.
-- If any `Open Questions` are listed, Status must be `incomplete` — the Root Agent answers them (asking the user when needed) and re-delegates with the answers included.
-- `Files Changed` table must be complete and accurate — the Root Agent's review (Step 6) relies on it.
-- `Verification / Checks Run` must record **every** check actually executed (build, lint, tests, secret/security scan, manual steps) with its command and result. A `not-run` row must be justified — the Root Agent trusts this table instead of re-running everything blind. A `fail` here means Status must be `incomplete`.
-- `Acceptance Criteria` maps each assigned task's criteria (copied from the delegation) to `yes | no | partial`. Any `no` or `partial` means the task is not done — set Status `incomplete`.
-- Do not mark `complete` if any assigned task was skipped without explicit justification.
+- Always set Status clearly — `complete` or `incomplete`. Nothing in between.
+- If `incomplete`, the `Blockers` section is required. The Root Agent uses it to delegate again or re-plan.
+- If any `Open Questions` are listed, Status must be `incomplete` — the Root Agent answers them (and asks the user when needed), then delegates again with the answers.
+- The `Files Changed` table must be full and correct — the Root Agent's review (Step 6) depends on it.
+- `Verification / Checks Run` must list **every** check you really ran (build, lint, tests, secret/security scan, manual steps) with its command and result. Give a reason for every `not-run` row — the Root Agent trusts this table instead of running everything again. A `fail` here means Status must be `incomplete`.
+- `Acceptance Criteria` links each task's criteria (copied from the delegation) to `yes | no | partial`. Any `no` or `partial` means the task is not done — set Status to `incomplete`.
+- Do not mark `complete` if you skipped any task without a clear reason.

@@ -1,6 +1,6 @@
 # Separation of Concerns
 
-Keep business logic out of components — the UI renders, the domain decides.
+Keep business logic out of components — the UI only shows things, the domain logic makes decisions.
 
 ```javascript
 // Bad — business rules inside a React component
@@ -11,7 +11,7 @@ function CheckoutPage({ cart }) {
   return <div>Total: {finalPrice}</div>;
 }
 
-// Good — domain logic extracted, UI only renders
+// Good — domain logic moved out, UI only shows the result
 function calculateOrderTotal(cart) {
   const tax = cart.total * TAX_RATE;
   const discount = cart.items.length > 5 ? cart.total * DISCOUNT_RATE : 0;
@@ -24,7 +24,7 @@ function CheckoutPage({ cart }) {
 }
 ```
 
-Divide the system into layers, each owning exactly one concern.
+Split the system into layers. Each layer has exactly one job.
 
 ```python
 # Bad — data access, business logic, and side effects all in one function
@@ -38,7 +38,7 @@ def process_refund(order_id):
     stripe.refund(order.payment_id)
     email.send(order.customer_email, "Refund processing")
 
-# Good — each layer owns its concern
+# Good — each layer does its own job
 class OrderRepository:
     def find(self, order_id): ...
     def update_status(self, order_id, status): ...
@@ -76,11 +76,11 @@ async function createUser(data: UserInput) {
 }
 ```
 
-## SoC Enforcement Rules
+## SoC Rules
 
-1. Business logic must be testable in isolation — no DB, no HTTP, no UI framework.
-2. Controllers must be thin: validate input → call domain → return output. No business rules.
-3. Repositories must be dumb: only translate between domain objects and storage.
-4. Cross-cutting concerns belong in middleware/decorators — not inline in business functions.
-5. Ask: "What would cause this to change?" Multiple unrelated reasons = mixed concerns.
+1. You must be able to test business logic on its own — no DB, no HTTP, no UI framework.
+2. Controllers must be small: check input → call domain logic → return output. No business rules.
+3. Repositories must be simple: they only convert between domain objects and storage.
+4. Cross-cutting concerns (auth, logging, validation) belong in middleware/decorators — not inline in business functions.
+5. Ask: "What would make this change?" If there are many unrelated reasons, the jobs are mixed.
 6. Flag with: "SoC violation: this function handles both `[concern A]` and `[concern B]`."

@@ -1,6 +1,6 @@
-# Step 9 — Produce the Review Report
+# Step 9 — Write the Review Report
 
-Assemble a single structured Markdown report using the template below.
+Put everything into one structured Markdown report with the template below.
 
 ```markdown
 ## PR Review — [PR Title] (#[number])
@@ -14,7 +14,7 @@ Assemble a single structured Markdown report using the template below.
 
 ### Summary
 
-[2–4 sentence overview: overall quality, risk level, and whether the PR is ready to merge, needs minor changes, or needs major changes.]
+[2–4 sentences: overall quality, risk level, and whether the PR is ready to merge, needs small changes, or needs big changes.]
 
 ---
 
@@ -36,7 +36,7 @@ Assemble a single structured Markdown report using the template below.
 
 #### Suggestions
 
-[List concrete refactors for the top 3–5 most impactful findings.]
+[List clear refactors for the 3–5 most important findings.]
 
 ---
 
@@ -50,7 +50,7 @@ Assemble a single structured Markdown report using the template below.
 
 #### Remediations
 
-[Provide code-level fixes for all CRITICAL and HIGH findings.]
+[Give code fixes for all CRITICAL and HIGH findings.]
 
 ---
 
@@ -64,7 +64,7 @@ Assemble a single structured Markdown report using the template below.
 
 #### Coverage Gaps
 
-[List new logic from the diff that lacks test coverage.]
+[List new logic from the diff that has no tests.]
 
 ---
 
@@ -79,7 +79,7 @@ Assemble a single structured Markdown report using the template below.
 | **Overall**  | ✅ **Approve** / ⚠️ **Request Changes (minor)** / ❌ **Request Changes (major)** |
 ```
 
-> - Use `✅` only when a dimension has zero findings or only cosmetic issues.
-> - Use `⚠️` for findings that should be addressed but are not blockers.
-> - Use `❌` when there is at least one CRITICAL/HIGH security finding, a major architectural violation, or tests are entirely absent for new logic.
-> - Overall verdict is the **worst** of the applicable dimensions.
+> - Use `✅` only when an area has no findings or only small style issues.
+> - Use `⚠️` for findings that should be fixed but do not block the merge.
+> - Use `❌` when there is at least one CRITICAL/HIGH security finding, a big architecture problem, or no tests at all for new logic.
+> - The overall verdict is the **worst** result of all the areas that apply.

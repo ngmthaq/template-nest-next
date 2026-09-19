@@ -1,6 +1,6 @@
 # Vulnerable Package Watchlist
 
-Use a real advisory scanner when one is available — it is always more current than this
+Use a real advisory scanner when you have one — it is always more up to date than this
 list:
 
 ```bash
@@ -14,25 +14,25 @@ cargo audit                           # Rust
 osv-scanner -r .                      # Any ecosystem (lockfile-based)
 ```
 
-This watchlist is the **fallback** for offline or sandboxed reviews, and a prompt for what
-to look up. Treat it as a starting point, not an exhaustive database — confirm the exact
-CVE and fixed version against the ecosystem advisory database before reporting.
+This watchlist is the **backup** for offline or sandboxed reviews, and a hint for what
+to look up. Use it as a starting point, not a full database — check the exact
+CVE and fixed version in the official advisory database before you report it.
 
 ---
 
 ## Triage Rules
 
-- **Report** any advisory with CVSS ≥ 7.0 that is reachable from production code.
-- **Downgrade** to LOW/INFO for `devDependencies`, test-only packages, and build tooling that
-  never ships — state the reasoning in the finding.
-- **Check reachability** before escalating: a vulnerable function that the codebase never
+- **Report** any advisory with CVSS ≥ 7.0 that production code can reach.
+- **Lower** to LOW/INFO for `devDependencies`, test-only packages, and build tools that
+  never go to production — write the reason in the finding.
+- **Check if the code is reached** before you raise the severity: an unsafe function that the codebase never
   calls is INFO, not HIGH. Grep for the affected API.
-- **Flag structurally**, even without a CVE: packages unmaintained for 2+ years, packages
-  with a single maintainer and high download counts, versions pinned years behind with no
-  upstream fix path, and typosquat-shaped names (`lodahs`, `crossenv`, `python-dateutil`
+- **Flag risky packages**, even without a CVE: packages with no updates for 2+ years, packages
+  with one maintainer and many downloads, versions locked years behind with no
+  fix available, and names that look like typos of real packages (typosquatting) (`lodahs`, `crossenv`, `python-dateutil`
   vs `dateutil`).
-- **Lockfile integrity** — no lockfile committed, `resolved` URLs pointing at non-official
-  registries, or `postinstall` scripts in transitive dependencies (supply-chain risk).
+- **Lockfile safety** — no lockfile committed, `resolved` URLs pointing to unofficial
+  registries, or `postinstall` scripts in indirect dependencies (supply-chain risk).
 
 ---
 
@@ -120,7 +120,7 @@ CVE and fixed version against the ecosystem advisory database before reporting.
 
 ## Reporting Format
 
-Report dependency findings as a single grouped section rather than one card per package —
+Report dependency findings in one grouped section, not one card per package —
 see [`report-format.md`](./report-format.md). Include package, current version, fixed
-version, CVE ID, CVSS, whether the vulnerable API is reachable, and whether it is a runtime
+version, CVE ID, CVSS, whether the code can reach the unsafe API, and whether it is a runtime
 or dev-only dependency.

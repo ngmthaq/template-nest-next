@@ -1,260 +1,209 @@
 # Coding Conventions
 
-When these notes and the code disagree, the code and its lint/format configs win — update this file.
-
----
-
-## 1. Structure
+## Project Structure
 
 ```
-apps/server/src/
-  core/        # Cross-cutting infra, every module @Global; core.module.ts aggregates them
-               # bull cache config event-emitter http mail prisma schedule security
-               # throttler websocket winston
-  feature/     # Domain modules (health, cache, auth, user…)
-  shared/      # Reusable primitives: config/ (handle*(app) helpers), dto/ guards/ pipes/
-  generated/   # GENERATED — never edit, lint, or cover
-apps/server/prisma/schema/   # Multi-file schema, ONE MODEL PER FILE
-apps/client/src/
-  app/(routes)/[locale]/   # Every page lives under a locale segment
-  assets/css/    # globals.css (Tailwind v4 entry)
-  components/    # Atomic Design: atoms → molecules → organisms → templates
-  constants/  hooks/  utils/
-  libs/          # Third-party wrappers: shadcn-ui, lucide, next-intl, next-themes
-  proxy.ts       # Must sit beside app/; delegates to libs/next-intl/configs/proxy
-packages/   # Shared workspace packages (none yet)
-docs/       # Agent plan files: <YYYY-MM-DD-HH-MM-SS>-<slug>.md
+.
+├── apps/
+│   ├── server/                  # NestJS API
+│   │   ├── prisma/
+│   │   │   ├── schema/          # schema.prisma + one <model>.prisma per model
+│   │   │   ├── migrations/
+│   │   │   └── seed.ts
+│   │   └── src/
+│   │       ├── main.ts          # bootstrap: calls handleXxx(app) setup functions
+│   │       ├── app.module.ts
+│   │       ├── core/            # global infra modules (config, prisma, cache, bull, mail, ...)
+│   │       ├── feature/         # business modules (auth, user, cache, health)
+│   │       ├── shared/          # config/, dto/, guards/, pipes/
+│   │       └── generated/       # Prisma client (generated, do not edit)
+│   └── client/                  # Next.js app
+│       └── src/
+│           ├── app/(routes)/[locale]/   # pages, layouts, error, not-found
+│           ├── components/      # atoms/, molecules/, organisms/, templates/
+│           ├── hooks/           # useXxx.ts
+│           ├── utils/           # xxxUtils.ts
+│           ├── constants/       # camelCase `as const` objects
+│           ├── libs/            # third-party wrappers: shadcn-ui/, next-intl/, next-themes/, lucide/
+│           └── assets/css/      # globals.css (Tailwind entry)
+├── packages/                    # shared packages (empty for now)
+├── scripts/                     # docker infra and deploy scripts
+└── docs/                        # agent plan files
 ```
 
-- Server: infra everyone needs → `core/`; a business domain → `feature/`; a reusable primitive with
-  no infra of its own → `shared/`.
-- Client: presentational → `components/` (by atomic level); third-party adapters →
-  `libs/<package>/`; framework-agnostic logic → `utils/`.
-- **No barrel files** — import from the owning file (`@/utils/httpUtils`, not `@/utils`). The one
-  exception is a component folder's `index.tsx`, which _is_ the component.
+## Formatting (Prettier + ESLint)
 
----
+Both apps use the same Prettier config:
 
-## 2. Formatting and linting
+- Single quotes, semicolons, trailing commas everywhere.
+- 2 spaces, max line width 100, LF line endings.
+- Always use parens on arrow args: `(x) => x`.
+- Imports and exports are sorted by `simple-import-sort`. Packages first, then a blank line, then local imports.
+- Run `pnpm <server|client> lint` and `format` before you finish. Husky runs ESLint on staged files.
 
-Never hand-format. `pnpm <app> format` / `pnpm <app> lint` (Prettier runs through ESLint, so lint
-fixes formatting too).
+Client only:
 
-Prettier, identical in both apps: `singleQuote`, `semi`, `trailingComma: all`, `tabWidth: 2`,
-`printWidth: 100`, `bracketSpacing`, `arrowParens: always`, `endOfLine: lf`. The client adds
-`prettier-plugin-tailwindcss`, so class order is sorted for you.
+- Tailwind classes are sorted by `prettier-plugin-tailwindcss`. No duplicate or conflicting classes.
+- `jsx-a11y` strict rules are on. Target WCAG 2.1 AA.
+- No `console.log`. Use `logUtils`. Only `console.warn` / `console.error` are allowed.
+- Use `const`, never `var`. Use `===` (`== null` is allowed).
+- Unused vars and args must start with `_`.
+- No `dangerouslySetInnerHTML`, no `javascript:` URLs, no `target="_blank"` without `rel`.
 
-ESLint 9 flat config, one per app. Both: `simple-import-sort` for imports _and_ exports (**error** —
-never hand-order), `no-unsanitized/*`, `no-eval`, `no-new-func`, `no-script-url`.
+Server only:
 
-- **Server** — `recommendedTypeChecked` + `eslint-plugin-security`. Deliberate deviations, keep
-  them: `no-explicit-any` off; `no-floating-promises` and `no-unsafe-argument` warn;
-  `security/detect-object-injection` off (false positives on `obj[key]`; TS key types constrain it).
-- **Client** — `eslint-config-next`, `jsx-a11y` **strict** (target is WCAG 2.1 AA),
-  `better-tailwindcss`, `eslint-plugin-storybook`, plus `eqeqeq` smart, `no-var`, `prefer-const`,
-  `object-shorthand`. `no-console` warns except `warn`/`error` — use `logUtils`. `react/no-danger`
-  is an error. Unused vars warn unless `_`-prefixed. Tailwind _ordering_ rules are off (Prettier
-  sorts); `enforce-canonical-classes` and `no-duplicate-classes` are errors.
-- **Ignored** — server: `dist/`, `coverage/`, `src/generated/`, `eslint.config.mjs`. Client:
-  `.next/`, `out/`, `build/`, `coverage/`, `next-env.d.ts`, `AGENTS.md`, `CLAUDE.md`.
+- `eslint-plugin-security` is on. No `eval`, `new Function`, unsafe regex, non-literal regex, non-literal `fs` paths, or `child_process`.
+- `any` is allowed but avoid it. Floating promises give a warning — use `await` or `void`.
 
----
+## Comments
 
-## 3. Naming
+- Add short JSDoc (`/** ... */`) to exported classes, public methods, DTOs, and constants, like the current code.
+- Keep JSDoc to one or two lines. Say what it does or why, not how.
+- Add inline `//` comments only for non-obvious reasons (a workaround, a gotcha).
+- Put an `eslint-disable-next-line <rule> -- <reason>` comment when you must turn off a rule.
 
-| Kind                     | Pattern                                           | Example                                        |
-| ------------------------ | ------------------------------------------------- | ---------------------------------------------- |
-| NestJS building block    | `name.role.ts` (kebab-case)                       | `health.service.ts`, `pagination-query.dto.ts` |
-| NestJS core infra module | `core-<concern>.module.ts`                        | `core-cache.module.ts`                         |
-| NestJS domain module     | `<domain>.module.ts`                              | `health.module.ts`                             |
-| Bootstrap helper         | `<concern>.config.ts`                             | `cors.config.ts`                               |
-| DI token file            | `<domain>.constants.ts`                           | `health.constants.ts`                          |
-| Prisma model             | one model per `<model>.prisma`                    | `user.prisma`                                  |
-| Client hook              | `use<Thing>.ts`                                   | `useClickOutside.ts`                           |
-| Client util              | `<thing>Utils.ts`                                 | `cookieUtils.ts`                               |
-| Own client component     | `PascalCase/index.tsx` folder                     | `templates/AppStatusTemplate/index.tsx`        |
-| shadcn/ui component      | flat kebab-case `.tsx`                            | `libs/shadcn-ui/button.tsx`                    |
-| Test / story             | `<source>.spec.ts(x)` / `.stories.tsx`, colocated | `hash.service.spec.ts`                         |
-| Plan doc                 | `<YYYY-MM-DD-HH-MM-SS>-<slug>.md`                 | `docs/2026-08-25-14-30-08-husky-hook.md`       |
+## Server (NestJS)
 
-> shadcn components stay flat because its CLI always writes `<aliases.ui>/<name>.tsx` — given
-> `button/index.tsx` it writes a fresh `button.tsx` that silently shadows yours.
+### Naming
 
-- `PascalCase` — classes, components, types, enums. NestJS classes end in their role
-  (`HealthService`, `NonProductionGuard`).
-- `camelCase` — variables, functions, object keys, i18n namespaces and keys.
-- `SCREAMING_SNAKE_CASE` — DI tokens (`HEALTH_MYSQL_POOL`) and env keys (`CORS_ORIGIN`).
-- `<ComponentName>Props` for prop interfaces, `Use<HookName>Options` for hook options.
-- Booleans read as predicates (`isCopied`, `enabled`); `_` prefix marks an unused binding.
+| Item                    | Rule                                             | Example                                          |
+| ----------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| Files                   | kebab-case + type suffix                         | `cache.service.ts`, `id-param.dto.ts`            |
+| Core wrapper modules    | `core-<name>.module.ts`, class `Core<Name>Module` | `core-cache.module.ts` → `CoreCacheModule`       |
+| Classes                 | PascalCase + type suffix                         | `CacheService`, `PaginationQueryDto`, `NonProductionGuard` |
+| Setup functions         | `handle<Thing>(app)` in `shared/config/`         | `handleCors`, `handleSwagger`                    |
+| DI tokens               | `UPPER_SNAKE_CASE` in `<feature>.constants.ts`   | `HEALTH_MYSQL_POOL`                              |
+| Static class constants  | `UPPER_SNAKE_CASE`, `private static readonly`    | `MAX_PATTERN_LENGTH`                             |
+| Variables and methods   | camelCase                                        | `compileMatcher`, `starKeyIndex`                 |
 
----
+### Module layout
 
-## 4. Inside a file
+- One folder per feature in `feature/<name>/`: `<name>.module.ts`, `<name>.controller.ts`, `<name>.service.ts`, `<name>.constants.ts` if needed.
+- Register new feature modules in `feature/feature.module.ts`. Register new infra modules in `core/core.module.ts` (they are `@Global`).
+- Shared DTOs, guards, and pipes go in `shared/`.
+- Use relative imports. There is no path alias on the server.
 
-Order: imports (`import type` for type-only) → constants and DI tokens → types/interfaces/DTOs used
-by the main export → the main export → private helpers.
+### Code order in a class
 
-**Server classes:** `public constructor` (deps `private readonly`) → lifecycle hooks → public
-methods in caller-meaningful order → private helpers in call order. Access modifiers are always
-explicit, constructor included.
+1. Static constants.
+2. Instance fields (e.g. `private readonly logger = new Logger(X.name)`).
+3. `public constructor(...)` with `private readonly` injected deps.
+4. Public methods (lifecycle hooks like `onModuleInit` go with them).
+5. Private helpers last.
 
-**React components:** `'use client'` first _only_ when genuinely needed (Server Components are the
-default), then imports, props interface, component.
+Always write `public` / `private` / `protected` on members.
 
-**Props come in as one `props` object, destructured on the first line** — never in the parameter
-list. It keeps the signature short as props grow and leaves `props` available to forward or log.
-Exception: `libs/shadcn-ui/**`, which the CLI rewrites.
+In a service file, response classes (e.g. `CacheEntry`) may sit above the service class.
 
-```tsx
-export default function GlobalError(props: GlobalErrorProps) {
-  const { error, retry } = props;
-```
+### Controllers and Swagger
 
-**Route metadata always uses `generateMetadata()`, never an exported `metadata` constant** — only
-the function form can `await getTranslations()` or read `params`. A route with nothing to await
-still uses the sync function form, so adding a translation later is not a rewrite.
+- Use `@Controller({ path, version })`. Versioning is on.
+- Every controller has `@ApiTags`. Every endpoint has `@ApiOperation` and `@Api*Response`. Add `@ApiParam` / `@ApiQuery` for inputs.
+- Controllers stay thin. Business logic goes in the service.
+- Return typed values (`Promise<CacheEntry[]>`), not `any`.
 
----
+### Validation
 
-## 5. Comments
+- Use DTO classes with `class-validator` and `class-transformer` decorators.
+- Every DTO field also has `@ApiProperty` or `@ApiPropertyOptional`.
+- Use `!` for required fields and defaults for optional ones (`page: number = 1`).
+- The global `ValidationPipe` uses `whitelist`, `forbidNonWhitelisted`, and `transform`. Do not add per-route pipes for the same job.
 
-**Every comment is at most two lines of content** — one by default, two when the "why" needs it,
-never three. Applies everywhere: JSDoc, `//`, YAML `#`, Dockerfile, Prisma. The `/**` and `*/`
-delimiters don't count. Compress the reasoning rather than deleting it; what survives the squeeze
-was the load-bearing part. **When two lines aren't enough, it belongs in the app's README** — point
-at it by section name from a JSDoc.
+### Error handling
 
-- JSDoc every exported class, and any method whose behaviour isn't obvious from its signature. Skip
-  it where name and types already say everything (`removeAccessToken`, a wiring-free `*.module.ts`).
-- Lead with verb and subject: "Broadcast to every connected client", not "This method is
-  responsible for…". Cross-reference with `{@link Other}` instead of restating.
-- Inline `//` explains **why**, never what: `// jsdom has no window.matchMedia, which next-themes
-calls eagerly on mount.`
-- Never restate a type signature, list a class's members, enumerate imports, or repeat a config
-  value three lines below — all of it drifts.
-- Swagger `description` strings are public API prose, not comments — the two-line cap exempts them.
-- `// Arrange` / `// Act` / `// Assert` are structural markers, not prose (§10).
+- Throw Nest HTTP exceptions (`BadRequestException`, `NotFoundException`, …) with a clear message.
+- Use try/catch only when a failure must become a normal value (e.g. health indicators return `down`).
+- Catch errors as `unknown`. Check `instanceof Error` before reading `.message`.
 
----
+### Config and env
 
-## 6. Validation and errors
+- Read config only through `ConfigService` (`config.get<T>('key', default)` or `config.getOrThrow<T>('key')`).
+- Add new env vars in `core/config/configuration.ts` and in `.env.example` (key only).
+- Do not read `process.env` inside services.
 
-- **Server** — `class-validator` + `class-transformer` DTOs in `shared/dto/` or the owning feature;
-  the global `ValidationPipe` whitelists and transforms. Reuse `IdParamDto`, `UuidParamDto`,
-  `EmailDto`, `PaginationQueryDto` rather than redeclaring params.
-- **Client** — `formik` + `yup`. The server DTO is the authority; never trust the client alone.
-- Every controller route and response class carries Swagger decorators (`@ApiOperation`,
-  `@ApiOkResponse`, `@ApiQuery`, `@ApiParam`, `@ApiProperty`) with a realistic `example` — they are
-  the API's public documentation.
-- Throw NestJS `HttpException` subclasses and let the framework serialise. Guards enforce access.
-  Probes that must never throw catch per-indicator and report `{ status: 'down', error }`.
-- `utils/httpUtils` throws named classes — narrow with `instanceof`: `HttpUtilsResponseError`
-  (non-2xx, carries `status` + parsed `body`), `HttpUtilsTimeoutError` (60s default),
-  `HttpUtilsNetworkError`, `HttpUtilsRequestCanceledError`.
-- Route failures surface via `error.tsx` / `not-found.tsx` under `[locale]`; `global-error.tsx` and
-  `global-not-found.tsx` are the last resort.
+### Database (Prisma)
 
----
+- Inject `PrismaService` and use its model delegates (`this.prisma.user`).
+- Add one model per file in `prisma/schema/<model>.prisma`.
+- After a schema change: `pnpm server prisma:generate`, then `pnpm server db:migrate`.
+- Never edit `src/generated/`.
 
-## 7. Logging
+### Cache, queues, logging, security
 
-Server: `nest-winston`, level from `LOG_LEVEL` — inject the logger, never `console.log`. Client:
-`utils/logUtils`. Never log secrets, tokens, cookie values, or bodies carrying credentials.
+- Cache: inject `CACHE_MANAGER` (`Cache` from cache-manager). Redis store via Keyv.
+- Queues: BullMQ via `@nestjs/bullmq`. Events: `@nestjs/event-emitter`. Cron: `@nestjs/schedule`.
+- Logging: `new Logger(ClassName.name)`. Winston is the global logger.
+- Hashing and encryption: use `HashService` and `EncryptionService` from `core/security`.
+- Mail: use `MailService` from `core/mail`.
+- Outgoing HTTP: use `HttpService` from `@nestjs/axios` (set up in `core/http`).
 
----
+## Client (Next.js)
 
-## 8. Database and cache
+> This Next.js version has breaking changes. Read `apps/client/AGENTS.md` and `node_modules/next/dist/docs/` before you write client code.
 
-- Prisma 7, multi-file schema, **one model per file**; `schema.prisma` holds only `generator` and
-  `datasource`. The URL is built in `prisma.config.ts` from `MYSQL_*` — not in `schema.prisma`.
-- Reach the DB only through the global `PrismaService`. Workflow: edit a model → `pnpm server
-db:migrate` → `pnpm server prisma:generate`. Migrations are committed; `db:push` is throwaway
-  local iteration only. Never import Prisma types from outside `src/generated/prisma/**`.
-- **Server cache** — `@nestjs/cache-manager` over Redis, TTL from `CACHE_TTL`; the `cache` feature
-  exposes search/delete behind `NonProductionGuard`.
-- **Client cache** — Cache Components are on. Opt in with `'use cache'` and _always_ pair it with a
-  `cacheLife` profile (`api`, `apiShort`, `apiLong`, `apiPrivate`) and `cacheUtils.tag(path,
-params)`. Tags are hierarchical, so revalidating a parent busts everything beneath it.
-- A `use cache` scope can't read cookies — unauthenticated or user-identical data only. Per-user
-  data uses `'use cache: private'` with `apiPrivate`, or no cache behind `<Suspense>`. Never pass an
-  access token to a cached function; it becomes part of the key.
-- Invalidate inside the Server Action that wrote: `cacheUtils.update()` for read-your-own-writes,
-  `revalidate()` for background refresh, `revalidateRoute()` for a route. `cacheUtils` is
-  server-only.
+### Naming
 
----
+| Item                | Rule                                            | Example                                  |
+| ------------------- | ----------------------------------------------- | ---------------------------------------- |
+| Components          | PascalCase folder with `index.tsx`              | `components/templates/AppStatusTemplate/index.tsx` |
+| Props type          | `<Component>Props` interface                    | `AppStatusTemplateProps`                 |
+| Hooks               | `useXxx.ts`, camelCase                          | `useCopyToClipboard.ts`                  |
+| Hook types          | `Use<Name>Options`, `Use<Name>Result`, exported | `UseCopyToClipboardResult`               |
+| Utils               | `xxxUtils.ts`: a class + one exported instance  | `LogUtils` → `logUtils`                  |
+| Constants           | camelCase object with `as const`                | `apiEndpoints`, `storageKeys`            |
+| shadcn-ui files     | kebab-case (shadcn default)                     | `libs/shadcn-ui/dropdown-menu.tsx`       |
+| Next.js route files | Next.js names                                   | `page.tsx`, `layout.tsx`, `error.tsx`    |
 
-## 9. Client ↔ server, third-party, i18n
+### Components
 
-- All calls go through `utils/httpUtils` (axios on the fetch adapter). It imports `server-only`, so
-  importing it from a Client Component is a build error. Endpoints live in `constants/apiEndpoints`,
-  cookie/storage keys in `constants/storageKeys`.
-- `httpUtils` owns the `access_token` / `refresh_token` cookies (`path: '/'`, `sameSite: 'strict'`,
-  `secure` in production) via `cookieUtils`. `get`/`delete` take `Record<string, string>` params;
-  `post`/`put`/`patch` take a JSON body; `*FormData` variants leave `Content-Type` alone. Base URL
-  comes from `API_URL` — never hardcode a host. Send `X-API-Version` for version-pinned routes.
-- Every configured third-party package gets one folder under `libs/` — never scatter its setup. On
-  the server, that wiring is a `Core*Module`. Add shadcn parts with `pnpm client shadcn-ui:add
-<name>`; merge classes with `cn()`.
-- Import `Link`, `redirect`, `usePathname`, `useRouter` from `@/libs/next-intl/configs/navigation`,
-  **not** `next/*`, so the locale stays in the URL.
-- `next-intl` with locale-prefixed URLs; `routing.ts` is the single source of truth. One namespace
-  per component or screen. Branching (plurals, `select`, skeletons) lives in the ICU message, not
-  JSX. Format with `useFormatter()` / `getFormatter()`, never `toLocaleString`.
-- `useTranslations()` in Server _and_ Client Components, `getTranslations()` in async server code.
-  Route Handlers and Server Actions must pass the locale explicitly. Missing keys are compile
-  errors, so adding a locale = copy `messages/en.json`, translate, add the code to `routing.ts`.
+- Follow Atomic Design: `atoms` → `molecules` → `organisms` → `templates`. Pages live in `app/`.
+- Each component folder holds `index.tsx`, `index.spec.tsx`, and `index.stories.tsx`.
+- Use named exports (`export function X`). Next.js route files use `export default`.
+- Take `props` as one argument, then destructure it on the first line: `const { a, b } = props;`.
+- Add `'use client'` only when the file needs client features (state, effects, browser APIs).
+- Build UI from `@/libs/shadcn-ui/*`. Style with Tailwind and `cn()`.
+- Do not edit shadcn-ui files unless the task needs it. Add new ones with `pnpm client shadcn-ui:add`.
 
----
+### Code order in a component or hook
 
-## 10. Testing
+1. `'use client'` (if needed).
+2. Imports.
+3. Exported types and interfaces.
+4. The component or hook.
+5. Inside: destructure props/options → hooks (`useTranslations`, `useState`, `useRef`) → callbacks → effects → return.
 
-**Code-First**: ship the implementation, then cover it. Tests are **colocated** as
-`<source>.spec.ts(x)` — no `test/` tree, no e2e suite. Both apps `passWithNoTests`.
+### Imports
 
-- Server: Jest 30 + ts-jest, `testEnvironment: node`. Coverage excludes `src/generated/**` and
-  `src/shared/config/**` (bootstrap helpers only hand a literal to the framework).
-- Client: Vitest 3 + jsdom + Testing Library, `globals: true`, `server-only` stubbed. Coverage
-  excludes stories, `app/(routes)/**`, `constants/`, `libs/`.
-- **Every test body carries `// Arrange`, `// Act`, `// Assert`.** Shared setup in `beforeEach`,
-  cleanup in `afterEach`. Names are full sentences about behaviour:
-  `it('returns false when comparing a wrong value against a stored hash')`.
-- **DTOs are tested**, colocated. Drive them as the global pipe does —
-  `plainToInstance(Dto, input, { enableImplicitConversion: true })` then `validateSync` — and assert
-  the failing constraint key (`min`, `isInt`), never the message. Cover the accepted case, every
-  boundary, string coercion, and defaults on empty input.
-- Prefer a hand-rolled stub over a Nest testing module when the class has no framework dependency.
-- Components under `src/components/` also get `*.stories.tsx`; `.storybook/preview.tsx` reproduces
-  the root provider tree so stories match the app.
+- Use the `@/` alias for `src/` (`@/libs/shadcn-ui/button`). Use `./` only for files in the same folder.
+- Mark type-only imports with `import type`.
 
----
+### HTTP and backend integration
 
-## 11. Security
+- Call the API only through `httpUtils` (no auth) or `httpUtilsAuth` (with tokens). Both are `server-only`.
+- Put endpoint paths in `constants/apiEndpoints.ts` under the HTTP method.
+- Handle the typed errors: `HttpUtilsResponseError`, `HttpUtilsTimeoutError`, `HttpUtilsNetworkError`, `HttpUtilsRequestCanceledError`.
+- Tokens live in `httpOnly` cookies. Use `cookieUtils`. Never read tokens in the browser.
 
-- Never commit a `.env*` other than `.env.example`, and never read env **values** — keys only.
-- No `eval`, `new Function`, `javascript:` URLs, or `dangerouslySetInnerHTML`.
-- `HashService` (bcrypt) for passwords; `EncryptionService` (AES-256-GCM) only for secrets that must
-  be recoverable.
-- Bootstrap hardening lives in `shared/config/` — helmet, CORS, compression, cookie-parser — driven
-  by `ConfigService`, not literals. Rate limiting is a global three-tier `ThrottlerGuard`.
-- Swagger is unmounted when `NODE_ENV=production`; dev-only routes sit behind `NonProductionGuard`.
-- Every export of a `'use server'` file is a network-reachable endpoint — never accept an arbitrary
-  path or identifier without an allowlist.
+### i18n
 
----
+- All UI text goes in `libs/next-intl/messages/en.json` and `zh.json`. Add keys to both files.
+- Read text with `useTranslations('<namespace>')` (or the server version).
+- Use `Link` and navigation helpers from `@/libs/next-intl/configs/navigation`, not `next/link`.
 
-## 12. Environment
+### Forms, state, logging
 
-- The **start script** sets the variable, not a file: `NODE_ENV` (server), `APP_ENV` (client), via
-  `cross-env`. Load order, first match wins: `.env.<ENV>.local` → `.env.<ENV>` → `.env`.
-- Read config through `ConfigService` with a typed default —
-  `this.config.get<number>('port', 3000)` — never `process.env` in feature code. Defaults live in
-  `core/config/configuration.ts`.
-- Adding a variable = default in `configuration.ts` + an entry in `.env.example` + a row in
-  `apps/server/README.md`.
+- Forms: Formik + Yup schemas.
+- State: local React state and custom hooks. No global state library.
+- Logging: `logUtils.error/warn/info/debug`.
+- Error pages: `error.tsx` logs with `logUtils.error` and shows `AppStatusTemplate`.
 
----
+## Testing
 
-## 13. Git
-
-See [GIT_CONVENTIONS](./GIT_CONVENTIONS.md).
+- Workflow: Code-First. Add or update tests for every change.
+- Test files sit next to the source file: `x.service.spec.ts`, `useX.spec.ts`, `Component/index.spec.tsx`.
+- Server: Jest + `@nestjs/testing` (`Test.createTestingModule`). Mock deps with `useValue`. No e2e tests.
+- Client: Vitest + Testing Library (`render`, `renderHook`, `userEvent`). Use `vi.fn()` and `vi.useFakeTimers()`.
+- Every test follows AAA with `// Arrange`, `// Act`, `// Assert` comments.
+- Test names read as behavior: `it('copies text and sets copiedText on success')`.
+- Components also get a Storybook story (`index.stories.tsx`, `title: '<Level>/<Name>'`).
+- Run: `pnpm <server|client> test`, coverage with `test:cov`.

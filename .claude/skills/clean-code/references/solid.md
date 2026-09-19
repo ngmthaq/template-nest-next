@@ -2,7 +2,7 @@
 
 ## S — Single Responsibility Principle
 
-Every class, module, or function has **one and only one reason to change**.
+Every class, module, or function has **only one reason to change**.
 
 ```javascript
 // Bad — validates, saves, emails, and logs in one class
@@ -12,7 +12,7 @@ class UserService {
   }
 }
 
-// Good — each class owns one concern
+// Good — each class has one job
 class UserValidator {
   validate(data) {
     ...
@@ -33,14 +33,14 @@ class UserService {
     ...
   }
   createUser(data) {
-    /* orchestrates the above */
+    /* calls the classes above in order */
   }
 }
 ```
 
 ## O — Open/Closed Principle
 
-Open for extension, closed for modification. Add behavior without editing existing code.
+Open to add new behavior, closed to changes. Add new behavior without changing existing code.
 
 ```javascript
 // Bad — must edit this function for every new discount type
@@ -67,10 +67,10 @@ class SeniorDiscount implements DiscountStrategy {
 
 ## L — Liskov Substitution Principle
 
-Subtypes must be substitutable for their base types without breaking correctness.
+A subtype must work anywhere its base type works, without breaking anything.
 
 ```javascript
-// Bad — Penguin breaks the Bird contract
+// Bad — Penguin breaks what Bird promises
 class Bird {
   fly() {
     ...
@@ -82,7 +82,7 @@ class Penguin extends Bird {
   }
 }
 
-// Good — redesign the hierarchy to match reality
+// Good — change the class tree to match real life
 class Bird {
   move() {
     ...
@@ -102,7 +102,7 @@ class Penguin extends Bird {
 
 ## I — Interface Segregation Principle
 
-Clients should not be forced to depend on interfaces they don't use.
+Code should not be forced to depend on methods it does not use.
 
 ```javascript
 // Bad — Robot must implement eat() and sleep()
@@ -112,7 +112,7 @@ interface Worker {
   sleep(): void;
 }
 
-// Good — split into focused interfaces
+// Good — split into small interfaces
 interface Workable {
   work(): void;
 }
@@ -127,7 +127,7 @@ interface Restable {
 
 ## D — Dependency Inversion Principle
 
-High-level modules depend on abstractions, not concrete implementations.
+High-level modules depend on abstractions (interfaces), not on concrete classes.
 
 ```javascript
 // Bad — tightly coupled to MySQL and SMTP
@@ -136,7 +136,7 @@ class OrderService {
   private mailer = new SmtpMailer();
 }
 
-// Good — depends on abstractions, injected externally
+// Good — depends on interfaces, passed in from outside
 class OrderService {
   constructor(
     private db: Database,
@@ -145,11 +145,11 @@ class OrderService {
 }
 ```
 
-## SOLID Enforcement Rules
+## SOLID Rules
 
-1. Before writing a class, identify its single responsibility and name it accordingly.
-2. Before adding a conditional branch for a new variant, consider abstraction + extension.
-3. Verify every subtype passes the substitutability test before merging.
-4. Ask "will every implementor use every method?" — if not, split the interface.
-5. High-level modules must reference abstractions, not concrete implementations.
+1. Before you write a class, find its one job and name the class after it.
+2. Before you add a new `if` branch for a new type, think about using an interface and a new class instead.
+3. Before merging, check that every subtype can replace its base type safely.
+4. Ask "will every class that implements this use every method?" — if not, split the interface.
+5. High-level modules must use interfaces, not concrete classes.
 6. Flag violations by principle name: "SRP violation: this class handles both X and Y."

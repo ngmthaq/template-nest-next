@@ -1,20 +1,20 @@
-# Step 2 — Research Project Overview
+# Step 1 — Research Project Overview
 
-**Goal:** Read [PROJECT_OVERVIEW.md](../../../references/PROJECT_OVERVIEW.md) to check for existing information. Build a complete picture of the project. Write all findings to [PROJECT_OVERVIEW.md](../../../references/PROJECT_OVERVIEW.md).
+**Goal:** Read [PROJECT_OVERVIEW.md](../../../references/PROJECT_OVERVIEW.md) to see what is already there. Get a full picture of the project. Write all findings to [PROJECT_OVERVIEW.md](../../../references/PROJECT_OVERVIEW.md).
 
-## 2.1 — Project Name and Description
+## 1.1 — Project Name and Description
 
-Scan for config files: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `.csproj`, `pubspec.yaml`, `composer.json`. Extract `name` and `description` fields.
+Look for config files: `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `.csproj`, `pubspec.yaml`, `composer.json`. Get the `name` and `description` fields.
 
 If not found, or the values are unclear or empty, ask the user:
 
 > "What is the project name and description?"
 
-## 2.2 — Programming Languages and Frameworks
+## 1.2 — Programming Languages and Frameworks
 
-Scan the repository for signals:
+Look in the repository for these signs:
 
-| Signal                     | Language / Framework |
+| Sign                       | Language / Framework |
 | -------------------------- | -------------------- |
 | `.ts`, `.tsx` files        | TypeScript           |
 | `.js`, `.jsx` files        | JavaScript           |
@@ -34,11 +34,11 @@ Scan the repository for signals:
 | `.rb` + `Gemfile`          | Ruby                 |
 | `.php` + `composer.json`   | PHP / Laravel        |
 
-For monorepos or microservices, list all discovered languages and frameworks per package or service.
+For monorepos or microservices, list all languages and frameworks you found for each package or service.
 
-## 2.3 — Package Manager
+## 1.3 — Package Manager
 
-Detect by lock file:
+Find it by the lock file:
 
 | Lock File           | Package Manager |
 | ------------------- | --------------- |
@@ -54,17 +54,17 @@ Detect by lock file:
 | `Gemfile.lock`      | Bundler         |
 | `composer.lock`     | Composer        |
 
-If multiple lock files exist for the same ecosystem, ask the user:
+If there are many lock files for the same language, ask the user:
 
 > "I found multiple lock files ([list them]). Which package manager should I use?"
 
-## 2.4 — Key Libraries
+## 1.4 — Key Libraries
 
-Scan `package.json`, `requirements.txt`, `pyproject.toml`, or other manifests. List primary libraries that appear across multiple features or modules, such as `prisma`, `axios`, `formik`, `react-query`, `zod`, `express`, `sqlalchemy`, or `celery`. Omit dev-only or single-use utilities.
+Look at `package.json`, `requirements.txt`, `pyproject.toml`, or other package files. List the main libraries used in many features or modules, such as `prisma`, `axios`, `formik`, `react-query`, `zod`, `express`, `sqlalchemy`, or `celery`. Leave out dev-only tools and tools used only once.
 
-## 2.5 — Database
+## 1.5 — Database
 
-Skip this section for pure frontend repositories with no local database.
+Skip this section for frontend-only repositories with no local database.
 
 Look for:
 
@@ -76,13 +76,13 @@ If nothing is found, ask:
 
 > "Does this project use a database? If so, which one?"
 
-## 2.6 — Doc Directory
+## 1.6 — Doc Directory
 
 Ask the user:
 
 > "Where should agent-generated plan files be stored? (e.g., `docs/`, `.github/docs/`, `.claude/docs/`, `plans/`)"
 
-## 2.7 — Testing Workflow
+## 1.7 — Testing Workflow
 
 Ask the user:
 
@@ -92,18 +92,18 @@ Ask the user:
 > - **Test-First** — Write tests before implementation (TDD/BDD)
 > - **Skip-Testing** — No automated tests in this project
 
-## 2.8 — Playwright Check
+## 1.8 — Playwright Check
 
 Ask the user:
 
-> "How should the Root Agent's review and the tester agent handle Playwright (browser) checks on UI-affecting changes?"
+> "How should the Root Agent's review and the tester agent handle Playwright (browser) checks when the UI changes?"
 >
 > - **Always** — Always run Playwright when UI changed
-> - **None** — Skip Playwright checks entirely
+> - **None** — Never run Playwright checks
 > - **Ask-User** — Ask before running (default)
 
 Default to `Ask-User` if the user does not respond.
 
-## 2.9 — Write PROJECT_OVERVIEW.md
+## 1.9 — Write PROJECT_OVERVIEW.md
 
 Write all findings to [PROJECT_OVERVIEW.md](../../../references/PROJECT_OVERVIEW.md).

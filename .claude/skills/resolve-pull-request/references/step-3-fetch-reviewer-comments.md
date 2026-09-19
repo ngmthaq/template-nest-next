@@ -1,15 +1,15 @@
 # Step 3 — Fetch Reviewer Comments
 
-Retrieve **every reviewer comment** on the PR using the access method chosen in Step 1. You need inline review comments (anchored to a file + line), review summary bodies, and each thread's resolved state.
+Get **every reviewer comment** on the PR with the access method chosen in Step 1. You need inline review comments (attached to a file + line), review summary texts, and whether each thread is resolved.
 
 ## Using MCP
 
-Use the available MCP tool(s) to list the PR's review comments / discussion threads. For each comment capture:
+Use the MCP tool(s) to list the PR's review comments / discussion threads. For each comment, save:
 
 - Comment / thread ID (needed to reply and resolve in Step 6)
 - File path and line
 - Author and body
-- Thread state: **resolved** vs **unresolved**, and whether the comment is **outdated** (anchored to a line that no longer exists)
+- Thread state: **resolved** vs **unresolved**, and whether the comment is **outdated** (attached to a line that no longer exists)
 
 ## Using the CLI
 
@@ -19,7 +19,7 @@ Use the available MCP tool(s) to list the PR's review comments / discussion thre
 | GitLab    | `glab api projects/:id/merge_requests/<number>/discussions --paginate` | `resolved` / `resolvable` fields are on each discussion note                     |
 | Bitbucket | `bb pr comments <number>` (flags vary by CLI)                          | per-CLI                                                                          |
 
-**GitHub — thread IDs and resolved state (GraphQL):** REST comment IDs cannot resolve a thread; you need the thread node ID.
+**GitHub — thread IDs and resolved state (GraphQL):** You cannot resolve a thread with a REST comment ID. You need the thread node ID.
 
 ```bash
 gh api graphql -f query='
@@ -32,10 +32,10 @@ gh api graphql -f query='
   -F owner=<owner> -F repo=<repo> -F number=<number>
 ```
 
-Identify from the fetched comments:
+From the comments, find:
 
-- Which files and lines each comment targets
+- Which files and lines each comment points to
 - The author of each comment (a comment from the PR author themselves is usually a note, not a request)
-- Which threads are already **resolved** or **outdated** — these are candidates to skip in Step 4
+- Which threads are already **resolved** or **outdated** — you may skip these in Step 4
 
-> Record each comment's ID, file, line, author, body, and resolved/outdated state. Step 6 replies to and resolves threads by these IDs, so keep them through the workflow.
+> Save each comment's ID, file, line, author, body, and resolved/outdated state. Step 6 uses these IDs to reply to and resolve threads, so keep them until the end.

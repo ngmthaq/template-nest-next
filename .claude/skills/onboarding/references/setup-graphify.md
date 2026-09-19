@@ -1,6 +1,6 @@
 # Graphify Setup
 
-Graphify transforms a repository — code, SQL schemas, docs, PDFs, images — into a queryable knowledge graph that AI agents can consult so they never miss code context. See [graphify on GitHub](https://github.com/safishamsi/graphify).
+Graphify turns a repository — code, SQL schemas, docs, PDFs, images — into a knowledge graph that AI agents can search, so they do not miss code context. See [graphify on GitHub](https://github.com/safishamsi/graphify).
 
 ## Prerequisites
 
@@ -31,15 +31,15 @@ uv tool install "graphifyy[all]"     # everything
 
 ## Register with Claude Code
 
-Register Graphify as a skill, scoped to the current project:
+Add Graphify as a skill for the current project only:
 
 ```bash
 graphify install --project
 ```
 
-Run once. After this, the assistant can consult the graph automatically.
+Run this once. After that, the assistant can use the graph on its own.
 
-`graphify install --project` writes its usage instructions into a root `CLAUDE.md`. For consistency with the project convention, move that Graphify block out of the root `CLAUDE.md` and into `.claude/CLAUDE.md` (create the file if it does not exist), then remove the now-empty root `CLAUDE.md`. All AI instructions live under `.claude/CLAUDE.md`.
+`graphify install --project` writes its usage notes into a root `CLAUDE.md`. To follow the project rule, move that Graphify block from the root `CLAUDE.md` into `.claude/CLAUDE.md` (create the file if it does not exist). Then delete the root `CLAUDE.md`, which is now empty. All AI instructions live in `.claude/CLAUDE.md`.
 
 ## Build the graph
 
@@ -49,9 +49,9 @@ graphify . --update        # re-extract only changed files
 graphify . --no-viz        # skip HTML, output report + JSON only
 ```
 
-This produces `graphify-out/` (`graph.html`, `GRAPH_REPORT.md`, `graph.json`). Commit `graphify-out/` so the whole team starts from the same map.
+This creates `graphify-out/` (`graph.html`, `GRAPH_REPORT.md`, `graph.json`). Commit `graphify-out/` so the whole team uses the same map.
 
-Headless extraction of docs/PDFs/images needs an LLM backend key — set `ANTHROPIC_API_KEY` (Claude) in the environment before building. Code files are parsed locally and never sent to an API.
+Reading docs/PDFs/images without a UI needs an LLM API key — set `ANTHROPIC_API_KEY` (Claude) in the environment before you build. Code files are read locally and never sent to an API.
 
 ## Query the graph
 
@@ -61,7 +61,7 @@ graphify path "UserService" "DatabasePool"
 graphify explain "RateLimiter"
 ```
 
-## Keep it fresh (optional)
+## Keep it up to date (optional)
 
 ```bash
 graphify hook install      # auto-rebuild on commit

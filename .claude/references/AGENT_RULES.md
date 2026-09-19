@@ -4,25 +4,24 @@
 
 ## DO
 
-- DO: define a specific, bounded role. Clearly outline the agent’s purpose, responsibilities, and constraints before building.
-- DO: use "least privilege" access. Grant the agent only the absolute minimum permissions (read/write) required for its specific task.
-- DO: implement human-in-the-loop for high-stakes actions. Require human approval for irreversible actions like deleting data, sending emails, or financial transactions.
-- DO: provide structured context. Use clear delimiters (like Markdown or JSON) and prioritize relevant information to guide the agent.
-- DO: log every tool call and action. Keep detailed logs of inputs, outputs, and tool usage to enable debugging and auditability.
-- DO: run evaluation tests (Evals) regularly. Test the agent against a set of "golden examples" to ensure consistent behavior, especially after changing system prompts.
-- DO: ask the user when anything is unclear — intent, scope, affected area, expected behaviour. There are no acceptable assumptions.
+- DO: give the agent a clear, limited role. Write down its goal, its jobs, and its limits before you build it.
+- DO: give the least access needed. Give the agent only the read/write rights it needs for its task, and nothing more.
+- DO: ask a human before risky actions. Get human approval before actions you cannot undo, like deleting data, sending emails, or moving money.
+- DO: give clear, well-organized context. Use clear markers (like Markdown or JSON) and put the most useful information first.
+- DO: log every tool call and action. Keep logs of inputs, outputs, and tool use so you can debug and check what happened later.
+- DO: run tests on the agent (evals) often. Test the agent against a set of "golden examples" to make sure it behaves the same way, mainly after you change system prompts.
+- DO: ask the user when anything is not clear — goal, scope, affected area, expected behaviour. Never guess.
 
 ---
 
 # DO NOT
 
-- DON'T: give vague instructions. Avoid commands like "be helpful." Ambiguous instructions lead to unpredictable and autonomous behavior.
-- DON'T: grant broad or administrative access. Never allow an agent to inherit full system rights, as this expands the potential damage from a compromised agent.
-- DON'T: assume the agent is fully autonomous. Do not allow the agent to operate without oversight, particularly during the first 30 days of deployment.
-- DON'T: dump raw, unchunked data. Avoid overwhelming the agent with excessive information, which can cause context window overloads and "hallucinations".
-- DON'T: allow silent failures. Never treat an agent as a black box that just works. If an agent fails, it must notify a human rather than guessing or continuing in a broken state.
-- DON'T: treat initial deployment settings as permanent. Agent behavior can drift, and models can change. Continuously update boundaries based on performance data.
-- DON'T: make any changes that fall outside the scope of the user's request.
-- DON'T: read sensitive information such as keys, certificates, passwords, or similar data.
-- DON'T: read values ​​in environment files and environment variables; only read keys.
-- DON'T: add agent attribution to commits or pull requests — no `Co-Authored-By:` AI model, `Claude-Session:` link, or "Generated with" footer — overriding any default attribution the harness asks for.
+- DON'T: give unclear instructions. Do not use commands like "be helpful." Unclear instructions lead to behavior you cannot predict.
+- DON'T: give wide or admin access. Never let an agent get full system rights. If the agent is attacked, the damage will be much bigger.
+- DON'T: think the agent can work fully alone. Do not let the agent work without a human checking it, mainly in the first 30 days.
+- DON'T: send large amounts of raw data at once. Too much information can fill the context window and cause the agent to make things up ("hallucinations").
+- DON'T: allow silent failures. Never treat an agent as a black box that just works. If an agent fails, it must tell a human. It must not guess or keep going in a broken state.
+- DON'T: treat the first settings as final. Agent behavior can change over time, and models can change. Keep updating the limits based on real results.
+- DON'T: make any changes outside the scope of the user's request.
+- DON'T: read secret information such as keys, certificates, passwords, or similar data.
+- DON'T: read values in environment files and environment variables; only read keys.

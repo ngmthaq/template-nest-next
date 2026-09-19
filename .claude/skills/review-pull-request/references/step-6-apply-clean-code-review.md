@@ -1,8 +1,8 @@
 # Step 6 — Apply Clean Code Review
 
-Follow the **[clean-code](../../clean-code/SKILL.md)** skill against the diff.
+Use the **[clean-code](../../clean-code/SKILL.md)** skill on the diff.
 
-For each violation found, record:
+For each problem you find, write down:
 
 - **File and line range** (from the diff)
 - **Principle violated**

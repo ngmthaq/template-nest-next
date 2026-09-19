@@ -1,82 +1,82 @@
 # Step 1 — Brainstorming (Root Agent)
 
-When a user prompt arrives, the Root Agent **must greet the user, classify the intent, and brainstorm the requirement with the user** before anything else. Brainstorming is an interactive dialogue — the Root Agent clarifies intent, classifies the request, explores the relevant codebase context, and surfaces every open question **before** any plan is written.
+When a user prompt comes in, the Root Agent **must first greet the user, classify the request, and brainstorm the requirement with the user**. Brainstorming is a two-way talk. The Root Agent makes the goal clear, classifies the request, looks at the related code, and lists every open question **before** any plan is written.
 
-> The Root Agent runs brainstorming itself. It may spawn one or more **read-only research sub-agents** to explore the codebase when the exploration is broad or spans many files — but these sub-agents research and report only; they never edit files, and no developer/tester (implementation) sub-agent is spawned at this stage.
+> The Root Agent runs brainstorming itself. When the search is big or covers many files, it can start one or more **read-only researcher sub-agents** to look through the codebase. These sub-agents only research and report. They never edit files. No developer/tester (coding) sub-agent starts at this stage.
 
 ---
 
 ## Check Task Complexity
 
-**Before classifying the intent, assess the size of the request.** A task is **big** when it:
+**Before you classify the request, check how big it is.** A task is **big** when it:
 
-- spans multiple layers (DB / API / business logic / UI),
-- describes an epic, user story, or feature request too large for a handful of atomic tasks, or
-- has many independent moving parts.
+- covers many layers (DB / API / business logic / UI),
+- is an epic, user story, or feature request that is too big for a few small tasks, or
+- has many independent parts.
 
-**If the task is big, STOP.** Tell the user they must run the [ticket-breakdown](../../ticket-breakdown/SKILL.md) skill first to decompose it into feature-level tickets, each with its own PRD, then **end the session**. Do not classify, brainstorm further, plan, or spawn any sub-agent. The user re-invokes `/party-mode` on an individual feature ticket once the breakdown is done.
+**If the task is big, STOP.** Tell the user to run the [ticket-breakdown](../../ticket-breakdown/SKILL.md) skill first. That skill splits the work into feature tickets, each with its own PRD. Then **end the session**. Do not classify, brainstorm more, plan, or start any sub-agent. When the breakdown is done, the user runs `/party-mode` again on one feature ticket.
 
-Only continue to classification when the task is small enough to be handled directly.
+Only move on to classification when the task is small enough to handle directly.
 
 ---
 
 ## Classify the Intent
 
-Classification shapes the brainstorming questions and the eventual plan structure.
+The class decides which questions you ask during brainstorming and how the plan looks.
 
 ### Feature
 
-Classify as `feature` when the prompt describes:
+Use `feature` when the prompt asks for:
 
-- New functionality to be added
-- Agent skill additions or modifications that add new capabilities
-- An existing behaviour to be refactored or improved
-- A performance improvement with no broken behaviour involved
-- A non-breaking change that adds value or enhances the user experience
-- A change that is explicitly framed as a "feature" by the user
+- New functionality
+- New or changed agent skills that add new abilities
+- A refactor or improvement of existing behaviour
+- A speed improvement where nothing is broken
+- A safe change that adds value or makes the user experience better
+- A change the user clearly calls a "feature"
 
 **Signal words:** "add", "implement", "create", "build", "refactor", "improve", "migrate", "support", "enable", "integrate"
 
 ### Bug
 
-Classify as `bug` when the prompt describes:
+Use `bug` when the prompt describes:
 
-- Something that was working and is now broken
-- Unexpected or incorrect behaviour
+- Something that worked before and is now broken
+- Unexpected or wrong behaviour
 - A crash, error, or exception
-- A regression introduced by a recent change
-- Output that does not match the specification
-- A change that is explicitly framed as a "bug" by the user
+- A regression (something broken by a recent change)
+- Output that does not match the spec
+- A change the user clearly calls a "bug"
 
 **Signal words:** "broken", "not working", "fails", "error", "crash", "wrong", "incorrect", "regression", "unexpected", "should be", "used to work"
 
-### Ambiguous Cases
+### Unclear Cases
 
-**Rule: ALWAYS ask the user. Never assume.**
+**Rule: ALWAYS ask the user. Never guess.**
 
-If the prompt contains signals for both `feature` and `bug`, or if intent cannot be determined with confidence, ask the user a direct, specific question before proceeding. Do not guess, infer, or proceed with a best-effort classification.
+If the prompt has signals for both `feature` and `bug`, or you are not sure of the intent, ask the user a direct, specific question before you go on. Do not guess, and do not go on with your best guess.
 
 ---
 
 ## Brainstorming Dialogue
 
-1. **Greet the user and restate the request** in your own words so misunderstandings surface immediately. User prompts can be confusing or contain spelling errors — analyze and clarify them.
-2. **Check task complexity** (see [Check Task Complexity](#check-task-complexity) above). If the task is big, instruct the user to run the [ticket-breakdown](../../ticket-breakdown/SKILL.md) skill first, then **end the session** — do not proceed to classification.
-3. **Classify the intent** (`feature` or `bug`) using the rules above.
-4. **Explore the codebase context.** Read the relevant files, modules, and conventions (read-only). Reference real paths — do not invent files. When the exploration is broad, spans many files, or needs parallel investigation, **spawn one or more read-only research sub-agents** to gather this context and report back — run independent research sub-agents in parallel by issuing multiple spawn calls in the same tool turn. Research sub-agents are strictly read-only: they search, read, and summarize findings; they never edit production or test files.
-5. **Load relevant documents.** Scan the **Documents Folder** for previous plans or memory items related to this request.
-6. **Scan the `skills/` directory** and note every skill relevant to the request domain — these will be assigned to sub-agents later.
-7. **Gather classification-specific details:**
-   - For a `feature`: scope, expected behaviour, affected areas, constraints, what is explicitly out of scope.
-   - For a `bug`: observed behaviour (error messages, stack traces, logs), expected behaviour, and reproduction steps. Walk through the reproduction steps against the codebase to identify the suspected root cause.
-8. **Surface every open question to the user.** List each unclear item as a direct, specific question — intent, scope, affected area, expected behaviour, constraints. **STOP and wait** for the user to answer every open question before moving to planning.
-9. **Iterate.** If the user's answers raise new questions, ask again. Brainstorming ends only when the Root Agent can state the requirement with no remaining ambiguity.
+1. **Greet the user and repeat the request** in your own words, so any misunderstanding shows up right away. User prompts can be confusing or have spelling errors — read them carefully and make them clear.
+2. **Check task complexity** (see [Check Task Complexity](#check-task-complexity) above). If the task is big, tell the user to run the [ticket-breakdown](../../ticket-breakdown/SKILL.md) skill first, then **end the session** — do not go on to classification.
+3. **Classify the intent** (`feature` or `bug`) with the rules above.
+4. **Look at the codebase.** Read the related files, modules, and conventions (read-only). Use real paths — do not make up files. When the search is big, covers many files, or is faster in parallel, **start one or more read-only researcher sub-agents** to collect the facts and report back. Run independent researcher sub-agents in parallel by making many start calls in the same tool turn. Researcher sub-agents are strictly read-only: they search, read, and sum up what they find. They never edit production or test files.
+5. **Load related documents.** Look in the **Documents Folder** for old plans or memory items about this request.
+6. **Look in the `skills/` directory** and note every skill that fits the request — you will give these to sub-agents later.
+7. **Collect details for the class:**
+   - For a `feature`: scope, expected behaviour, affected areas, limits, and what is clearly out of scope.
+   - For a `bug`: what happens now (error messages, stack traces, logs), what should happen, and steps to reproduce. Follow the reproduction steps through the code to find the likely root cause.
+8. **Show every open question to the user.** Write each unclear point as a direct, specific question — goal, scope, affected area, expected behaviour, limits. **STOP and wait** until the user answers every open question before you move to planning.
+9. **Repeat.** If the user's answers bring new questions, ask again. Brainstorming ends only when the Root Agent can describe the requirement with nothing left unclear.
 
 ---
 
 ## Usage Notes
 
-- Brainstorming is always the **first action** of the Root Agent. No planning or implementation delegation happens before it — read-only research sub-agents are the only sub-agents allowed at this stage, and only to gather codebase context.
-- **ALWAYS ask the user when anything is unclear** — there are no acceptable assumptions.
-- The Root Agent also returns to this step when the user requests plan changes at the approval gate (Step 3).
-- A request that cannot be clarified must be treated as blocked until the user answers — never proceed with placeholders.
+- Brainstorming is always the Root Agent's **first action**. No planning or coding delegation happens before it. Read-only researcher sub-agents are the only sub-agents allowed at this stage, and only to collect codebase facts.
+- **ALWAYS ask the user when anything is unclear** — never guess.
+- The Root Agent also comes back to this step when the user asks for plan changes at the approval gate (Step 3).
+- If a request cannot be made clear, treat it as blocked until the user answers — never go on with placeholders.

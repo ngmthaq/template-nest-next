@@ -1,45 +1,42 @@
 # CLAUDE
 
-Always read all markdown files in the sections below to get complete information about the project, do-do (DO) and don't-do (DO NOT) tasks.
+Always read all the markdown files linked in the sections below. They give you the full picture of the project and the things to do (DO) and not do (DO NOT).
 
 ---
 
 ## PROJECT OVERVIEW
 
-This section will provide an overview of the project, such as the project name, description, programming language, frameworks, main libraries used, library management platform, and project documentation location - see [PROJECT_OVERVIEW](./references/PROJECT_OVERVIEW.md).
+This section gives a short overview of the project: name, description, programming languages, frameworks, main libraries, package manager, and where the docs live - see [PROJECT_OVERVIEW](./references/PROJECT_OVERVIEW.md).
 
 ---
 
 ## CODING CONVENTIONS
 
-This section will describe the programming conventions for the project. If agents need to write code, they should follow these conventions to ensure everyone understands and adheres to them - see [CODING_CONVENTIONS](./references/CODING_CONVENTIONS.md)
-
----
-
-## GIT CONVENTIONS
-
-This section covers branch naming, base branch, merge strategy, commit message format, and PR
-expectations - see [GIT_CONVENTIONS](./references/GIT_CONVENTIONS.md).
+This section describes the coding rules for the project. When agents write code, they must follow these rules so the code stays the same style everywhere - see [CODING_CONVENTIONS](./references/CODING_CONVENTIONS.md)
 
 ---
 
 ## AGENT RULES
 
-This section provides information on "DO" and "DO NOT" clauses. Agents should refer to these items to prioritize tasks when receiving assignments from users or to avoid following them when receiving assignments from users - see [AGENT_RULES](./references/AGENT_RULES.md)
+This section lists the "DO" and "DO NOT" rules. Agents use them to decide what to do first when they get a task, and what they must never do - see [AGENT_RULES](./references/AGENT_RULES.md)
+
+---
+
+## WRITING STYLE
+
+This section describes how agents must write text — plain, simple English that non-native speakers can read easily. Every skill and sub-agent must follow it - see [WRITING_STYLE](./references/WRITING_STYLE.md)
 
 ---
 
 ## GRAPHIFY
 
-The repository is indexed into a knowledge graph at `graphify-out/` (god nodes, community
-structure, cross-file relationships). The skill lives at
-[graphify](./skills/graphify/SKILL.md) and is invoked with `/graphify`.
+- **graphify** (`.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
 
-- For codebase questions, run `graphify query "<question>"` first whenever
-  `graphify-out/graph.json` exists. Use `graphify path "<A>" "<B>"` for relationships and
-  `graphify explain "<concept>"` for a focused concept. These return a scoped subgraph, usually
-  far smaller than `GRAPH_REPORT.md` or raw grep output.
-- If `graphify-out/wiki/index.md` exists, use it for broad navigation instead of browsing source.
-- Read `graphify-out/GRAPH_REPORT.md` only for broad architecture review, or when
-  `query` / `path` / `explain` do not surface enough context.
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

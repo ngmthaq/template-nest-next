@@ -1,6 +1,6 @@
 # DRY — Don't Repeat Yourself
 
-Every piece of knowledge has a **single, authoritative representation** in the system.
+Every piece of knowledge lives in **one single place** in the system. That place is the source of truth.
 
 ```javascript
 // Bad — tax logic duplicated in three places
@@ -26,9 +26,9 @@ const mockUser = { id: "1", email: "a@b.com", role: "admin" }; // tests
 export type User = { id: string; email: string; role: string };
 ```
 
-## DRY Enforcement Rules
+## DRY Rules
 
-1. Before copy-pasting, stop — extract a function, constant, or module first.
-2. Before hardcoding a value, check if it appears elsewhere — if so, name it as a constant.
-3. "Rule of Three": abstract on the third repetition, not the first.
-4. Do not DRY prematurely — coincidentally similar code representing different concepts should stay separate.
+1. Before you copy and paste, stop — move the code into a function, constant, or module first.
+2. Before you hardcode a value, check if it is used somewhere else — if so, make it a named constant.
+3. "Rule of Three": make shared code on the third copy, not the first.
+4. Do not DRY too early — code that looks the same by chance but means different things should stay separate.

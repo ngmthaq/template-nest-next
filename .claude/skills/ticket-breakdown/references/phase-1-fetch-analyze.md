@@ -1,6 +1,6 @@
 # Phase 1 — Fetch & Analyze the Epic
 
-## 1a. Determine input source
+## 1a. Find the input source
 
 | Source                           | Action                       |
 | -------------------------------- | ---------------------------- |
@@ -9,23 +9,23 @@
 | Linear ticket ID/URL             | Fetch via Linear MCP         |
 | GitHub Issue URL or `#number`    | Fetch via GitHub MCP         |
 
-If the user provides a ticket ID but no system is specified, ask: _"Is that a Jira, Linear, or GitHub issue?"_
+If the user gives a ticket ID but does not say which system, ask: _"Is that a Jira, Linear, or GitHub issue?"_
 
-If the input is a single feature rather than an epic, say so and confirm with the user: _"This reads as one feature, not an epic. Shall I write a single PRD for it instead of breaking it into multiple features?"_
+If the input is one feature and not an epic, say so and check with the user: _"This looks like one feature, not an epic. Should I write one PRD for it instead of splitting it into many features?"_
 
 ## 1b. Ask clarifying questions first
 
-Before analyzing, check whether you can answer all of these from the input. If not, **ask the user** — do not invent answers:
+Before you analyze, check if the input answers all of these. If not, **ask the user** — do not make up answers:
 
 - Who are the target users / personas?
-- What problem or business need is this epic addressing?
+- What problem or business need does this epic solve?
 - What outcome or metric should improve?
 - Are there known constraints (compliance, platform, launch date, existing product areas)?
 - Is anything explicitly out of scope?
 
-## 1c. Analyze and output a structured summary
+## 1c. Analyze and write a structured summary
 
-Present this before asking for Phase 2 approval:
+Show this before you ask for Phase 2 approval:
 
 ```md
 ## 📋 Epic Analysis
@@ -36,7 +36,7 @@ Present this before asking for Phase 2 approval:
 
 ### Problem
 
-<3–5 sentences: the user problem or business need this epic addresses>
+<3–5 sentences: the user problem or business need this epic solves>
 
 ### Desired Outcome
 
@@ -48,11 +48,11 @@ Present this before asking for Phase 2 approval:
 
 ### Product Scope
 
-<bullet list of the capabilities in scope, expressed as user-facing value — not technical layers>
+<bullet list of the abilities in scope, written as value for users — not technical layers>
 
 ### Out of Scope / Assumptions
 
-<bullet list of assumptions or explicit exclusions>
+<bullet list of assumptions or things clearly left out>
 
 ### Constraints
 
@@ -60,7 +60,7 @@ Present this before asking for Phase 2 approval:
 
 ### Risks / Open Questions
 
-<anything ambiguous that the team needs to clarify>
+<anything unclear that the team needs to clear up>
 ```
 
 Then ask: _"Does this analysis look right? Any corrections before I break the epic into features?"_
