@@ -76,6 +76,14 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `MYSQL_USER`            | `nestjs`                                 | Application user.                                                                              |
 | `MYSQL_PASSWORD`        | `nestjs`                                 | Application user password.                                                                     |
 | `MYSQL_ROOT_PASSWORD`   | `root`                                   | Root password; used only by the container's healthcheck / admin access.                        |
+| `OPENOBSERVE_PORT`      | `5080`                                   | Published host port of the OpenObserve container (`docker-compose-infra.yml`).                 |
+| `ZO_ROOT_USER_EMAIL`    | _(none)_                                 | OpenObserve root user, created on the container's first boot. Required for it to start.        |
+| `ZO_ROOT_USER_PASSWORD` | _(none)_                                 | OpenObserve root user password. Needs 8+ chars with lower, upper, digit, and special char.     |
+| `OPENOBSERVE_URL`       | _(empty)_                                | Base URL of the OpenObserve ingest API. Empty turns off log shipping; console logging stays on. |
+| `OPENOBSERVE_ORG`       | `default`                                | OpenObserve organization the server ships logs to.                                             |
+| `OPENOBSERVE_STREAM`    | `server`                                 | OpenObserve stream the server ships logs to.                                                    |
+| `OPENOBSERVE_USER`      | _(empty)_                                | Login used to authenticate log ingest requests (basic auth) — the OpenObserve root user.        |
+| `OPENOBSERVE_PASSWORD`  | _(empty)_                                | Password for `OPENOBSERVE_USER`.                                                                |
 
 > The `MYSQL_*` keys use the official `mysql` image's own variable names, so
 > `docker-compose-infra.yml` passes the env file straight through with no remapping.
@@ -140,10 +148,10 @@ preflight checks, and a confirmation gate. Run them from the repository root wit
   and `apps/client/.env.*`, so the laptop's env files overwrite the VM's copies — the script's
   summary names both files before you confirm.
 
-### Local infrastructure (MySQL + Redis)
+### Local infrastructure (MySQL + Redis + OpenObserve)
 
 ```bash
-# Start MySQL + Redis for the development environment
+# Start MySQL + Redis + OpenObserve for the development environment
 NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
 
 # Stop them
@@ -154,8 +162,44 @@ NODE_ENV=development docker compose -f docker-compose-infra.yml down -v
 ```
 
 Containers are named per environment (`template-nest-next-mysql-<NODE_ENV>`,
-`template-nest-next-redis-<NODE_ENV>`). The `MYSQL_*` / `REDIS_*` values come from
-`.env.<NODE_ENV>`, so the app database and user are created from that file on first start.
+`template-nest-next-redis-<NODE_ENV>`, `template-nest-next-openobserve-<NODE_ENV>`). The
+`MYSQL_*` / `REDIS_*` / `ZO_*` values come from `.env.<NODE_ENV>`, so the app database, user,
+and OpenObserve root login are created from that file on first start. `pnpm infra` (the
+interactive script) starts all three and shows the ports it used.
+
+### OpenObserve (logs)
+
+[OpenObserve](https://openobserve.ai) collects logs sent by both apps. It starts with
+`pnpm infra` alongside MySQL and Redis (see above).
+
+1. Set `ZO_ROOT_USER_EMAIL` and `ZO_ROOT_USER_PASSWORD` in `apps/server/.env.<NODE_ENV>` before
+   the first start — the container refuses to boot without them. The password needs 8+
+   characters with a lowercase letter, an uppercase letter, a digit, and a special character.
+2. Start it with `pnpm infra` (or `docker compose -f docker-compose-infra.yml up -d`).
+3. Open the UI at `http://localhost:5080` (or your `OPENOBSERVE_PORT`) and log in with the
+   `ZO_ROOT_USER_EMAIL` / `ZO_ROOT_USER_PASSWORD` you set.
+4. Logs land in org `default`: the server's stream is `server`, the client's is `client`
+   (see `apps/client/README.md` for its env keys).
+
+Set these in **both** `apps/server/.env.<NODE_ENV>` and `apps/client/.env.<NODE_ENV>` to turn
+log shipping on:
+
+| Variable              | Default   | Description                                                    |
+| ---------------------- | --------- | ---------------------------------------------------------------- |
+| `OPENOBSERVE_URL`      | _(empty)_ | Base URL of the ingest API. Empty = shipping off; console logging still works. |
+| `OPENOBSERVE_ORG`      | `default` | Organization to ship logs to.                                    |
+| `OPENOBSERVE_STREAM`   | `server` (client: `client`) | Stream this app ships logs to.                  |
+| `OPENOBSERVE_USER`     | _(empty)_ | Login for ingest requests (basic auth) — the OpenObserve root user. |
+| `OPENOBSERVE_PASSWORD` | _(empty)_ | Password for `OPENOBSERVE_USER`.                                  |
+
+> **Running the apps in Docker?** `OPENOBSERVE_URL=http://localhost:5080` will not reach the
+> OpenObserve container from inside `server`/`client`'s own container — `localhost` there means
+> the container itself. Use the host instead: `http://host.docker.internal:5080` on Docker
+> Desktop (macOS/Windows), or the VM's own IP/hostname on Linux or a remote VM.
+
+A failed send (OpenObserve down, wrong password) is swallowed — it never crashes the app and
+never falls back to logging through the same path (no loop). Console logging is unaffected
+either way.
 
 ### Application container
 

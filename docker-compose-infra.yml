@@ -1,5 +1,6 @@
-# MySQL + Redis for local development, selected by NODE_ENV (default `development`). Published
-# host ports come from your shell, not the env file. See the Docker section of apps/server/README.md.
+# MySQL + Redis + OpenObserve for local development, selected by NODE_ENV (default
+# `development`). Published host ports come from your shell, not the env file. See the Docker
+# section of apps/server/README.md.
 
 name: template-nest-next-infra
 
@@ -46,6 +47,28 @@ services:
       timeout: 5s
       retries: 5
 
+  # The "-debug" tag is used on purpose: the plain tag ships no shell and no curl/wget, so a
+  # container-exec healthcheck against it is not possible (confirmed against the image).
+  openobserve:
+    image: openobserve/openobserve:v1.0.3-debug
+    container_name: template-nest-next-openobserve-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${OPENOBSERVE_PORT:-5080}:5080"
+    env_file:
+      - apps/server/.env.${NODE_ENV:-development}
+    environment:
+      ZO_DATA_DIR: /data
+    volumes:
+      - openobserve-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
 volumes:
   mysql-data:
   redis-data:
+  openobserve-data:

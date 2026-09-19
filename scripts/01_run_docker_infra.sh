@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Interactive TUI: bring up MySQL + Redis (docker-compose-infra.yml) for a chosen
+# Interactive TUI: bring up MySQL + Redis + OpenObserve (docker-compose-infra.yml) for a chosen
 # environment, locally or on a remote VM already provisioned by script 02.
 set -euo pipefail
 
@@ -39,28 +39,30 @@ verify_remote_repo() {
 
 print_summary() {
   local target="$1" environment="$2" env_file="$3" mysql_port="$4" redis_port="$5"
+  local openobserve_port="$6"
   local target_label="local"
   if [[ "$target" == "remote" ]]; then
     target_label="${SSH_USER}@${SSH_HOST}:${SSH_PORT}"
   fi
   ui_header "Summary"
-  ui_info "Target:      ${target_label}"
-  ui_info "Environment: ${environment}"
-  ui_info "Env file:    ${env_file}"
-  ui_info "MySQL port:  ${mysql_port}"
-  ui_info "Redis port:  ${redis_port}"
+  ui_info "Target:            ${target_label}"
+  ui_info "Environment:       ${environment}"
+  ui_info "Env file:          ${env_file}"
+  ui_info "MySQL port:        ${mysql_port}"
+  ui_info "Redis port:        ${redis_port}"
+  ui_info "OpenObserve port:  ${openobserve_port}"
 }
 
-# Compose interpolates MYSQL_PORT/REDIS_PORT from the shell, not env_file:,
-# so both must be exported into whichever process runs `compose up`.
+# Compose interpolates MYSQL_PORT/REDIS_PORT/OPENOBSERVE_PORT from the shell, not env_file:,
+# so all three must be exported into whichever process runs `compose up`.
 compose_up() {
-  local target="$1" environment="$2" mysql_port="$3" redis_port="$4"
+  local target="$1" environment="$2" mysql_port="$3" redis_port="$4" openobserve_port="$5"
   if [[ "$target" == "remote" ]]; then
     MSYS_NO_PATHCONV=1 ssh_run \
-      "cd '${REMOTE_PATH}' && NODE_ENV='${environment}' MYSQL_PORT='${mysql_port}' REDIS_PORT='${redis_port}' docker compose -f ${COMPOSE_FILE} up -d"
+      "cd '${REMOTE_PATH}' && NODE_ENV='${environment}' MYSQL_PORT='${mysql_port}' REDIS_PORT='${redis_port}' OPENOBSERVE_PORT='${openobserve_port}' docker compose -f ${COMPOSE_FILE} up -d"
   else
     NODE_ENV="$environment" MYSQL_PORT="$mysql_port" REDIS_PORT="$redis_port" \
-      docker compose -f "$COMPOSE_FILE" up -d
+      OPENOBSERVE_PORT="$openobserve_port" docker compose -f "$COMPOSE_FILE" up -d
   fi
 }
 
@@ -71,14 +73,14 @@ show_status() {
   else
     docker compose -f "$COMPOSE_FILE" ps
   fi
-  ui_success "template-nest-next-mysql-${environment} and template-nest-next-redis-${environment} are up."
+  ui_success "template-nest-next-mysql-${environment}, template-nest-next-redis-${environment}, and template-nest-next-openobserve-${environment} are up."
 }
 
 main() {
   require_command docker "Install Docker Desktop or the Docker Engine before continuing."
   cd "$REPO_ROOT"
 
-  ui_header "Docker infra: MySQL + Redis"
+  ui_header "Docker infra: MySQL + Redis + OpenObserve"
 
   local target
   ui_select target "Where should the stack run?" "local" "remote"
@@ -95,16 +97,18 @@ main() {
   local env_file="apps/server/.env.${environment}"
   env_require_file "$env_file"
 
-  local mysql_port redis_port
+  local mysql_port redis_port openobserve_port
   mysql_port="$(env_value "$env_file" "MYSQL_PORT")"
   redis_port="$(env_value "$env_file" "REDIS_PORT")"
+  openobserve_port="$(env_value "$env_file" "OPENOBSERVE_PORT")"
   mysql_port="${mysql_port:-3306}"
   redis_port="${redis_port:-6379}"
+  openobserve_port="${openobserve_port:-5080}"
 
-  print_summary "$target" "$environment" "$env_file" "$mysql_port" "$redis_port"
-  ui_confirm "Bring up MySQL + Redis with these settings?" || ui_die "Aborted."
+  print_summary "$target" "$environment" "$env_file" "$mysql_port" "$redis_port" "$openobserve_port"
+  ui_confirm "Bring up MySQL + Redis + OpenObserve with these settings?" || ui_die "Aborted."
 
-  compose_up "$target" "$environment" "$mysql_port" "$redis_port"
+  compose_up "$target" "$environment" "$mysql_port" "$redis_port" "$openobserve_port"
   show_status "$target" "$environment"
 }
 

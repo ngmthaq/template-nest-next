@@ -9,6 +9,13 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '3000', 10),
   log: {
     level: process.env.LOG_LEVEL ?? 'debug',
+    openobserve: {
+      url: process.env.OPENOBSERVE_URL || undefined,
+      org: process.env.OPENOBSERVE_ORG ?? 'default',
+      stream: process.env.OPENOBSERVE_STREAM ?? 'server',
+      user: process.env.OPENOBSERVE_USER || undefined,
+      password: process.env.OPENOBSERVE_PASSWORD || undefined,
+    },
   },
   cache: {
     ttl: parseInt(process.env.CACHE_TTL ?? '3600000', 10),
