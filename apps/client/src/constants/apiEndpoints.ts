@@ -1,7 +1,12 @@
 export const apiEndpoints = {
-  get: {},
+  get: {
+    health: '/health',
+    cache: '/cache',
+  },
   post: {},
   put: {},
   patch: {},
-  delete: {},
+  delete: {
+    cache: '/cache',
+  },
 } as const;

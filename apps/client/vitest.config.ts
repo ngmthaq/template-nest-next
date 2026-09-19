@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(clientRoot, 'src'),
+      '@vitest-helpers': path.resolve(clientRoot, 'vitest.helpers.tsx'),
       'server-only': path.resolve(clientRoot, 'vitest.server-only-stub.ts'),
     },
   },

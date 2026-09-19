@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@vitest-helpers": ["./vitest.helpers.tsx"]
     }
   },
   "include": [

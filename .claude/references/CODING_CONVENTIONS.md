@@ -18,14 +18,17 @@
 │   │       ├── shared/          # config/, dto/, guards/, pipes/
 │   │       └── generated/       # Prisma client (generated, do not edit)
 │   └── client/                  # Next.js app
+│       ├── vitest.helpers.tsx   # shared test helpers, imported as `@vitest-helpers`
 │       └── src/
-│           ├── app/(routes)/[locale]/   # pages, layouts, error, not-found
+│           ├── app/(routes)/[locale]/   # pages, layouts, error, not-found, route-only actions.ts
 │           ├── components/      # atoms/, molecules/, organisms/, templates/
 │           ├── hooks/           # useXxx.ts
 │           ├── utils/           # xxxUtils.ts
+│           ├── schemas/         # xxxSchema.ts: Yup schema factories + inferred form types
 │           ├── constants/       # camelCase `as const` objects
 │           ├── libs/            # third-party wrappers: shadcn-ui/, next-intl/, next-themes/, lucide/
-│           └── assets/css/      # globals.css (Tailwind entry)
+│           ├── assets/css/      # globals.css (Tailwind entry)
+│           └── proxy.ts         # request proxy: next-intl routing + production gate for dev-only routes
 ├── packages/                    # shared packages (empty for now)
 ├── scripts/                     # docker infra and deploy scripts
 └── docs/                        # agent plan files
@@ -151,6 +154,8 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 | Hook types          | `Use<Name>Options`, `Use<Name>Result`, exported | `UseCopyToClipboardResult`               |
 | Utils               | `xxxUtils.ts`: a class + one exported instance  | `LogUtils` → `logUtils`                  |
 | Constants           | camelCase object with `as const`                | `apiEndpoints`, `storageKeys`            |
+| Schemas             | `src/schemas/xxxSchema.ts`: `createXxxSchema(t)` + `XxxFormValues` | `createCacheSearchSchema`, `CacheSearchFormValues` |
+| Route-only code     | `actions.ts` next to `page.tsx`                 | `health/actions.ts`, `cache/actions.ts`  |
 | shadcn-ui files     | kebab-case (shadcn default)                     | `libs/shadcn-ui/dropdown-menu.tsx`       |
 | Next.js route files | Next.js names                                   | `page.tsx`, `layout.tsx`, `error.tsx`    |
 
@@ -163,6 +168,18 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 - Add `'use client'` only when the file needs client features (state, effects, browser APIs).
 - Build UI from `@/libs/shadcn-ui/*`. Style with Tailwind and `cn()`.
 - Do not edit shadcn-ui files unless the task needs it. Add new ones with `pnpm client shadcn-ui:add`.
+- Delete a level's `.gitkeep` once that folder has a real file in it.
+- Small components used by only one route (e.g. a Suspense child and its fallback) stay as local functions in that route's `page.tsx`. Do not move them to `components/`.
+- Shared components must not import from `src/app`. Pass route data or actions in as props.
+
+### Routes, Cache Components, and env
+
+- `cacheComponents: true` is on. Request-time data (`connection()`, `cookies()`, `headers()`, uncached `fetch`) must sit inside `<Suspense>`, or the route must set `export const instant = false`. If not, `pnpm client build` fails with "Blocking Route".
+- A `notFound()` that depends on request-time data runs after the static shell has started streaming, so the response keeps status 200. To send a real 404, decide it in `src/proxy.ts` and rewrite to the `[...rest]` catch-all.
+- Route `actions.ts`: use `'use server'` for Server Actions that client components call. Use `import 'server-only'` for data loaders that only Server Components call, so they are not exposed as POST endpoints.
+- Check the environment on the server only, with `envUtils.isProduction()` (reads `APP_ENV` on each call). Never expose it through `NEXT_PUBLIC_`.
+- Dev-only routes (e.g. `/[locale]/cache`) are blocked in three places: `proxy.ts` (real 404), the page (`notFound()`), and each Server Action.
+- Hidden routes (not linked from the UI) set `robots: { index: false, follow: false }` in their metadata.
 
 ### Code order in a component or hook
 
@@ -187,12 +204,14 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 ### i18n
 
 - All UI text goes in `libs/next-intl/messages/en.json` and `zh.json`. Add keys to both files.
+- Keys are one level deep inside a namespace. Join a nested path in camelCase: `health.tableIndicator`, `cache.errorsProduction` — not `health.table.indicator`.
 - Read text with `useTranslations('<namespace>')` (or the server version).
 - Use `Link` and navigation helpers from `@/libs/next-intl/configs/navigation`, not `next/link`.
 
 ### Forms, state, logging
 
-- Forms: Formik + Yup schemas.
+- Forms: Formik + Yup schemas. Put each schema in `src/schemas/xxxSchema.ts` as a factory that takes the namespaced translator: `createXxxSchema(t: ReturnType<typeof useTranslations<'ns'>>)`. Infer the form values type from it: `type XxxFormValues = InferType<ReturnType<typeof createXxxSchema>>`. Export shared limits (e.g. `MAX_CACHE_PATTERN_LENGTH`) from the same file.
+- Async handlers: prefer `async` functions with `try/catch/finally`. Call them from JSX with `void`, e.g. `onClick={() => void handleDelete(key)}`.
 - State: local React state and custom hooks. No global state library.
 - Logging: `logUtils.error/warn/info/debug`.
 - Error pages: `error.tsx` logs with `logUtils.error` and shows `AppStatusTemplate`.
@@ -203,6 +222,10 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 - Test files sit next to the source file: `x.service.spec.ts`, `useX.spec.ts`, `Component/index.spec.tsx`.
 - Server: Jest + `@nestjs/testing` (`Test.createTestingModule`). Mock deps with `useValue`. No e2e tests.
 - Client: Vitest + Testing Library (`render`, `renderHook`, `userEvent`). Use `vi.fn()` and `vi.useFakeTimers()`.
+- Client components that read translations: render with `renderWithIntl(ui)` from `@vitest-helpers` (`apps/client/vitest.helpers.tsx`). Do not wrap `NextIntlClientProvider` in each spec.
+- Client env: mock env with `vi.stubEnv` and reset it with `vi.unstubAllEnvs`. Specs that use `next/server` (e.g. `proxy.spec.ts`) add `// @vitest-environment node` at the top.
+- No specs in `src/app/(routes)/**` (route files are also left out of coverage). Keep route files thin and test the logic they use in `utils/`, `schemas/`, or `components/`.
+- Client page work is done only when `pnpm client build` passes. Typecheck and tests do not catch Cache Components errors.
 - Every test follows AAA with `// Arrange`, `// Act`, `// Assert` comments.
 - Test names read as behavior: `it('copies text and sets copiedText on success')`.
 - Components also get a Storybook story (`index.stories.tsx`, `title: '<Level>/<Name>'`).
