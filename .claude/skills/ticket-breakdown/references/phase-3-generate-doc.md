@@ -4,7 +4,7 @@ Write one PRD markdown file **for each feature** approved in Phase 2. Also write
 
 ## File path
 
-Write all files directly into the **Doc Directory** (see `references/PROJECT_OVERVIEW.md`, default is `/docs`) — no sub-folders:
+Write all files directly into the **Doc Directory** (see `references/PROJECT_OVERVIEW.md`, default is `/.claude/plans`) — no sub-folders:
 
 ```
 <Doc Directory>/yyyy-mm-dd-<summary>-prd.md
@@ -13,7 +13,7 @@ Write all files directly into the **Doc Directory** (see `references/PROJECT_OVE
 - `yyyy-mm-dd` = date the PRD is written (e.g. `2026-08-07`)
 - `<summary>` = the feature name in kebab-case (max 6 words, lowercase, no special characters)
 
-**Example:** `/docs/2026-08-07-self-serve-assessment-creation-prd.md`
+**Example:** `/.claude/plans/2026-08-07-self-serve-assessment-creation-prd.md`
 
 ## PRD template
 
@@ -84,7 +84,7 @@ After you write the PRDs, write **one** overview file that links to all of them:
 - `<epic-summary>` = the **epic** name in kebab-case (max 6 words)
 - Same date as the PRDs, same Doc Directory — so links are simple paths in the same folder (`./<file>.md`)
 
-**Example:** `/docs/2026-08-07-performance-review-cycle-prd-overview.md`
+**Example:** `/.claude/plans/2026-08-07-performance-review-cycle-prd-overview.md`
 
 ### Overview template
 
@@ -150,10 +150,10 @@ Show a summary of what you wrote:
 
 | #   | Feature                        | Path                                                   |
 | --- | ------------------------------ | ------------------------------------------------------ |
-| 1   | Self-serve assessment creation | /docs/2026-08-07-self-serve-assessment-creation-prd.md |
-| 2   | Assessment results dashboard   | /docs/2026-08-07-assessment-results-dashboard-prd.md   |
+| 1   | Self-serve assessment creation | /.claude/plans/2026-08-07-self-serve-assessment-creation-prd.md |
+| 2   | Assessment results dashboard   | /.claude/plans/2026-08-07-assessment-results-dashboard-prd.md   |
 
-**Overview:** /docs/2026-08-07-performance-review-cycle-prd-overview.md
+**Overview:** /.claude/plans/2026-08-07-performance-review-cycle-prd-overview.md
 ```
 
 Then ask: _"PRDs saved ✅ — track them from the overview file. Should I go on and create the feature tickets in your ticket system?"_

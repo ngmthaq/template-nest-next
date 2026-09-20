@@ -44,11 +44,11 @@ After all tickets are created, show a summary table:
 
 | #   | Ticket ID | Feature                        | PRD                                                    | Link  |
 | --- | --------- | ------------------------------ | ------------------------------------------------------ | ----- |
-| 1   | PROJ-124  | Self-serve assessment creation | /docs/2026-08-07-self-serve-assessment-creation-prd.md | <url> |
-| 2   | PROJ-125  | Assessment results dashboard   | /docs/2026-08-07-assessment-results-dashboard-prd.md   | <url> |
+| 1   | PROJ-124  | Self-serve assessment creation | /.claude/plans/2026-08-07-self-serve-assessment-creation-prd.md | <url> |
+| 2   | PROJ-125  | Assessment results dashboard   | /.claude/plans/2026-08-07-assessment-results-dashboard-prd.md   | <url> |
 
 **Parent epic:** PROJ-123 — features linked ✅
-**Overview updated:** /docs/2026-08-07-performance-review-cycle-prd-overview.md
+**Overview updated:** /.claude/plans/2026-08-07-performance-review-cycle-prd-overview.md
 ```
 
 ## MCP Reference

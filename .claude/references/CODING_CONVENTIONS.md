@@ -31,7 +31,11 @@
 │           └── proxy.ts         # request proxy: next-intl routing + production gate for dev-only routes
 ├── packages/                    # shared packages (empty for now)
 ├── scripts/                     # docker infra and deploy scripts
-└── docs/                        # agent plan files
+├── docs/                        # business documents written by people
+└── .claude/
+    ├── references/              # AI context: overview, conventions, rules, writing style
+    ├── skills/                  # AI skills
+    └── plans/                   # agent-written files: plans and PRDs
 ```
 
 ## Formatting (Prettier + ESLint)

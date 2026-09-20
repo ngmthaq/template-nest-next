@@ -9,7 +9,7 @@
 - **Package Managers**: `pnpm 10 (workspaces)`
 - **Key Libraries**: `server: Prisma 7, class-validator, class-transformer, BullMQ, cache-manager + Keyv/Redis, Socket.IO, Winston, Swagger, Nodemailer, Helmet, Throttler | client: Axios, Formik, Yup, next-intl, TanStack Table, shadcn/ui (Radix + Base UI), Tailwind CSS 4, Sonner`
 - **Database**: `MySQL (Prisma with the MariaDB adapter), Redis (cache and BullMQ queues)`
-- **Doc Directory**: `/docs`
+- **Doc Directory**: `/.claude/plans`
 - **Testing Workflow**: `Code-First` <!-- Code-First | Test-First | Skip-Testing -->
 - **Playwright Check**: `Ask-User` <!-- Always | None | Ask-User -->
 
@@ -29,9 +29,11 @@
 | `apps/client`          | Next.js app. See `apps/client/README.md`.                                              |
 | `apps/client/src`      | `app/`, `components/`, `hooks/`, `libs/` (incl. `libs/shadcn-ui`), `utils/`, `schemas/`, `constants/`, `proxy.ts`. |
 | `apps/client/src/app/(routes)/[locale]/health`, `/cache` | Hidden dev pages (no UI links, `noindex`). `health` shows server/MySQL/Redis status. `cache` searches and deletes cache keys, and returns 404 in production. |
-| `packages/`            | Shared packages (empty for now).                                                       |
+| `packages/`            | Shared packages. Declared in `pnpm-workspace.yaml`, but the folder does not exist yet.  |
 | `scripts/`             | `01_run_docker_infra.sh` (local infra), `02_deploy_docker_vm.sh` (VM deploy).          |
-| `docs/`                | Agent plan files, named `YYYY-MM-DD-HH-mm-ss-<slug>.md`.                               |
+| `docs/`                | Business documents written by people. Not for agent output.                            |
+| `.claude/plans/`        | Agent-written files: plan files named `YYYY-MM-DD-HH-mm-ss-<slug>.md`, and PRDs.       |
+| `.claude/references/`  | AI context: `PROJECT_OVERVIEW.md`, `CODING_CONVENTIONS.md`, `AGENT_RULES.md`, `WRITING_STYLE.md`. |
 
 ### Commands
 
@@ -53,4 +55,5 @@
 - The client uses a new Next.js version. Read `apps/client/AGENTS.md` and the docs in `node_modules/next/dist/docs/` before writing client code.
 - Husky + lint-staged run ESLint on staged files before each commit.
 - CI config exists for both GitHub (`.github/workflows`) and GitLab (`.gitlab`).
+- Logs from both apps go to a self-hosted OpenObserve. The server ships them with a Winston transport (`src/core/winston/lib/openobserve-transport-options.ts`). The client batches them in `src/utils/logUtils.ts` and POSTs to the `_json` ingest endpoint. Never use `console.log` in the client — use `logUtils`.
 - Graphify graph lives in `graphify-out/`. Run `graphify update .` after code changes.
