@@ -3,10 +3,10 @@ import { notFound } from 'next/navigation';
 import { connection } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 
-import { CacheExplorer } from '@/components/organisms/CacheExplorer';
 import { Typography } from '@/libs/shadcn-ui/typography';
-import { envUtils } from '@/utils/envUtils';
+import { envUtils } from '@/shared/utils/envUtils';
 
+import { CacheExplorer } from './_components/CacheExplorer';
 import { deleteCacheAction, searchCacheAction } from './actions';
 
 export async function generateMetadata(): Promise<Metadata> {

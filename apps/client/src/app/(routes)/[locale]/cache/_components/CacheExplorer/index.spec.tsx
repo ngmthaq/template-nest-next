@@ -10,7 +10,7 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), info: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock('@/utils/logUtils', () => ({
+vi.mock('@/shared/utils/logUtils', () => ({
   logUtils: { error: vi.fn() },
 }));
 

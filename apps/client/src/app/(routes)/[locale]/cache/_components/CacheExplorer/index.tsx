@@ -30,9 +30,13 @@ import {
   TableRow,
 } from '@/libs/shadcn-ui/table';
 import { Typography } from '@/libs/shadcn-ui/typography';
-import type { CacheSearchFormValues } from '@/schemas/cacheSearchSchema';
-import { createCacheSearchSchema, MAX_CACHE_PATTERN_LENGTH } from '@/schemas/cacheSearchSchema';
-import { logUtils } from '@/utils/logUtils';
+import { logUtils } from '@/shared/utils/logUtils';
+
+import type { CacheSearchFormValues } from '../../_schemas/cacheSearchSchema';
+import {
+  createCacheSearchSchema,
+  MAX_CACHE_PATTERN_LENGTH,
+} from '../../_schemas/cacheSearchSchema';
 
 /** A single cache entry returned by `GET /cache?pattern=`. */
 export interface CacheEntry {

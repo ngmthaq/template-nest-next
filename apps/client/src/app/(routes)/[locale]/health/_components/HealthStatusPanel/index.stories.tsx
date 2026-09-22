@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { HealthStatusPanel } from '.';
 
 const meta = {
-  title: 'Organisms/HealthStatusPanel',
+  title: 'Routes/Health/HealthStatusPanel',
   component: HealthStatusPanel,
 } satisfies Meta<typeof HealthStatusPanel>;
 

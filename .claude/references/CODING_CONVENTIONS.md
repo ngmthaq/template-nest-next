@@ -20,12 +20,15 @@
 │   └── client/                  # Next.js app
 │       ├── vitest.helpers.tsx   # shared test helpers, imported as `@vitest-helpers`
 │       └── src/
-│           ├── app/(routes)/[locale]/   # pages, layouts, error, not-found, route-only actions.ts
-│           ├── components/      # atoms/, molecules/, organisms/, templates/
-│           ├── hooks/           # useXxx.ts
-│           ├── utils/           # xxxUtils.ts
-│           ├── schemas/         # xxxSchema.ts: Yup schema factories + inferred form types
-│           ├── constants/       # camelCase `as const` objects
+│           ├── app/(routes)/[locale]/<route>/   # page.tsx, actions.ts, ... (no specs, no coverage)
+│           │   ├── _components/<Name>/index.tsx # route-only components (+ index.spec.tsx, index.stories.tsx)
+│           │   ├── _schemas/xxxSchema.ts         # route-only Yup schemas (+ spec)
+│           │   ├── _constants/apiEndpoints.ts    # route-only constants, e.g. API paths grouped by HTTP method
+│           │   └── _hooks/, _utils/              # when needed
+│           ├── shared/
+│           │   ├── components/  # atoms/, molecules/, organisms/, templates/ (Atomic Design)
+│           │   ├── hooks/       # useXxx.ts
+│           │   └── utils/       # xxxUtils.ts (schemas/ and constants/ added here only when 2+ routes share one)
 │           ├── libs/            # third-party wrappers: shadcn-ui/, next-intl/, next-themes/, lucide/
 │           ├── assets/css/      # globals.css (Tailwind entry)
 │           └── proxy.ts         # request proxy: next-intl routing + production gate for dev-only routes
@@ -148,33 +151,41 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 
 > This Next.js version has breaking changes. Read `apps/client/AGENTS.md` and `node_modules/next/dist/docs/` before you write client code.
 
+### Where code goes
+
+- Code used by only one route goes in that route's `_<kind>/` folder: `_components`, `_schemas`, `_hooks`, `_utils`, `_constants`.
+- Our own code used by 2 or more routes goes in `src/shared/<kind>/`.
+- The leading `_` makes the folder a Next.js private folder, so it is never a route.
+
 ### Naming
 
 | Item                | Rule                                            | Example                                  |
 | ------------------- | ----------------------------------------------- | ---------------------------------------- |
-| Components          | PascalCase folder with `index.tsx`              | `components/templates/AppStatusTemplate/index.tsx` |
+| Components          | PascalCase folder with `index.tsx`              | `shared/components/templates/AppStatusTemplate/index.tsx` |
 | Props type          | `<Component>Props` interface                    | `AppStatusTemplateProps`                 |
-| Hooks               | `useXxx.ts`, camelCase                          | `useCopyToClipboard.ts`                  |
+| Hooks               | `useXxx.ts`, camelCase, in `shared/hooks/` (or a route's `_hooks/` when only that route uses it) | `useCopyToClipboard.ts` |
 | Hook types          | `Use<Name>Options`, `Use<Name>Result`, exported | `UseCopyToClipboardResult`               |
-| Utils               | `xxxUtils.ts`: a class + one exported instance  | `LogUtils` → `logUtils`                  |
-| Constants           | camelCase object with `as const`                | `apiEndpoints`, `storageKeys`            |
-| Schemas             | `src/schemas/xxxSchema.ts`: `createXxxSchema(t)` + `XxxFormValues` | `createCacheSearchSchema`, `CacheSearchFormValues` |
+| Utils               | `xxxUtils.ts`: a class + one exported instance, in `shared/utils/` (or a route's `_utils/` when only that route uses it) | `LogUtils` → `logUtils` |
+| Constants           | camelCase object with `as const`, in the route's `_constants/` (or `shared/constants/` when 2 or more routes share one, made only when needed) | `cache/_constants/apiEndpoints.ts` |
+| Schemas             | `<route>/_schemas/xxxSchema.ts`: `createXxxSchema(t)` + `XxxFormValues` (or `shared/schemas/` when 2 or more routes share one, made only when needed) | `cache/_schemas/cacheSearchSchema.ts`, `createCacheSearchSchema`, `CacheSearchFormValues` |
 | Route-only code     | `actions.ts` next to `page.tsx`                 | `health/actions.ts`, `cache/actions.ts`  |
+| Async Server Components | folder and component name end in `Async`; no spec, no story, skipped by coverage | `health/_components/HealthReportAsync/index.tsx` |
 | shadcn-ui files     | kebab-case (shadcn default)                     | `libs/shadcn-ui/dropdown-menu.tsx`       |
 | Next.js route files | Next.js names                                   | `page.tsx`, `layout.tsx`, `error.tsx`    |
 
 ### Components
 
-- Follow Atomic Design: `atoms` → `molecules` → `organisms` → `templates`. Pages live in `app/`.
-- Each component folder holds `index.tsx`, `index.spec.tsx`, and `index.stories.tsx`.
+- Follow Atomic Design: `atoms` → `molecules` → `organisms` → `templates`. Pages live in `app/`. Atomic Design components live in `src/shared/components/`.
+- Each component folder holds `index.tsx`, `index.spec.tsx`, and `index.stories.tsx` (except `*Async` components, see below).
 - Use named exports (`export function X`). Next.js route files use `export default`.
 - Take `props` as one argument, then destructure it on the first line: `const { a, b } = props;`.
 - Add `'use client'` only when the file needs client features (state, effects, browser APIs).
 - Build UI from `@/libs/shadcn-ui/*`. Style with Tailwind and `cn()`.
 - Do not edit shadcn-ui files unless the task needs it. Add new ones with `pnpm client shadcn-ui:add`.
 - Delete a level's `.gitkeep` once that folder has a real file in it.
-- Small components used by only one route (e.g. a Suspense child and its fallback) stay as local functions in that route's `page.tsx`. Do not move them to `components/`.
-- Shared components must not import from `src/app`. Pass route data or actions in as props.
+- A component used by only one route (including a Suspense child and its fallback) goes in that route's `_components/<Name>/`, with the same `index.tsx`, `index.spec.tsx`, `index.stories.tsx` files. Its story title is `Routes/<Route>/<Name>`, e.g. `Routes/Health/HealthStatusPanel`.
+- An async Server Component uses the `Async` suffix on its folder and component name (e.g. `HealthReportAsync`). Keep it thin: it only loads data (e.g. `connection()` plus a loader from `actions.ts`) and passes it to a tested component. It gets no spec and no story. Only async Server Components may end in `Async`, because coverage skips every `*Async/` folder.
+- Code in `src/shared/` must not import from `src/app`. Pass route data or actions in as props.
 
 ### Routes, Cache Components, and env
 
@@ -195,13 +206,14 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 
 ### Imports
 
-- Use the `@/` alias for `src/` (`@/libs/shadcn-ui/button`). Use `./` only for files in the same folder.
+- Use the `@/` alias for `src/` (`@/libs/shadcn-ui/button`) and for shared code (`@/shared/utils/logUtils`).
+- Inside a route, use relative paths: `./_components/X`, `../../_schemas/x`, `../../actions`.
 - Mark type-only imports with `import type`.
 
 ### HTTP and backend integration
 
 - Call the API only through `httpUtils` (no auth) or `httpUtilsAuth` (with tokens). Both are `server-only`.
-- Put endpoint paths in `constants/apiEndpoints.ts` under the HTTP method.
+- Put endpoint paths in the route's `_constants/apiEndpoints.ts`, grouped by HTTP method. It is a separate file because a `'use server'` `actions.ts` can only export async functions.
 - Handle the typed errors: `HttpUtilsResponseError`, `HttpUtilsTimeoutError`, `HttpUtilsNetworkError`, `HttpUtilsRequestCanceledError`.
 - Tokens live in `httpOnly` cookies. Use `cookieUtils`. Never read tokens in the browser.
 
@@ -214,7 +226,7 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 
 ### Forms, state, logging
 
-- Forms: Formik + Yup schemas. Put each schema in `src/schemas/xxxSchema.ts` as a factory that takes the namespaced translator: `createXxxSchema(t: ReturnType<typeof useTranslations<'ns'>>)`. Infer the form values type from it: `type XxxFormValues = InferType<ReturnType<typeof createXxxSchema>>`. Export shared limits (e.g. `MAX_CACHE_PATTERN_LENGTH`) from the same file.
+- Forms: Formik + Yup schemas. Put each schema in the route's `_schemas/xxxSchema.ts` as a factory that takes the namespaced translator: `createXxxSchema(t: ReturnType<typeof useTranslations<'ns'>>)`. Infer the form values type from it: `type XxxFormValues = InferType<ReturnType<typeof createXxxSchema>>`. Export shared limits (e.g. `MAX_CACHE_PATTERN_LENGTH`) from the same file.
 - Async handlers: prefer `async` functions with `try/catch/finally`. Call them from JSX with `void`, e.g. `onClick={() => void handleDelete(key)}`.
 - State: local React state and custom hooks. No global state library.
 - Logging: `logUtils.error/warn/info/debug`.
@@ -234,9 +246,9 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 - Client: Vitest + Testing Library (`render`, `renderHook`, `userEvent`). Use `vi.fn()` and `vi.useFakeTimers()`.
 - Client components that read translations: render with `renderWithIntl(ui)` from `@vitest-helpers` (`apps/client/vitest.helpers.tsx`). Do not wrap `NextIntlClientProvider` in each spec.
 - Client env: mock env with `vi.stubEnv` and reset it with `vi.unstubAllEnvs`. Specs that use `next/server` (e.g. `proxy.spec.ts`) add `// @vitest-environment node` at the top.
-- No specs in `src/app/(routes)/**` (route files are also left out of coverage). Keep route files thin and test the logic they use in `utils/`, `schemas/`, or `components/`.
+- No specs for App Router files (`page.tsx`, `layout.tsx`, `actions.ts`, `error.tsx`, …). Coverage counts only `src/shared/**`, `_`-prefixed route folders (except `_constants` and `*Async` folders), and `src/proxy.ts`. Keep route files thin and test the logic they use in `_components/`, `_schemas/`, `_utils/`, or `src/shared/`.
 - Client page work is done only when `pnpm client build` passes. Typecheck and tests do not catch Cache Components errors.
 - Every test follows AAA with `// Arrange`, `// Act`, `// Assert` comments.
 - Test names read as behavior: `it('copies text and sets copiedText on success')`.
-- Components also get a Storybook story (`index.stories.tsx`, `title: '<Level>/<Name>'`).
+- Components also get a Storybook story (`index.stories.tsx`). Shared components use `title: '<Level>/<Name>'` (e.g. `Templates/AppStatusTemplate`); route components use `title: 'Routes/<Route>/<Name>'` (e.g. `Routes/Health/HealthStatusPanel`).
 - Run: `pnpm <server|client> test`, coverage with `test:cov`.

@@ -4,11 +4,11 @@ import '@/assets/css/globals.css';
 
 import { useEffect, useRef } from 'react';
 
-import { AppStatusTemplate } from '@/components/templates/AppStatusTemplate';
 import { AppThemeProvider } from '@/libs/next-themes/AppThemeProvider';
 import { Button } from '@/libs/shadcn-ui/button';
 import { Typography } from '@/libs/shadcn-ui/typography';
-import { logUtils } from '@/utils/logUtils';
+import { AppStatusTemplate } from '@/shared/components/templates/AppStatusTemplate';
+import { logUtils } from '@/shared/utils/logUtils';
 
 export interface GlobalErrorProps {
   error: Error & { digest?: string };

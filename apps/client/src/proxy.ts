@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 import nextIntlProxy from '@/libs/next-intl/configs/proxy';
 import { routing } from '@/libs/next-intl/configs/routing';
-import { envUtils } from '@/utils/envUtils';
+import { envUtils } from '@/shared/utils/envUtils';
 
 const LOCALE_GROUP = routing.locales.join('|');
 const CACHE_ROUTE_PATTERN = new RegExp(`^/(?:(?:${LOCALE_GROUP})/)?cache/?$`);

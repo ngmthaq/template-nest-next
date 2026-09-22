@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/libs/shadcn-ui/table';
 import { Typography } from '@/libs/shadcn-ui/typography';
-import { timeUtils } from '@/utils/timeUtils';
+import { timeUtils } from '@/shared/utils/timeUtils';
 
 /** Liveness result for a single dependency, as returned by `GET /health`. */
 export interface IndicatorStatus {

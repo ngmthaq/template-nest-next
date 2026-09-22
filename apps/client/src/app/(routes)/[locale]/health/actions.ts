@@ -1,14 +1,15 @@
 import 'server-only';
 
-import type { HealthResult } from '@/components/organisms/HealthStatusPanel';
-import { apiEndpoints } from '@/constants/apiEndpoints';
-import { httpUtils } from '@/utils/httpUtils';
+import { httpUtils } from '@/shared/utils/httpUtils';
 import {
   HttpUtilsNetworkError,
   HttpUtilsResponseError,
   HttpUtilsTimeoutError,
-} from '@/utils/httpUtilsHelper';
-import { logUtils } from '@/utils/logUtils';
+} from '@/shared/utils/httpUtilsHelper';
+import { logUtils } from '@/shared/utils/logUtils';
+
+import type { HealthResult } from './_components/HealthStatusPanel';
+import { apiEndpoints } from './_constants/apiEndpoints';
 
 /** A `503` still carries the full report in its body; a network failure means "unreachable". */
 export async function fetchHealthReport(): Promise<HealthResult | null> {

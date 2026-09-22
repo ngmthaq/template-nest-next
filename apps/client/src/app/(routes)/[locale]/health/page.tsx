@@ -1,14 +1,12 @@
 import type { Metadata } from 'next';
-import { connection } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
-import { RefreshRouterButton } from '@/components/molecules/RefreshRouterButton';
-import { HealthStatusPanel } from '@/components/organisms/HealthStatusPanel';
-import { Skeleton } from '@/libs/shadcn-ui/skeleton';
 import { Typography } from '@/libs/shadcn-ui/typography';
+import { RefreshRouterButton } from '@/shared/components/molecules/RefreshRouterButton';
 
-import { fetchHealthReport } from './actions';
+import { HealthReportAsync } from './_components/HealthReportAsync';
+import { HealthReportFallback } from './_components/HealthReportFallback';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('health');
@@ -31,25 +29,8 @@ export default async function HealthPage() {
         <RefreshRouterButton label={t('refresh')} />
       </div>
       <Suspense fallback={<HealthReportFallback />}>
-        <HealthReport />
+        <HealthReportAsync />
       </Suspense>
-    </div>
-  );
-}
-
-/** Reads the live report at request time, kept out of the static shell so the route can prerender. */
-async function HealthReport() {
-  await connection();
-  const report = await fetchHealthReport();
-
-  return <HealthStatusPanel report={report} />;
-}
-
-function HealthReportFallback() {
-  return (
-    <div className="flex flex-col gap-4">
-      <Skeleton className="h-6 w-24" />
-      <Skeleton className="h-48 w-full" />
     </div>
   );
 }

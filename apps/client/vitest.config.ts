@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import { configDefaults, defineConfig } from 'vitest/config';
 
-const serverOnlySpecs = 'src/utils/http*.spec.ts';
+const serverOnlySpecs = 'src/shared/utils/http*.spec.ts';
 
 const clientRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -41,19 +41,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      include: ['src/**/*.{ts,tsx}'],
-      exclude: [
-        '**/*.spec.*',
-        '**/*.stories.*',
-        'src/app/(routes)/**',
-        'src/constants/**',
-        'src/libs/**',
-        'src/app/global-error.tsx',
-        'src/app/global-not-found.tsx',
-        'vitest.config.ts',
-        'vitest.setup.ts',
-        'vitest.d.ts',
-      ],
+      include: ['src/shared/**/*.{ts,tsx}', 'src/app/**/_*/**/*.{ts,tsx}', 'src/proxy.ts'],
+      exclude: ['**/*.spec.*', '**/*.stories.*', '**/_constants/**', '**/*Async/**'],
     },
   },
 });

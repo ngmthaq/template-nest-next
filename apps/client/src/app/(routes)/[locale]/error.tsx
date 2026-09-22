@@ -3,10 +3,10 @@
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 
-import { AppStatusTemplate } from '@/components/templates/AppStatusTemplate';
 import { Button } from '@/libs/shadcn-ui/button';
 import { Typography } from '@/libs/shadcn-ui/typography';
-import { logUtils } from '@/utils/logUtils';
+import { AppStatusTemplate } from '@/shared/components/templates/AppStatusTemplate';
+import { logUtils } from '@/shared/utils/logUtils';
 
 export interface ErrorProps {
   error: Error & { digest?: string };

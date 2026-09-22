@@ -1,14 +1,11 @@
 'use server';
 
-import type {
-  CacheActionResult,
-  CacheDeleteResult,
-  CacheEntry,
-} from '@/components/organisms/CacheExplorer';
-import { apiEndpoints } from '@/constants/apiEndpoints';
-import { envUtils } from '@/utils/envUtils';
-import { httpUtils } from '@/utils/httpUtils';
-import { logUtils } from '@/utils/logUtils';
+import { envUtils } from '@/shared/utils/envUtils';
+import { httpUtils } from '@/shared/utils/httpUtils';
+import { logUtils } from '@/shared/utils/logUtils';
+
+import type { CacheActionResult, CacheDeleteResult, CacheEntry } from './_components/CacheExplorer';
+import { apiEndpoints } from './_constants/apiEndpoints';
 
 /** Search cached entries by glob pattern. Refuses to call the API in production. */
 export async function searchCacheAction(pattern: string): Promise<CacheActionResult<CacheEntry[]>> {

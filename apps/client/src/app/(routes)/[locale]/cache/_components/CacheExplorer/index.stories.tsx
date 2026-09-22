@@ -10,7 +10,7 @@ const sampleEntries: CacheEntry[] = [
 ];
 
 const meta = {
-  title: 'Organisms/CacheExplorer',
+  title: 'Routes/Cache/CacheExplorer',
   component: CacheExplorer,
   args: {
     searchAction: fn(async (): Promise<CacheActionResult<CacheEntry[]>> => ({

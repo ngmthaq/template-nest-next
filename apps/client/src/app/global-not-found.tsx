@@ -3,9 +3,9 @@ import '@/assets/css/globals.css';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { AppStatusTemplate } from '@/components/templates/AppStatusTemplate';
 import { AppThemeProvider } from '@/libs/next-themes/AppThemeProvider';
 import { Button } from '@/libs/shadcn-ui/button';
+import { AppStatusTemplate } from '@/shared/components/templates/AppStatusTemplate';
 
 export function generateMetadata(): Metadata {
   return {
