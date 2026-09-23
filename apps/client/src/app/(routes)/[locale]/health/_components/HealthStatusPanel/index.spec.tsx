@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import { renderWithIntl } from '@vitest-helpers';
 
-import type { HealthResult } from '.';
+import type { HealthResult } from '../../_schemas/healthResponseSchema';
 import { HealthStatusPanel } from '.';
 
 function renderPanel(report: HealthResult | null) {

@@ -1,5 +1,6 @@
 import type { AxiosInstance } from 'axios';
 import type { CookiesFn } from 'cookies-next';
+import * as Yup from 'yup';
 
 import { cookieUtils } from './cookieUtils';
 import {
@@ -9,6 +10,7 @@ import {
   type HttpUtilsRequestOptions,
   HttpUtilsResponseError,
   HttpUtilsTimeoutError,
+  HttpUtilsYupValidationError,
 } from './httpUtilsHelper';
 
 vi.mock('./cookieUtils', () => ({
@@ -635,6 +637,125 @@ describe('HttpUtilsHelper', () => {
         expect(fetchOptions).not.toHaveProperty('withAuth');
         expect(fetchOptions).toMatchObject({ cache: 'no-store' });
       });
+    });
+
+    describe('schema validation', () => {
+      const responseSchema = Yup.object({
+        id: Yup.number().required(),
+        name: Yup.string().required(),
+      });
+
+      it('returns the schema-validated data with unknown fields stripped when a schema is given', async () => {
+        // Arrange
+        const fetchMock = vi
+          .fn()
+          .mockResolvedValue(jsonResponse({ id: 1, name: 'bar', extra: 'unexpected' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        // Act
+        const result = await helper.exposedRequest('/foo', { schema: responseSchema });
+
+        // Assert
+        expect(result).toEqual({ id: 1, name: 'bar' });
+      });
+
+      it('returns the response data unchanged, keeping unknown fields, when no schema is given', async () => {
+        // Arrange
+        const fetchMock = vi
+          .fn()
+          .mockResolvedValue(jsonResponse({ id: 1, name: 'bar', extra: 'unexpected' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        // Act
+        const result = await helper.exposedRequest('/foo', {});
+
+        // Assert
+        expect(result).toEqual({ id: 1, name: 'bar', extra: 'unexpected' });
+      });
+
+      it('rejects with HttpUtilsYupValidationError carrying field-level messages and no body when the response has a wrong shape', async () => {
+        // Arrange
+        const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ name: 'bar' }));
+        vi.stubGlobal('fetch', fetchMock);
+
+        // Act
+        const act = helper.exposedRequest('/foo', { schema: responseSchema });
+
+        // Assert
+        await expect(act).rejects.toBeInstanceOf(HttpUtilsYupValidationError);
+        await expect(act).rejects.toMatchObject({
+          name: 'HttpUtilsYupValidationError',
+          message: 'Validation Error',
+          errors: expect.arrayContaining([expect.stringContaining('id')]),
+        });
+        await expect(act).rejects.not.toHaveProperty('body');
+      });
+
+      it('never passes schema to the axios config, at the top level or inside fetchOptions', async () => {
+        // Arrange
+        const seen: Array<Record<string, unknown>> = [];
+        const spy = vi.spyOn(helper.exposedAxiosInstance, 'request');
+        spy.mockImplementation(async (config: unknown) => {
+          seen.push(config as Record<string, unknown>);
+          return { data: { id: 1, name: 'bar' } };
+        });
+
+        // Act
+        await helper.exposedRequest('/foo', { schema: responseSchema, cache: 'no-store' });
+
+        // Assert
+        expect(seen[0]).not.toHaveProperty('schema');
+        expect(seen[0].fetchOptions).not.toHaveProperty('schema');
+        spy.mockRestore();
+      });
+    });
+  });
+
+  describe('parse', () => {
+    const schema = Yup.object({
+      id: Yup.number().required(),
+      name: Yup.string().required(),
+    });
+
+    it('returns the schema-validated value with unknown fields stripped for valid data', async () => {
+      // Arrange
+      const data = { id: 1, name: 'bar', extra: 'unexpected' };
+
+      // Act
+      const result = await helper.parse(schema, data);
+
+      // Assert
+      expect(result).toEqual({ id: 1, name: 'bar' });
+    });
+
+    it('rejects with HttpUtilsYupValidationError carrying a field path for data with a wrong shape', async () => {
+      // Arrange
+      const data = { name: 'bar' };
+
+      // Act
+      const act = helper.parse(schema, data);
+
+      // Assert
+      await expect(act).rejects.toBeInstanceOf(HttpUtilsYupValidationError);
+      await expect(act).rejects.toMatchObject({
+        name: 'HttpUtilsYupValidationError',
+        errors: expect.arrayContaining([expect.stringContaining('id')]),
+      });
+    });
+
+    it('rethrows a non-Yup error from schema.validate unchanged instead of wrapping it', async () => {
+      // Arrange
+      const boom = new Error('boom');
+      const brokenSchema = {
+        validate: vi.fn().mockRejectedValue(boom),
+      } as unknown as Yup.Schema<unknown>;
+
+      // Act
+      const act = helper.parse(brokenSchema, {});
+
+      // Assert
+      await expect(act).rejects.toBe(boom);
+      await expect(act).rejects.not.toBeInstanceOf(HttpUtilsYupValidationError);
     });
   });
 });

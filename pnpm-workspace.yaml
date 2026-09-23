@@ -2,13 +2,19 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-onlyBuiltDependencies:
-  - bcrypt
-  - '@swc/core'
-
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+# Only these dependencies may run install scripts; every other one is listed as false so pnpm
+# does not stop the install to ask about it.
+allowBuilds:
+  bcrypt: true
+  '@swc/core': true
+  '@parcel/watcher': false
+  '@prisma/engines': false
+  '@scarf/scarf': false
+  esbuild: false
+  msgpackr-extract: false
+  prisma: false
+  sharp: false
+  unrs-resolver: false
 
 # Security overrides for transitive deps whose parents pin them exactly, so a parent bump cannot
 # reach the fix. Run `pnpm audit` for the details; drop an entry once its parent ships a fixed range.

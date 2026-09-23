@@ -3,66 +3,66 @@ import 'server-only';
 import { HttpUtilsHelper, type HttpUtilsRequestOptions } from './httpUtilsHelper';
 
 export class HttpUtils extends HttpUtilsHelper {
-  public get<T>(
+  public get<T = unknown>(
     url: string,
     params?: Record<string, string>,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(this.buildUrl(url, params), { ...options, method: 'GET' });
   }
 
-  public post<T>(
+  public post<T = unknown>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'POST', body });
   }
 
-  public postFormData<T>(
+  public postFormData<T = unknown>(
     url: string,
     formData: FormData,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'POST', body: formData });
   }
 
-  public put<T>(
+  public put<T = unknown>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'PUT', body });
   }
 
-  public putFormData<T>(
+  public putFormData<T = unknown>(
     url: string,
     formData: FormData,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'PUT', body: formData });
   }
 
-  public patch<T>(
+  public patch<T = unknown>(
     url: string,
     body?: Record<string, unknown>,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'PATCH', body });
   }
 
-  public patchFormData<T>(
+  public patchFormData<T = unknown>(
     url: string,
     formData: FormData,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(url, { ...options, method: 'PATCH', body: formData });
   }
 
-  public delete<T>(
+  public delete<T = unknown>(
     url: string,
     params?: Record<string, string>,
-    options: HttpUtilsRequestOptions = {},
+    options: HttpUtilsRequestOptions<T> = {},
   ): Promise<T> {
     return this.request<T>(this.buildUrl(url, params), { ...options, method: 'DELETE' });
   }

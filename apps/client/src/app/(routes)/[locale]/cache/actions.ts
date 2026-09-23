@@ -4,8 +4,14 @@ import { envUtils } from '@/shared/utils/envUtils';
 import { httpUtils } from '@/shared/utils/httpUtils';
 import { logUtils } from '@/shared/utils/logUtils';
 
-import type { CacheActionResult, CacheDeleteResult, CacheEntry } from './_components/CacheExplorer';
+import type { CacheActionResult } from './_components/CacheExplorer';
 import { apiEndpoints } from './_constants/apiEndpoints';
+import {
+  type CacheDeleteResult,
+  cacheDeleteResultSchema,
+  type CacheEntry,
+  cacheEntryListSchema,
+} from './_schemas/cacheResponseSchema';
 
 /** Search cached entries by glob pattern. Refuses to call the API in production. */
 export async function searchCacheAction(pattern: string): Promise<CacheActionResult<CacheEntry[]>> {
@@ -13,7 +19,13 @@ export async function searchCacheAction(pattern: string): Promise<CacheActionRes
     return { ok: false, error: 'production' };
   }
   try {
-    const data = await httpUtils.get<CacheEntry[]>(apiEndpoints.get.cache, { pattern });
+    const data = await httpUtils.get(
+      apiEndpoints.get.cache,
+      { pattern },
+      {
+        schema: cacheEntryListSchema,
+      },
+    );
     return { ok: true, data };
   } catch (error) {
     logUtils.error(error);
@@ -29,8 +41,12 @@ export async function deleteCacheAction(
     return { ok: false, error: 'production' };
   }
   try {
-    const data = await httpUtils.delete<CacheDeleteResult>(
+    const data = await httpUtils.delete(
       `${apiEndpoints.delete.cache}/${encodeURIComponent(key)}`,
+      undefined,
+      {
+        schema: cacheDeleteResultSchema,
+      },
     );
     return { ok: true, data };
   } catch (error) {

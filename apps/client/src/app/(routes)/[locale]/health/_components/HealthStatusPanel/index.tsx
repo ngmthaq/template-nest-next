@@ -12,18 +12,7 @@ import {
 import { Typography } from '@/libs/shadcn-ui/typography';
 import { timeUtils } from '@/shared/utils/timeUtils';
 
-/** Liveness result for a single dependency, as returned by `GET /health`. */
-export interface IndicatorStatus {
-  status: 'up' | 'down';
-  error?: string;
-  uptime?: number;
-}
-
-/** Aggregated health report across every checked dependency. */
-export interface HealthResult {
-  status: 'ok' | 'error';
-  info: Record<string, IndicatorStatus>;
-}
+import type { HealthResult } from '../../_schemas/healthResponseSchema';
 
 export interface HealthStatusPanelProps {
   /** `null` means the API could not be reached at all (network error, timeout). */

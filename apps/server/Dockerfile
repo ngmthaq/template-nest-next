@@ -6,7 +6,7 @@
 FROM node:24-alpine AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN corepack enable && corepack prepare pnpm@10.25.0 --activate
+RUN corepack enable && corepack prepare pnpm@12.5.1 --activate
 WORKDIR /app
 
 # ---- Dependencies (with toolchain for native modules like bcrypt) ----

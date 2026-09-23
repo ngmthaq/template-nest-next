@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { expect, fn, userEvent, waitFor, within } from 'storybook/test';
 
-import type { CacheActionResult, CacheDeleteResult, CacheEntry } from '.';
+import type { CacheDeleteResult, CacheEntry } from '../../_schemas/cacheResponseSchema';
+import type { CacheActionResult } from '.';
 import { CacheExplorer } from '.';
 
 const sampleEntries: CacheEntry[] = [

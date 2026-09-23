@@ -32,23 +32,12 @@ import {
 import { Typography } from '@/libs/shadcn-ui/typography';
 import { logUtils } from '@/shared/utils/logUtils';
 
+import type { CacheDeleteResult, CacheEntry } from '../../_schemas/cacheResponseSchema';
 import type { CacheSearchFormValues } from '../../_schemas/cacheSearchSchema';
 import {
   createCacheSearchSchema,
   MAX_CACHE_PATTERN_LENGTH,
 } from '../../_schemas/cacheSearchSchema';
-
-/** A single cache entry returned by `GET /cache?pattern=`. */
-export interface CacheEntry {
-  key: string;
-  value: unknown;
-}
-
-/** Result of deleting a single cache entry by exact key. */
-export interface CacheDeleteResult {
-  key: string;
-  deleted: boolean;
-}
 
 /** Outcome of a cache Server Action: typed success, or a short reason the client maps to text. */
 export type CacheActionResult<T> =

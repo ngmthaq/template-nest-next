@@ -167,7 +167,7 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 | Hook types          | `Use<Name>Options`, `Use<Name>Result`, exported | `UseCopyToClipboardResult`               |
 | Utils               | `xxxUtils.ts`: a class + one exported instance, in `shared/utils/` (or a route's `_utils/` when only that route uses it) | `LogUtils` → `logUtils` |
 | Constants           | camelCase object with `as const`, in the route's `_constants/` (or `shared/constants/` when 2 or more routes share one, made only when needed) | `cache/_constants/apiEndpoints.ts` |
-| Schemas             | `<route>/_schemas/xxxSchema.ts`: `createXxxSchema(t)` + `XxxFormValues` (or `shared/schemas/` when 2 or more routes share one, made only when needed) | `cache/_schemas/cacheSearchSchema.ts`, `createCacheSearchSchema`, `CacheSearchFormValues` |
+| Schemas             | `<route>/_schemas/xxxSchema.ts`: `createXxxSchema(t)` + `XxxFormValues` (or `shared/schemas/` when 2 or more routes share one, made only when needed). Response schemas follow `<route>/_schemas/xxxResponseSchema.ts`, with plain schema constants and their `InferType` types | `cache/_schemas/cacheSearchSchema.ts`, `createCacheSearchSchema`, `CacheSearchFormValues`; `cache/_schemas/cacheResponseSchema.ts`, `cacheEntrySchema`, `CacheEntry` |
 | Route-only code     | `actions.ts` next to `page.tsx`                 | `health/actions.ts`, `cache/actions.ts`  |
 | Async Server Components | folder and component name end in `Async`; no spec, no story, skipped by coverage | `health/_components/HealthReportAsync/index.tsx` |
 | shadcn-ui files     | kebab-case (shadcn default)                     | `libs/shadcn-ui/dropdown-menu.tsx`       |
@@ -214,7 +214,8 @@ In a service file, response classes (e.g. `CacheEntry`) may sit above the servic
 
 - Call the API only through `httpUtils` (no auth) or `httpUtilsAuth` (with tokens). Both are `server-only`.
 - Put endpoint paths in the route's `_constants/apiEndpoints.ts`, grouped by HTTP method. It is a separate file because a `'use server'` `actions.ts` can only export async functions.
-- Handle the typed errors: `HttpUtilsResponseError`, `HttpUtilsTimeoutError`, `HttpUtilsNetworkError`, `HttpUtilsRequestCanceledError`.
+- Every API call passes a response schema: `httpUtils.get(url, params, { schema })`. The schema lives in the route's `_schemas/xxxResponseSchema.ts`, and its type is inferred with `InferType`. For data from an error body (e.g. a `503` payload), use `httpUtils.parse(schema, data)` instead.
+- Handle the typed errors: `HttpUtilsResponseError`, `HttpUtilsTimeoutError`, `HttpUtilsNetworkError`, `HttpUtilsRequestCanceledError`, `HttpUtilsYupValidationError`.
 - Tokens live in `httpOnly` cookies. Use `cookieUtils`. Never read tokens in the browser.
 
 ### i18n

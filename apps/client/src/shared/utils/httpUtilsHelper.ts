@@ -3,6 +3,7 @@ import 'server-only';
 import type { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { CookiesFn, OptionsType } from 'cookies-next';
+import * as Yup from 'yup';
 
 import { cookieUtils } from './cookieUtils';
 
@@ -17,8 +18,11 @@ export interface HttpUtilsAuthOptions {
   withAuth?: boolean;
 }
 
-export interface HttpUtilsRequestOptions extends Omit<RequestInit, 'body'>, HttpUtilsAuthOptions {
+export interface HttpUtilsRequestOptions<T = unknown>
+  extends Omit<RequestInit, 'body'>, HttpUtilsAuthOptions {
   body?: RequestInit['body'] | Record<string, unknown>;
+  /** Validates the response against this schema. Never reaches the axios config. */
+  schema?: Yup.Schema<T>;
 }
 
 export class HttpUtilsTimeoutError extends Error {
@@ -51,6 +55,17 @@ export class HttpUtilsResponseError extends Error {
     this.name = 'HttpUtilsResponseError';
     this.status = status;
     this.body = body;
+  }
+}
+
+/** A response failed schema validation. Carries only Yup's messages, never the raw body. */
+export class HttpUtilsYupValidationError extends Error {
+  public readonly errors: string[];
+
+  constructor(errors: string[], message: string = 'Validation Error') {
+    super(message);
+    this.name = 'HttpUtilsYupValidationError';
+    this.errors = errors;
   }
 }
 
@@ -108,8 +123,13 @@ export class HttpUtilsHelper {
     return `${path}?${search.toString()}`;
   }
 
+  /** Validates `data` against `schema`, throwing `HttpUtilsYupValidationError` on a bad shape. */
+  public async parse<T>(schema: Yup.Schema<T>, data: unknown): Promise<T> {
+    return this.validate(schema, data);
+  }
+
   protected async request<T>(url: string, options: HttpUtilsRequestOptions): Promise<T> {
-    const { cookies, withAuth, method, body, signal, headers, ...fetchOptions } = options;
+    const { cookies, withAuth, method, body, signal, headers, schema, ...fetchOptions } = options;
 
     const requestHeaders: Record<string, string | null> = Object.fromEntries(
       new Headers(headers).entries(),
@@ -132,7 +152,8 @@ export class HttpUtilsHelper {
 
     try {
       const response = await this.axiosInstance.request(config);
-      return response.data as T;
+      const data = response.data as T;
+      return schema ? await this.validate(schema as Yup.Schema<T>, data) : data;
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.code === 'ERR_NETWORK') {
@@ -153,5 +174,16 @@ export class HttpUtilsHelper {
 
   private cookieOptions(options?: OptionsType): OptionsType {
     return Object.assign({}, this.tokenCookieOptions, options ?? {});
+  }
+
+  private async validate<T>(schema: Yup.Schema<T>, data: unknown): Promise<T> {
+    try {
+      return await schema.validate(data, { stripUnknown: true, abortEarly: false });
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        throw new HttpUtilsYupValidationError(error.errors);
+      }
+      throw error;
+    }
   }
 }

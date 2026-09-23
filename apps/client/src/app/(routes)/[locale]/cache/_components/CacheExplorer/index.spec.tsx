@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { renderWithIntl } from '@vitest-helpers';
 import { toast } from 'sonner';
 
-import type { CacheActionResult, CacheDeleteResult, CacheEntry } from '.';
+import type { CacheDeleteResult, CacheEntry } from '../../_schemas/cacheResponseSchema';
+import type { CacheActionResult } from '.';
 import { CacheExplorer } from '.';
 
 vi.mock('sonner', () => ({

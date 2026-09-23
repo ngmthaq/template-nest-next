@@ -19,7 +19,7 @@ A [pnpm workspace](https://pnpm.io/workspaces) monorepo.
 ## Requirements
 
 - Node.js >= 24
-- pnpm 10 (`corepack enable` picks up the pinned `packageManager` version)
+- pnpm >= 12.5.1 (`corepack enable` picks up the pinned `packageManager` version)
 
 ## Getting started
 

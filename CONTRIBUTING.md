@@ -8,7 +8,7 @@ the exact rules rather than restating them.
 ## Setup
 
 See [README.md](./README.md) for install and run instructions. In short: Node.js `>= 24`, pnpm
-`10.25.0` (pinned in `package.json`'s `packageManager`, picked up by `corepack enable`), then
+`>= 12.5.1` (pinned in `package.json`'s `packageManager`, picked up by `corepack enable`), then
 `pnpm install`.
 
 ---
