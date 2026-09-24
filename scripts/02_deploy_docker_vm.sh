@@ -26,7 +26,7 @@ source "${SCRIPT_DIR}/lib/common.sh"
 
 # Transfer excludes: build artefacts and VCS metadata never belong on the VM.
 # .env.* is deliberately NOT excluded — the user chose to ship env files from the laptop.
-readonly TRANSFER_EXCLUDES=(node_modules .next .git dist build coverage storybook-static '*.log' .DS_Store)
+readonly TRANSFER_EXCLUDES=(node_modules .next .git dist build coverage storybook-static '*.log' .DS_Store .venv __pycache__ .mypy_cache .pytest_cache .ruff_cache)
 
 # ---------------------------------------------------------------------------
 # Preflight
@@ -45,10 +45,11 @@ select_environment() {
   ui_select NODE_ENV "Select the target environment" "development" "staging" "production"
 }
 
-# Developers hand-author both env files; this only fails fast if one is missing.
+# Developers hand-author all three env files; this only fails fast if one is missing.
 check_env_files() {
   env_require_file "${REPO_ROOT}/apps/server/.env.${NODE_ENV}"
   env_require_file "${REPO_ROOT}/apps/client/.env.${NODE_ENV}"
+  env_require_file "${REPO_ROOT}/apps/py-service/.env.${NODE_ENV}"
   ui_info "Under Compose, the client's API_URL must be the internal hostname http://server:3000/api — localhost cannot reach the server container from inside the client container."
 }
 
@@ -62,6 +63,7 @@ prompt_host_ports() {
   ui_info "Compose reads these from the shell, not from the env files, to publish the containers."
   ui_prompt HOST_SERVER_PORT "Published host port for the server" "3000"
   ui_prompt HOST_CLIENT_PORT "Published host port for the client" "3001"
+  ui_prompt HOST_PY_SERVICE_PORT "Published host port for the py-service" "8000"
 }
 
 resolve_version() {
@@ -74,16 +76,18 @@ resolve_version() {
 
 print_summary() {
   ui_header "Deployment summary"
-  ui_info "Target:       ${SSH_USER}@${SSH_HOST}:${SSH_PORT}"
-  ui_info "Remote path:  ${REMOTE_PATH}"
-  ui_info "Environment:  ${NODE_ENV}"
-  ui_info "App version:  ${APP_VERSION}"
-  ui_info "Server image: template-nest-next-server:${APP_VERSION}-${NODE_ENV}  ->  :${NODE_ENV}"
-  ui_info "Client image: template-nest-next-client:${APP_VERSION}-${NODE_ENV}  ->  :${NODE_ENV}"
-  ui_info "Host ports:   server ${HOST_SERVER_PORT}, client ${HOST_CLIENT_PORT}"
+  ui_info "Target:           ${SSH_USER}@${SSH_HOST}:${SSH_PORT}"
+  ui_info "Remote path:      ${REMOTE_PATH}"
+  ui_info "Environment:      ${NODE_ENV}"
+  ui_info "App version:      ${APP_VERSION}"
+  ui_info "Server image:     template-nest-next-server:${APP_VERSION}-${NODE_ENV}  ->  :${NODE_ENV}"
+  ui_info "Client image:     template-nest-next-client:${APP_VERSION}-${NODE_ENV}  ->  :${NODE_ENV}"
+  ui_info "Py-service image: template-nest-next-py-service:${APP_VERSION}-${NODE_ENV}  ->  :${NODE_ENV}"
+  ui_info "Host ports:       server ${HOST_SERVER_PORT}, client ${HOST_CLIENT_PORT}, py-service ${HOST_PY_SERVICE_PORT}"
   ui_warn "The following env files will be pushed and will OVERWRITE the VM's copies:"
   ui_warn "  apps/server/.env.${NODE_ENV}"
   ui_warn "  apps/client/.env.${NODE_ENV}"
+  ui_warn "  apps/py-service/.env.${NODE_ENV}"
 }
 
 confirm_or_abort() {
@@ -134,7 +138,7 @@ transfer_repo() {
 
 build_and_start_remote() {
   ui_header "Building and starting the stack on ${SSH_HOST}"
-  MSYS_NO_PATHCONV=1 ssh_run "cd '${REMOTE_PATH}' && APP_VERSION='${APP_VERSION}' NODE_ENV='${NODE_ENV}' PORT='${HOST_SERVER_PORT}' CLIENT_PORT='${HOST_CLIENT_PORT}' docker compose up -d --build"
+  MSYS_NO_PATHCONV=1 ssh_run "cd '${REMOTE_PATH}' && APP_VERSION='${APP_VERSION}' NODE_ENV='${NODE_ENV}' PORT='${HOST_SERVER_PORT}' CLIENT_PORT='${HOST_CLIENT_PORT}' PY_SERVICE_PORT='${HOST_PY_SERVICE_PORT}' docker compose up -d --build"
 }
 
 # Moves the moving :<env> pointer onto the image just built, so a rollback is a retag away.
@@ -142,6 +146,7 @@ retag_images() {
   ui_header "Retagging images"
   ssh_run "docker tag template-nest-next-server:${APP_VERSION}-${NODE_ENV} template-nest-next-server:${NODE_ENV}"
   ssh_run "docker tag template-nest-next-client:${APP_VERSION}-${NODE_ENV} template-nest-next-client:${NODE_ENV}"
+  ssh_run "docker tag template-nest-next-py-service:${APP_VERSION}-${NODE_ENV} template-nest-next-py-service:${NODE_ENV}"
 }
 
 tail_remote_logs() {
@@ -151,7 +156,7 @@ tail_remote_logs() {
 
 finish_success() {
   ui_success "Deployed version ${APP_VERSION} to ${SSH_HOST} as '${NODE_ENV}'."
-  ui_success "Rollback: on the VM in ${REMOTE_PATH}, run 'APP_VERSION=<old-version> NODE_ENV=${NODE_ENV} PORT=${HOST_SERVER_PORT} CLIENT_PORT=${HOST_CLIENT_PORT} docker compose up -d --no-build' — --no-build is what stops Compose from silently rebuilding current source when that image is missing."
+  ui_success "Rollback: on the VM in ${REMOTE_PATH}, run 'APP_VERSION=<old-version> NODE_ENV=${NODE_ENV} PORT=${HOST_SERVER_PORT} CLIENT_PORT=${HOST_CLIENT_PORT} PY_SERVICE_PORT=${HOST_PY_SERVICE_PORT} docker compose up -d --no-build' — --no-build is what stops Compose from silently rebuilding current source when that image is missing."
 }
 
 # ---------------------------------------------------------------------------

@@ -141,12 +141,13 @@ preflight checks, and a confirmation gate. Run them from the repository root wit
   `docker compose` on the VM over SSH; it does **not** transfer the repository, so the VM must
   already have it (run script 02 first).
 - **`scripts/02_deploy_docker_vm.sh`** — prompts for the SSH connection, environment, and the
-  published host ports for the server and client, then: transfers the working tree to the VM
-  (`rsync`, falling back to `tar` over `ssh` when `rsync` is unavailable, as on Git Bash), builds
-  and starts `server` + `client` there with `docker compose up -d --build`, retags the freshly
-  built images, and tails the last 50 log lines. The transfer **does** carry `apps/server/.env.*`
-  and `apps/client/.env.*`, so the laptop's env files overwrite the VM's copies — the script's
-  summary names both files before you confirm.
+  published host ports for the server, client, and py-service, then: transfers the working tree
+  to the VM (`rsync`, falling back to `tar` over `ssh` when `rsync` is unavailable, as on Git
+  Bash), builds and starts `server` + `client` + `py-service` there with
+  `docker compose up -d --build`, retags the freshly built images, and tails the last 50 log
+  lines. The transfer **does** carry `apps/server/.env.*`, `apps/client/.env.*`, and
+  `apps/py-service/.env.*`, so the laptop's env files overwrite the VM's copies — the script's
+  summary names all three files before you confirm.
 
 ### Local infrastructure (MySQL + Redis + OpenObserve)
 

@@ -1,0 +1,3 @@
+{
+  "*.py": ["pnpm exec ruff check --fix", "pnpm exec ruff format"]
+}

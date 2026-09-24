@@ -37,20 +37,25 @@ inside `apps/py-service`.
 | `typecheck`    | Runs `mypy` in strict mode.                                             |
 | `test`         | Runs `pytest`. Tests sit next to the source file (`test_*.py`).        |
 
+## Lint-staged
+
+`.lintstagedrc.json` runs `ruff check --fix` and `ruff format` on staged `.py` files when you
+commit, the same way `server`/`client` lint their own staged files.
+
 ## Environment
 
-Settings load from `.env.<APP_ENV>` (default `development`). Copy the example file to make
-your own:
+The start scripts, Docker Compose, and the Dockerfile all set `APP_ENV` from outside the app.
+It picks which `.env.<APP_ENV>` file Settings loads (default `development` when unset). Copy
+the example file to make your own:
 
 ```bash
 cp .env.example .env.development
 ```
 
-| Key       | Default       | What it does                                                       |
-| --------- | ------------- | -------------------------------------------------------------------- |
-| `APP_ENV` | `development` | Picks which `.env.<APP_ENV>` file to load.                          |
-| `HOST`    | `127.0.0.1`   | Address the server binds to. Set to `0.0.0.0` in Docker/production so it accepts outside connections. |
-| `PORT`    | `8000`        | HTTP server port.                                                   |
+| Key    | Default     | What it does                                                       |
+| ------ | ----------- | -------------------------------------------------------------------- |
+| `HOST` | `127.0.0.1` | Address the server binds to. Set to `0.0.0.0` in Docker/production so it accepts outside connections. |
+| `PORT` | `8000`      | HTTP server port.                                                   |
 
 `start:dev` and `start:debug` always use `uvicorn`'s own default (port 8000) and do not read
 `HOST`/`PORT`. `start:staging` and `start:prod` run `python -m app`, which reads both from
@@ -75,6 +80,10 @@ It has two stages:
 `docker-compose.yml` at the repo root has a `py-service` service in the same style as
 `server`/`client` (`PY_SERVICE_PORT`, default `8000`). See the root `README.md` for the full
 Docker commands.
+
+`scripts/02_deploy_docker_vm.sh` (`pnpm deploy:vm`) deploys `py-service` to a VM the same way
+as `server`/`client`: it checks `apps/py-service/.env.<NODE_ENV>`, asks for its published host
+port, and builds, starts, and retags its image alongside the other two.
 
 ## pnpm quirks
 
