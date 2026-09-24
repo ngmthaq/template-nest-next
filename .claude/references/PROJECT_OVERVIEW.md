@@ -6,7 +6,7 @@
 - **Project Description**: `pnpm workspace monorepo template with a NestJS API (apps/server) and a Next.js front-end (apps/client)`
 - **Programming Languages**: `TypeScript`
 - **Frameworks**: `NestJS 11 (apps/server), Next.js 16 + React 19 (apps/client)`
-- **Package Managers**: `pnpm >= 12.5.1 (workspaces)`
+- **Package Managers**: `pnpm >= 12.6.0 (workspaces)`
 - **Key Libraries**: `server: Prisma 7, class-validator, class-transformer, BullMQ, cache-manager + Keyv/Redis, Socket.IO, Winston, Swagger, Nodemailer, Helmet, Throttler | client: Axios, Formik, Yup, next-intl, TanStack Table, shadcn/ui (Radix + Base UI), Tailwind CSS 4, Sonner`
 - **Database**: `MySQL (Prisma with the MariaDB adapter), Redis (cache and BullMQ queues)`
 - **Doc Directory**: `/.claude/plans`

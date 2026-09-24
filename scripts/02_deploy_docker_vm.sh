@@ -12,7 +12,7 @@ if [[ ${BASH_VERSINFO[0]:-0} -lt 4 || (${BASH_VERSINFO[0]:-0} -eq 4 && ${BASH_VE
   fi
   _bv_major="${_bv%% *}"; _bv_rest="${_bv#* }"; _bv_minor="${_bv_rest%% *}"; _bv_patch="${_bv_rest#* }"
   if [[ ${_bv_major:-0} -gt 4 || (${_bv_major:-0} -eq 4 && ${_bv_minor:-0} -ge 3) ]]; then
-    echo "scripts/02_deploy_docker_vm.sh was started with an old bash (${_cur_v}). A suitable bash ${_bv_major}.${_bv_minor}.${_bv_patch:-0} is already installed at ${_bv_path} — you are probably running it with \`sh\`, which ignores the shebang. Run it instead as: ./scripts/02_deploy_docker_vm.sh   or   bash scripts/02_deploy_docker_vm.sh   (or \`pnpm deploy\`)." >&2
+    echo "scripts/02_deploy_docker_vm.sh was started with an old bash (${_cur_v}). A suitable bash ${_bv_major}.${_bv_minor}.${_bv_patch:-0} is already installed at ${_bv_path} — you are probably running it with \`sh\`, which ignores the shebang. Run it instead as: ./scripts/02_deploy_docker_vm.sh   or   bash scripts/02_deploy_docker_vm.sh   (or \`pnpm deploy:vm\`)." >&2
   else
     echo "scripts/02_deploy_docker_vm.sh requires Bash 4.3+ (found ${_cur_v}). On macOS: brew install bash, then re-run this script with that bash. Linux/WSL already ship a new enough bash." >&2
   fi

@@ -8,7 +8,7 @@ the exact rules rather than restating them.
 ## Setup
 
 See [README.md](./README.md) for install and run instructions. In short: Node.js `>= 24`, pnpm
-`>= 12.5.1` (pinned in `package.json`'s `packageManager`, picked up by `corepack enable`), then
+`>= 12.6.0` (pinned in `package.json`'s `packageManager`, picked up by `corepack enable`), then
 `pnpm install`.
 
 ---
@@ -36,6 +36,8 @@ Every commit runs `husky`'s `pre-commit` hook, which — after linting — bumps
 commit touches `package.json`**, which routinely causes conflicts when rebasing a branch onto a
 moved `main`. Take the higher version number and move on; it is not a real conflict. Full
 mechanics: [GIT_CONVENTIONS.md §2](./.claude/references/GIT_CONVENTIONS.md#2-commits).
+
+The hook uses `npm version`, not `pnpm version`, because it never touches `pnpm-lock.yaml`.
 
 ---
 

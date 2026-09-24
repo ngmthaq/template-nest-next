@@ -134,7 +134,7 @@ defaults to `development` when unset.
 
 Two dependency-free bash TUIs under `scripts/` wrap the Compose commands below with prompts,
 preflight checks, and a confirmation gate. Run them from the repository root with `pnpm infra` /
-`pnpm deploy`, or directly with `bash scripts/01_run_docker_infra.sh` / `bash scripts/02_deploy_docker_vm.sh`.
+`pnpm deploy:vm`, or directly with `bash scripts/01_run_docker_infra.sh` / `bash scripts/02_deploy_docker_vm.sh`.
 
 - **`scripts/01_run_docker_infra.sh`** — prompts for target (local or remote over SSH) and
   environment, then brings up MySQL + Redis for that environment. Remote mode only runs

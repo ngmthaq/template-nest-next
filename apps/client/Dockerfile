@@ -3,12 +3,20 @@
 # Build from the REPO ROOT (`docker build -f apps/client/Dockerfile .`), where the lockfile lives.
 # Environment-agnostic — built once, configured at container start via runtime env vars.
 
-# ---- Base: pnpm via corepack ----
+# ---- pnpm-version: isolates the packageManager value so a version bump in package.json ----
+# ---- does not bust the base layer's cache ----
+FROM node:24-alpine AS pnpm-version
+WORKDIR /app
+COPY package.json ./
+RUN node -p "require('./package.json').packageManager" > /pnpm-version
+
+# ---- Base: pnpm via corepack, version read from the root package.json ----
 FROM node:24-alpine AS base
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
-RUN corepack enable && corepack prepare pnpm@12.5.1 --activate
 WORKDIR /app
+COPY --from=pnpm-version /pnpm-version /pnpm-version
+RUN corepack enable && corepack prepare "$(cat /pnpm-version)" --activate
 
 # ---- Dependencies ----
 FROM base AS deps

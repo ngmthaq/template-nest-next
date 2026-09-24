@@ -19,7 +19,7 @@ A [pnpm workspace](https://pnpm.io/workspaces) monorepo.
 ## Requirements
 
 - Node.js >= 24
-- pnpm >= 12.5.1 (`corepack enable` picks up the pinned `packageManager` version)
+- pnpm >= 12.6.0 (`corepack enable` picks up the pinned `packageManager` version)
 
 ## Getting started
 
@@ -61,7 +61,7 @@ NODE_ENV=development docker compose up -d --build
 NODE_ENV=development docker compose up -d --build client
 ```
 
-Interactive alternative: `pnpm infra` / `pnpm deploy` (or `bash scripts/01_run_docker_infra.sh` /
+Interactive alternative: `pnpm infra` / `pnpm deploy:vm` (or `bash scripts/01_run_docker_infra.sh` /
 `bash scripts/02_deploy_docker_vm.sh`) prompt for the target and environment, including a full VM
 deploy over SSH. See the Docker section of [apps/server/README.md](./apps/server/README.md) for
 prerequisites, image tags, and rollback.
