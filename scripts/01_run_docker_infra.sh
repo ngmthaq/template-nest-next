@@ -59,9 +59,9 @@ compose_up() {
   local target="$1" environment="$2" mysql_port="$3" redis_port="$4" openobserve_port="$5"
   if [[ "$target" == "remote" ]]; then
     MSYS_NO_PATHCONV=1 ssh_run \
-      "cd '${REMOTE_PATH}' && NODE_ENV='${environment}' MYSQL_PORT='${mysql_port}' REDIS_PORT='${redis_port}' OPENOBSERVE_PORT='${openobserve_port}' docker compose -f ${COMPOSE_FILE} up -d"
+      "cd '${REMOTE_PATH}' && APP_ENV='${environment}' MYSQL_PORT='${mysql_port}' REDIS_PORT='${redis_port}' OPENOBSERVE_PORT='${openobserve_port}' docker compose -f ${COMPOSE_FILE} up -d"
   else
-    NODE_ENV="$environment" MYSQL_PORT="$mysql_port" REDIS_PORT="$redis_port" \
+    APP_ENV="$environment" MYSQL_PORT="$mysql_port" REDIS_PORT="$redis_port" \
       OPENOBSERVE_PORT="$openobserve_port" docker compose -f "$COMPOSE_FILE" up -d
   fi
 }

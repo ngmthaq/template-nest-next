@@ -54,7 +54,7 @@
 - `apps/client/src/proxy.ts` wraps the next-intl proxy. It also rewrites dev-only routes (`/cache`, `/<locale>/cache`) to a real 404 when `APP_ENV=production`. On the client, check the environment on the server only, with `envUtils.isProduction()`.
 - Client i18n keys are one level deep inside a namespace (e.g. `health.tableIndicator`).
 - Prisma client is generated into `apps/server/src/generated/prisma`. The DB URL is built in `src/core/config/database-url.ts` from `MYSQL_*` env vars, not in `schema.prisma`.
-- Env files: each app has `.env.example`. The client loads env through `load-env-cli.mjs` with `APP_ENV`; the server uses `NODE_ENV`.
+- Env files: each app has `.env.example`. All apps load env with `APP_ENV`; the client does it through `load-env-cli.mjs`.
 - The client uses a new Next.js version. Read `apps/client/AGENTS.md` and the docs in `node_modules/next/dist/docs/` before writing client code.
 - Husky + lint-staged run ESLint on staged files before each commit.
 - CI config exists for both GitHub (`.github/workflows`) and GitLab (`.gitlab`).

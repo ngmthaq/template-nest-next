@@ -13,7 +13,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        skipIf: () => config.get<string>('nodeEnv', 'development') === 'development',
+        skipIf: () => config.get<string>('appEnv', 'development') === 'development',
         throttlers: [
           {
             name: 'short',

@@ -5,27 +5,27 @@ jest.mock('@nestjs/config', () => ({
 }));
 
 describe('CoreConfigModule', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
+  const originalAppEnv = process.env.APP_ENV;
 
   afterEach(() => {
-    if (originalNodeEnv === undefined) {
-      delete process.env.NODE_ENV;
+    if (originalAppEnv === undefined) {
+      delete process.env.APP_ENV;
     } else {
-      process.env.NODE_ENV = originalNodeEnv;
+      process.env.APP_ENV = originalAppEnv;
     }
   });
 
   /**
-   * Sets `NODE_ENV`, then re-requires the module in an isolated registry so its
+   * Sets `APP_ENV`, then re-requires the module in an isolated registry so its
    * `envFilePath` (computed once, at import time) picks up the new value.
    */
-  function captureForRootOptions(nodeEnv: string | undefined): ConfigModuleOptions {
+  function captureForRootOptions(appEnv: string | undefined): ConfigModuleOptions {
     let options!: ConfigModuleOptions;
     jest.isolateModules(() => {
-      if (nodeEnv === undefined) {
-        delete process.env.NODE_ENV;
+      if (appEnv === undefined) {
+        delete process.env.APP_ENV;
       } else {
-        process.env.NODE_ENV = nodeEnv;
+        process.env.APP_ENV = appEnv;
       }
       // eslint-disable-next-line @typescript-eslint/no-require-imports -- isolateModules needs require, not a static import
       const { ConfigModule } = require('@nestjs/config') as {
@@ -38,7 +38,7 @@ describe('CoreConfigModule', () => {
     return options;
   }
 
-  it('orders env files for development when NODE_ENV is unset', () => {
+  it('orders env files for development when APP_ENV is unset', () => {
     // Act
     const options = captureForRootOptions(undefined);
 
@@ -46,7 +46,7 @@ describe('CoreConfigModule', () => {
     expect(options.envFilePath).toEqual(['.env.development.local', '.env.development', '.env']);
   });
 
-  it('orders env files for production when NODE_ENV is production', () => {
+  it('orders env files for production when APP_ENV is production', () => {
     // Act
     const options = captureForRootOptions('production');
 

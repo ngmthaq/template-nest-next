@@ -4,10 +4,10 @@ import { ConfigService } from '@nestjs/config';
 import { NonProductionGuard } from './non-production.guard';
 
 describe('NonProductionGuard', () => {
-  const createGuard = (nodeEnv: string | undefined): NonProductionGuard => {
+  const createGuard = (appEnv: string | undefined): NonProductionGuard => {
     const config = {
       get: jest.fn<string | undefined, [string, string?]>(
-        (_key, defaultValue) => nodeEnv ?? defaultValue,
+        (_key, defaultValue) => appEnv ?? defaultValue,
       ),
     } as unknown as ConfigService;
     return new NonProductionGuard(config);
@@ -46,7 +46,7 @@ describe('NonProductionGuard', () => {
     expect(result).toBe(true);
   });
 
-  it('allows access using the development default when nodeEnv is unset', () => {
+  it('allows access using the development default when appEnv is unset', () => {
     // Arrange
     const guard = createGuard(undefined);
 

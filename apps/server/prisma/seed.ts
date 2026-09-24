@@ -5,8 +5,8 @@ import { buildDatabaseUrl } from '../src/core/config/database-url';
 import { PrismaClient } from '../src/generated/prisma/client';
 
 // Load env as the app does, so this also runs directly via `tsx prisma/seed.ts`.
-const nodeEnv = process.env.NODE_ENV ?? 'development';
-loadEnv({ path: [`.env.${nodeEnv}.local`, `.env.${nodeEnv}`, '.env'] });
+const appEnv = process.env.APP_ENV ?? 'development';
+loadEnv({ path: [`.env.${appEnv}.local`, `.env.${appEnv}`, '.env'] });
 
 const prisma = new PrismaClient({ adapter: new PrismaMariaDb(buildDatabaseUrl()) });
 

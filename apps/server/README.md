@@ -8,10 +8,10 @@ typed factory in `src/core/configuration.ts` and injected via `ConfigService`.
 
 ### How the environment is selected
 
-`NODE_ENV` is set by the **npm start script** — not by any `.env` file — so it is the single
-source of truth for which environment is running and which `.env.<NODE_ENV>` file is loaded:
+`APP_ENV` is set by the **npm start script** — not by any `.env` file — so it is the single
+source of truth for which environment is running and which `.env.<APP_ENV>` file is loaded:
 
-| Script               | `NODE_ENV`    | Command              | Env file loaded    |
+| Script               | `APP_ENV`     | Command              | Env file loaded    |
 | -------------------- | ------------- | -------------------- | ------------------ |
 | `pnpm start`         | `development` | `nest start`         | `.env.development` |
 | `pnpm start:dev`     | `development` | `nest start --watch` | `.env.development` |
@@ -19,14 +19,15 @@ source of truth for which environment is running and which `.env.<NODE_ENV>` fil
 | `pnpm start:staging` | `staging`     | `node dist/main`     | `.env.staging`     |
 | `pnpm start:prod`    | `production`  | `node dist/main`     | `.env.production`  |
 
-> `cross-env` sets `NODE_ENV` so the scripts work on Windows, macOS, and Linux.
+> `cross-env` sets `APP_ENV` so the scripts work on Windows, macOS, and Linux. The server no
+> longer sets `NODE_ENV`.
 
 ### Env file load order
 
-For a given `NODE_ENV`, files are loaded in this order (**first match wins**):
+For a given `APP_ENV`, files are loaded in this order (**first match wins**):
 
-1. `.env.<NODE_ENV>.local` — git-ignored; machine-specific secrets/overrides
-2. `.env.<NODE_ENV>` — git-ignored; per-environment defaults
+1. `.env.<APP_ENV>.local` — git-ignored; machine-specific secrets/overrides
+2. `.env.<APP_ENV>` — git-ignored; per-environment defaults
 3. `.env` — git-ignored; local fallback
 
 All `.env*` files are git-ignored **except `.env.example`**, which is committed as the
@@ -43,7 +44,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 
 | Variable                | Default                                  | Description                                                                                    |
 | ----------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `NODE_ENV`              | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour.  |
+| `APP_ENV`               | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour.  |
 | `PORT`                  | `3000`                                   | HTTP server port.                                                                              |
 | `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                   |
 | `CACHE_TTL`             | `3600000`                                | Redis-backed cache entry TTL, in milliseconds.                                                 |
@@ -96,12 +97,12 @@ import { ConfigService } from '@nestjs/config';
 constructor(private readonly config: ConfigService) {}
 
 const port = this.config.get<number>('port', 3000);
-const env = this.config.get<string>('nodeEnv');
+const env = this.config.get<string>('appEnv');
 ```
 
 ### Adding a new environment
 
-1. Add a `start:<name>` script with `cross-env NODE_ENV=<name> ...` in `package.json`.
+1. Add a `start:<name>` script with `cross-env APP_ENV=<name> ...` in `package.json`.
 2. Create a matching `.env.<name>` file (git-ignored automatically).
 
 ## Docker
@@ -110,8 +111,8 @@ const env = this.config.get<string>('nodeEnv');
 > at the monorepo root and reference this app via `apps/server` for the build context and
 > env files.
 
-Two independent Compose files, both selecting their environment through `NODE_ENV` (no
-`--env-file` flag). `NODE_ENV` picks which `.env.<NODE_ENV>` file each service loads and
+Two independent Compose files, both selecting their environment through `APP_ENV` (no
+`--env-file` flag). `APP_ENV` picks which `.env.<APP_ENV>` file each service loads and
 defaults to `development` when unset.
 
 | File                       | Contains            | When to use                                                             |
@@ -126,8 +127,8 @@ defaults to `development` when unset.
   `PATH`, so Homebrew's bash is picked up automatically. Linux and WSL already ship 4.3+. On
   Windows, run under WSL or Git Bash.
 - **Env files are hand-authored — the scripts never create or edit them.** Before running either
-  script, copy `apps/server/.env.example` to `apps/server/.env.<NODE_ENV>` and fill it in; for a
-  deploy, also copy `apps/client/.env.example` to `apps/client/.env.<NODE_ENV>`. Each script fails
+  script, copy `apps/server/.env.example` to `apps/server/.env.<APP_ENV>` and fill it in; for a
+  deploy, also copy `apps/client/.env.example` to `apps/client/.env.<APP_ENV>`. Each script fails
   fast with the missing path and a pointer to the matching `.env.example` if the file isn't there.
 
 ### Interactive scripts
@@ -153,18 +154,18 @@ preflight checks, and a confirmation gate. Run them from the repository root wit
 
 ```bash
 # Start MySQL + Redis + OpenObserve for the development environment
-NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
+APP_ENV=development docker compose -f docker-compose-infra.yml up -d
 
 # Stop them
-NODE_ENV=development docker compose -f docker-compose-infra.yml down
+APP_ENV=development docker compose -f docker-compose-infra.yml down
 
 # Stop and wipe all data (drops the volumes)
-NODE_ENV=development docker compose -f docker-compose-infra.yml down -v
+APP_ENV=development docker compose -f docker-compose-infra.yml down -v
 ```
 
-Containers are named per environment (`template-nest-next-mysql-<NODE_ENV>`,
-`template-nest-next-redis-<NODE_ENV>`, `template-nest-next-openobserve-<NODE_ENV>`). The
-`MYSQL_*` / `REDIS_*` / `ZO_*` values come from `.env.<NODE_ENV>`, so the app database, user,
+Containers are named per environment (`template-nest-next-mysql-<APP_ENV>`,
+`template-nest-next-redis-<APP_ENV>`, `template-nest-next-openobserve-<APP_ENV>`). The
+`MYSQL_*` / `REDIS_*` / `ZO_*` values come from `.env.<APP_ENV>`, so the app database, user,
 and OpenObserve root login are created from that file on first start. `pnpm infra` (the
 interactive script) starts all three and shows the ports it used.
 
@@ -173,7 +174,7 @@ interactive script) starts all three and shows the ports it used.
 [OpenObserve](https://openobserve.ai) collects logs sent by both apps. It starts with
 `pnpm infra` alongside MySQL and Redis (see above).
 
-1. Set `ZO_ROOT_USER_EMAIL` and `ZO_ROOT_USER_PASSWORD` in `apps/server/.env.<NODE_ENV>` before
+1. Set `ZO_ROOT_USER_EMAIL` and `ZO_ROOT_USER_PASSWORD` in `apps/server/.env.<APP_ENV>` before
    the first start — the container refuses to boot without them. The password needs 8+
    characters with a lowercase letter, an uppercase letter, a digit, and a special character.
 2. Start it with `pnpm infra` (or `docker compose -f docker-compose-infra.yml up -d`).
@@ -182,7 +183,7 @@ interactive script) starts all three and shows the ports it used.
 4. Logs land in org `default`: the server's stream is `server`, the client's is `client`
    (see `apps/client/README.md` for its env keys).
 
-Set these in **both** `apps/server/.env.<NODE_ENV>` and `apps/client/.env.<NODE_ENV>` to turn
+Set these in **both** `apps/server/.env.<APP_ENV>` and `apps/client/.env.<APP_ENV>` to turn
 log shipping on:
 
 | Variable              | Default   | Description                                                    |
@@ -206,45 +207,45 @@ either way.
 
 Multi-stage `Dockerfile` (pnpm via corepack, native-module toolchain for `bcrypt`, prod-pruned
 runtime on `node:24-alpine`). MySQL/Redis are **not** included here — their hosts come from
-`.env.<NODE_ENV>`.
+`.env.<APP_ENV>`.
 
 ```bash
 # Build and run the development image (omit `server` to build the client too)
-NODE_ENV=development docker compose up -d --build server
+APP_ENV=development docker compose up -d --build server
 
 # Other environments
-NODE_ENV=staging    docker compose up -d --build server
-NODE_ENV=production docker compose up -d --build server
+APP_ENV=staging    docker compose up -d --build server
+APP_ENV=production docker compose up -d --build server
 
 docker compose down
 ```
 
 ### Image tags & rollback
 
-The container name is still suffixed with `NODE_ENV` alone (`template-nest-next-server-<NODE_ENV>`),
+The container name is still suffixed with `APP_ENV` alone (`template-nest-next-server-<APP_ENV>`),
 but the **image tag** now also carries the app version (from the root `package.json`):
-`template-nest-next-server:<version>-<NODE_ENV>` and `template-nest-next-client:<version>-<NODE_ENV>`
-(default `0.0.0-development` when `APP_VERSION`/`NODE_ENV` are unset). After a build,
-`scripts/02_deploy_docker_vm.sh` also retags a moving `:<NODE_ENV>` pointer (e.g. `:production`)
+`template-nest-next-server:<version>-<APP_ENV>` and `template-nest-next-client:<version>-<APP_ENV>`
+(default `0.0.0-development` when `APP_VERSION`/`APP_ENV` are unset). After a build,
+`scripts/02_deploy_docker_vm.sh` also retags a moving `:<APP_ENV>` pointer (e.g. `:production`)
 onto the version just built. That pointer is a human-facing marker of which version is currently
 live — handy for `docker images` or a manual `docker run` — but **`docker-compose.yml` never reads
-it**; `image:` there resolves from `APP_VERSION`/`NODE_ENV` directly, so Compose ignores the moving
+it**; `image:` there resolves from `APP_VERSION`/`APP_ENV` directly, so Compose ignores the moving
 tag entirely. The versioned tag itself is never overwritten. Running Compose by hand only produces
 the versioned tag, not the moving one.
 
 **Rollback: re-run Compose against the old version, without letting it rebuild:**
 
 ```bash
-APP_VERSION=0.0.21 NODE_ENV=production docker compose up -d --no-build
+APP_VERSION=0.0.21 APP_ENV=production docker compose up -d --no-build
 ```
 
 Both parts matter: `APP_VERSION=0.0.21` is what makes `image:` resolve to the older,
-already-built tag instead of the current `0.0.0-<NODE_ENV>` default — without it, Compose falls
+already-built tag instead of the current `0.0.0-<APP_ENV>` default — without it, Compose falls
 back to `0.0.0-production`, an image that doesn't exist. `--no-build` matters because the service
 also has a `build:` section: if the resolved image is missing, Compose silently rebuilds from
 whatever is currently checked out, deploying the exact code you were trying to roll back away
 from, instead of failing. With `--no-build`, a missing image is a hard error. If non-default host
-ports are in use, pass `PORT=<port>` / `CLIENT_PORT=<port>` alongside `APP_VERSION`/`NODE_ENV` the
+ports are in use, pass `PORT=<port>` / `CLIENT_PORT=<port>` alongside `APP_VERSION`/`APP_ENV` the
 same way, since those also come from the shell rather than the env file.
 
 ### Ports
@@ -253,14 +254,14 @@ The server always listens on **3000 inside** the container; `PORT` sets only the
 host port** (default `3000`), letting environments run side by side on one host:
 
 ```bash
-PORT=8080 NODE_ENV=staging docker compose up -d --build server   # reachable on host :8080
+PORT=8080 APP_ENV=staging docker compose up -d --build server   # reachable on host :8080
 ```
 
 > **Infra ports are read from your shell, not the env file.** Compose resolves the `ports:`
-> mapping before `env_file` loads, so `MYSQL_PORT` / `REDIS_PORT` in `.env.<NODE_ENV>` set where
+> mapping before `env_file` loads, so `MYSQL_PORT` / `REDIS_PORT` in `.env.<APP_ENV>` set where
 > the **app connects**, while the published host ports come from the shell (defaulting to
 > `3306` / `6379`). To publish a non-default port, pass it inline and keep it in sync with the
-> env file, e.g. `MYSQL_PORT=3307 NODE_ENV=development docker compose -f docker-compose-infra.yml up -d`.
+> env file, e.g. `MYSQL_PORT=3307 APP_ENV=development docker compose -f docker-compose-infra.yml up -d`.
 
 ## Security & HTTP Hardening
 
@@ -343,7 +344,7 @@ The document (titled _"Template Nest Next API"_) is built by scanning controller
 registered as a global parameter, so you can set the requested API version directly from the UI,
 and authorization is persisted across page reloads (`persistAuthorization`).
 
-> **Disabled in production.** When `NODE_ENV=production` the docs are not mounted, so they are
+> **Disabled in production.** When `APP_ENV=production` the docs are not mounted, so they are
 > never exposed there. They are available in development and staging.
 
 ### API versioning

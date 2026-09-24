@@ -57,13 +57,13 @@ Both compose files run from the repo root. `docker-compose.yml` defines a `serve
 
 ```bash
 # Local infrastructure (MySQL + Redis)
-NODE_ENV=development docker compose -f docker-compose-infra.yml up -d
+APP_ENV=development docker compose -f docker-compose-infra.yml up -d
 
 # Application containers (server + client)
-NODE_ENV=development docker compose up -d --build
+APP_ENV=development docker compose up -d --build
 
 # One service only
-NODE_ENV=development docker compose up -d --build client
+APP_ENV=development docker compose up -d --build client
 ```
 
 Interactive alternative: `pnpm infra` / `pnpm deploy:vm` (or `bash scripts/01_run_docker_infra.sh` /

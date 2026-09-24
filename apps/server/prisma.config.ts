@@ -4,8 +4,8 @@ import { defineConfig } from 'prisma/config';
 import { buildDatabaseUrl } from './src/core/config/database-url';
 
 // Mirrors the app's env-loading order (see core-config.module.ts).
-const nodeEnv = process.env.NODE_ENV ?? 'development';
-loadEnv({ path: [`.env.${nodeEnv}.local`, `.env.${nodeEnv}`, '.env'] });
+const appEnv = process.env.APP_ENV ?? 'development';
+loadEnv({ path: [`.env.${appEnv}.local`, `.env.${appEnv}`, '.env'] });
 
 export default defineConfig({
   schema: 'prisma/schema',

@@ -1,4 +1,4 @@
-# MySQL + Redis + OpenObserve for local development, selected by NODE_ENV (default
+# MySQL + Redis + OpenObserve for local development, selected by APP_ENV (default
 # `development`). Published host ports come from your shell, not the env file. See the Docker
 # section of apps/server/README.md.
 
@@ -7,12 +7,12 @@ name: template-nest-next-infra
 services:
   mysql:
     image: mysql:8.4
-    container_name: template-nest-next-mysql-${NODE_ENV:-development}
+    container_name: template-nest-next-mysql-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     env_file:
-      - apps/server/.env.${NODE_ENV:-development}
+      - apps/server/.env.${APP_ENV:-development}
     environment:
       MYSQL_HOST: ""
     volumes:
@@ -27,12 +27,12 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: template-nest-next-redis-${NODE_ENV:-development}
+    container_name: template-nest-next-redis-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
     env_file:
-      - apps/server/.env.${NODE_ENV:-development}
+      - apps/server/.env.${APP_ENV:-development}
     command: >
       sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
                exec redis-server --requirepass "$$REDIS_PASSWORD";
@@ -51,12 +51,12 @@ services:
   # container-exec healthcheck against it is not possible (confirmed against the image).
   openobserve:
     image: openobserve/openobserve:v1.0.3-debug
-    container_name: template-nest-next-openobserve-${NODE_ENV:-development}
+    container_name: template-nest-next-openobserve-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${OPENOBSERVE_PORT:-5080}:5080"
     env_file:
-      - apps/server/.env.${NODE_ENV:-development}
+      - apps/server/.env.${APP_ENV:-development}
     environment:
       ZO_DATA_DIR: /data
     volumes:

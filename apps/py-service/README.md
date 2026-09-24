@@ -82,7 +82,7 @@ It has two stages:
 Docker commands.
 
 `scripts/02_deploy_docker_vm.sh` (`pnpm deploy:vm`) deploys `py-service` to a VM the same way
-as `server`/`client`: it checks `apps/py-service/.env.<NODE_ENV>`, asks for its published host
+as `server`/`client`: it checks `apps/py-service/.env.<APP_ENV>`, asks for its published host
 port, and builds, starts, and retags its image alongside the other two.
 
 ## pnpm quirks

@@ -34,7 +34,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 
 # ---- Runtime ----
 FROM node:24-alpine AS runtime
-ENV NODE_ENV=production
+ENV APP_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /prod/server/node_modules ./node_modules
 COPY --from=build --chown=node:node /prod/server/dist ./dist

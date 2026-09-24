@@ -16,8 +16,8 @@ import { buildOpenObserveTransportOptions } from './lib/openobserve-transport-op
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const level = config.get<string>('log.level', 'debug');
-        const nodeEnv = config.get<string>('nodeEnv', 'development');
-        const isProduction = nodeEnv === 'production';
+        const appEnv = config.get<string>('appEnv', 'development');
+        const isProduction = appEnv === 'production';
         const format = isProduction
           ? winston.format.combine(winston.format.timestamp(), winston.format.json())
           : winston.format.combine(
@@ -47,7 +47,7 @@ import { buildOpenObserveTransportOptions } from './lib/openobserve-transport-op
               // added `timestamp`, and Nest's Logger already sets `context`.
               format: winston.format((info) => {
                 info.service = 'server';
-                info.env = nodeEnv;
+                info.env = appEnv;
                 return info;
               })(),
             }),

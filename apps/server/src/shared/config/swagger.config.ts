@@ -12,8 +12,8 @@ export const SWAGGER_PATH = 'swagger';
  * Not mounted in production, so the docs are never exposed there.
  */
 export function handleSwagger(app: INestApplication): void {
-  const nodeEnv = app.get(ConfigService).get<string>('nodeEnv', 'development');
-  if (nodeEnv === 'production') return;
+  const appEnv = app.get(ConfigService).get<string>('appEnv', 'development');
+  if (appEnv === 'production') return;
 
   const config = new DocumentBuilder()
     .setTitle('Template Nest Next API')

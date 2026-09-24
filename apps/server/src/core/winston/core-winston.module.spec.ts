@@ -6,7 +6,7 @@ import * as winston from 'winston';
 import { CoreWinstonModule } from './core-winston.module';
 
 interface TestConfig {
-  nodeEnv: string;
+  appEnv: string;
   log: {
     level: string;
     openobserve: {
@@ -32,7 +32,7 @@ async function buildLogger(config: TestConfig): Promise<winston.Logger> {
 
 function buildTestConfig(openobserve: Partial<TestConfig['log']['openobserve']> = {}): TestConfig {
   return {
-    nodeEnv: 'test',
+    appEnv: 'test',
     log: {
       level: 'debug',
       openobserve: { org: 'default', stream: 'server', ...openobserve },

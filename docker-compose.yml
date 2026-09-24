@@ -1,4 +1,4 @@
-# Server + client + py-service containers, one environment at a time via NODE_ENV; image tags
+# Server + client + py-service containers, one environment at a time via APP_ENV; image tags
 # carry APP_VERSION. See apps/server/README.md for usage, ports, and rollback-by-retag.
 
 name: template-nest-next
@@ -8,47 +8,47 @@ services:
     build:
       context: .
       dockerfile: apps/server/Dockerfile
-    image: template-nest-next-server:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
-    container_name: template-nest-next-server-${NODE_ENV:-development}
+    image: template-nest-next-server:${APP_VERSION:-0.0.0}-${APP_ENV:-development}
+    container_name: template-nest-next-server-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     env_file:
-      - apps/server/.env.${NODE_ENV:-development}
+      - apps/server/.env.${APP_ENV:-development}
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      APP_ENV: ${APP_ENV:-development}
       PORT: 3000
 
   client:
     build:
       context: .
       dockerfile: apps/client/Dockerfile
-    image: template-nest-next-client:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
-    container_name: template-nest-next-client-${NODE_ENV:-development}
+    image: template-nest-next-client:${APP_VERSION:-0.0.0}-${APP_ENV:-development}
+    container_name: template-nest-next-client-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${CLIENT_PORT:-3001}:3001"
     env_file:
-      - apps/client/.env.${NODE_ENV:-development}
+      - apps/client/.env.${APP_ENV:-development}
     environment:
       # Documents, not enforces: Next's standalone server.js hardcodes NODE_ENV=production
-      # whatever compose passes. NODE_ENV above still picks the tag, name, and env file.
+      # whatever compose passes. APP_ENV above still picks the tag, name, and env file.
       NODE_ENV: production
-      APP_ENV: ${NODE_ENV:-development}
+      APP_ENV: ${APP_ENV:-development}
       PORT: 3001
 
   py-service:
     build:
       context: .
       dockerfile: apps/py-service/Dockerfile
-    image: template-nest-next-py-service:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
-    container_name: template-nest-next-py-service-${NODE_ENV:-development}
+    image: template-nest-next-py-service:${APP_VERSION:-0.0.0}-${APP_ENV:-development}
+    container_name: template-nest-next-py-service-${APP_ENV:-development}
     restart: unless-stopped
     ports:
       - "${PY_SERVICE_PORT:-8000}:8000"
     env_file:
-      - apps/py-service/.env.${NODE_ENV:-development}
+      - apps/py-service/.env.${APP_ENV:-development}
     environment:
-      APP_ENV: ${NODE_ENV:-development}
+      APP_ENV: ${APP_ENV:-development}
       HOST: 0.0.0.0
       PORT: 8000

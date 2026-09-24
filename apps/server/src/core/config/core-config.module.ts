@@ -4,7 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './configuration';
 
 /**
- * Global `ConfigService`, loading `.env.<NODE_ENV>` variants in order —
+ * Global `ConfigService`, loading `.env.<APP_ENV>` variants in order —
  * first file to define a variable wins.
  */
 @Global()
@@ -15,8 +15,8 @@ import configuration from './configuration';
       cache: true,
       load: [configuration],
       envFilePath: [
-        `.env.${process.env.NODE_ENV ?? 'development'}.local`,
-        `.env.${process.env.NODE_ENV ?? 'development'}`,
+        `.env.${process.env.APP_ENV ?? 'development'}.local`,
+        `.env.${process.env.APP_ENV ?? 'development'}`,
         '.env',
       ],
     }),

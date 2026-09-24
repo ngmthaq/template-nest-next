@@ -6,7 +6,7 @@ import { getOptionsToken, ThrottlerGuard } from '@nestjs/throttler';
 import { CoreThrottlerModule } from './core-throttler.module';
 
 interface TestConfig {
-  nodeEnv?: string;
+  appEnv?: string;
   throttle?: {
     short?: Partial<{ ttl: number; limit: number }>;
     medium?: Partial<{ ttl: number; limit: number }>;
@@ -64,7 +64,7 @@ describe('CoreThrottlerModule', () => {
     ]);
   });
 
-  it('skips throttling when nodeEnv is missing (defaults to development)', async () => {
+  it('skips throttling when appEnv is missing (defaults to development)', async () => {
     // Act
     const options = await buildThrottlerOptions({});
 
@@ -72,9 +72,9 @@ describe('CoreThrottlerModule', () => {
     expect(options.skipIf()).toBe(true);
   });
 
-  it('does not skip throttling when nodeEnv is production', async () => {
+  it('does not skip throttling when appEnv is production', async () => {
     // Act
-    const options = await buildThrottlerOptions({ nodeEnv: 'production' });
+    const options = await buildThrottlerOptions({ appEnv: 'production' });
 
     // Assert
     expect(options.skipIf()).toBe(false);
