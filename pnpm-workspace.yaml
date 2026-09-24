@@ -2,6 +2,17 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+# Experimental: lets pnpm manage a Python virtualenv (apps/py-service) next to the npm packages.
+python:
+  enabled: true
+
+# Locks pylock.toml (and npm optional deps) for CI (linux-x64) and Docker (linux-arm64) too, not
+# just this Mac; manylinux_2_28 matches glibc 2.36 on node:24-slim/python:3.13-slim and ubuntu-latest.
+supportedArchitectures:
+  - darwin-arm64
+  - linux-x64-manylinux_2_28
+  - linux-arm64-manylinux_2_28
+
 # Only these dependencies may run install scripts; every other one is listed as false so pnpm
 # does not stop the install to ask about it.
 allowBuilds:

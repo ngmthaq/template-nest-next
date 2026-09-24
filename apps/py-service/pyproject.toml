@@ -1,0 +1,27 @@
+[project]
+name = "py-service"
+version = "0.0.1"
+requires-python = ">=3.13,<3.14"
+dependencies = ["fastapi==0.141.1", "uvicorn[standard]==0.53.0", "pydantic-settings==2.15.0"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/test_*.py" = ["S101"]
+
+[tool.mypy]
+strict = true
+files = ["app"]
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["app"]
+pythonpath = ["."]
+
+[dependency-groups]
+dev = ["ruff==0.16.8", "mypy==2.3.1", "pytest==9.1.1", "httpx==0.28.1", "debugpy==1.8.22"]

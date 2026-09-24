@@ -27,6 +27,7 @@ workflow:
     key:
       files:
         - pnpm-lock.yaml
+        - apps/py-service/pylock.toml
     paths:
       - .pnpm-store
 
@@ -42,6 +43,13 @@ lint:client:
   script:
     - pnpm --filter @template-nest-next/client exec eslint
 
+lint:py-service:
+  stage: lint
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/py-service run lint:check
+    - pnpm --filter @template-nest-next/py-service run format:check
+
 typecheck:server:
   stage: typecheck
   <<: *setup
@@ -54,6 +62,12 @@ typecheck:client:
   script:
     - pnpm --filter @template-nest-next/client run typecheck
 
+typecheck:py-service:
+  stage: typecheck
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/py-service run typecheck
+
 test:server:
   stage: test
   <<: *setup
@@ -65,6 +79,12 @@ test:client:
   <<: *setup
   script:
     - pnpm --filter @template-nest-next/client exec vitest run
+
+test:py-service:
+  stage: test
+  <<: *setup
+  script:
+    - pnpm --filter @template-nest-next/py-service run test
 
 build:server:
   stage: build

@@ -57,5 +57,12 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Prisma generated client (any workspace)
 **/src/generated/
 
+# Python (apps/py-service)
+.venv
+__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
 # Graphify knowledge graph output
 graphify-out/

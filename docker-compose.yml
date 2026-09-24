@@ -1,5 +1,5 @@
-# Server + client containers, one environment at a time via NODE_ENV; image tags carry APP_VERSION.
-# See apps/server/README.md for usage, ports, and rollback-by-retag.
+# Server + client + py-service containers, one environment at a time via NODE_ENV; image tags
+# carry APP_VERSION. See apps/server/README.md for usage, ports, and rollback-by-retag.
 
 name: template-nest-next
 
@@ -36,3 +36,19 @@ services:
       NODE_ENV: production
       APP_ENV: ${NODE_ENV:-development}
       PORT: 3001
+
+  py-service:
+    build:
+      context: .
+      dockerfile: apps/py-service/Dockerfile
+    image: template-nest-next-py-service:${APP_VERSION:-0.0.0}-${NODE_ENV:-development}
+    container_name: template-nest-next-py-service-${NODE_ENV:-development}
+    restart: unless-stopped
+    ports:
+      - "${PY_SERVICE_PORT:-8000}:8000"
+    env_file:
+      - apps/py-service/.env.${NODE_ENV:-development}
+    environment:
+      APP_ENV: ${NODE_ENV:-development}
+      HOST: 0.0.0.0
+      PORT: 8000

@@ -1,0 +1,23 @@
+{
+  "name": "@template-nest-next/py-service",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start:dev": "cross-env APP_ENV=development uvicorn app.main:app --reload",
+    "start:debug": "cross-env APP_ENV=development python -m debugpy --listen 127.0.0.1:5678 -m uvicorn app.main:app --reload",
+    "start:staging": "cross-env APP_ENV=staging python -m app",
+    "start:prod": "cross-env APP_ENV=production python -m app",
+    "lint": "ruff check --fix .",
+    "lint:check": "ruff check .",
+    "format": "ruff format .",
+    "format:check": "ruff format --check .",
+    "typecheck": "mypy",
+    "test": "pytest"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0"
+  }
+}
