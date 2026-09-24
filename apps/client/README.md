@@ -25,7 +25,7 @@ Copy `.env.example` to `.env.development` (or `.env.<APP_ENV>.local` for secrets
 | Variable  | Used for                                                     |
 | --------- | ------------------------------------------------------------ |
 | `PORT`    | Port the Next server listens on — read by `load-env-cli.mjs` |
-| `API_URL` | Base URL of the API, including its `/api` prefix             |
+| `API_URL` | Base URL of the API                                          |
 
 Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, first match wins (see
 `load-env.mjs`).
@@ -36,13 +36,13 @@ Files load in the order `.env.<APP_ENV>.local` → `.env.<APP_ENV>` → `.env`, 
 [OpenObserve](https://openobserve.ai) instance, the same one the server ships to. See the
 "OpenObserve (logs)" section of `apps/server/README.md` for how to start it and log in.
 
-| Variable               | Default   | Used for                                                                     |
-| ----------------------- | --------- | ------------------------------------------------------------------------------ |
-| `OPENOBSERVE_URL`       | _(empty)_ | Base URL of the ingest API. Empty turns off log shipping; console logging still works. |
-| `OPENOBSERVE_ORG`       | `default` | Organization to ship logs to.                                                  |
-| `OPENOBSERVE_STREAM`    | `client`  | Stream this app ships logs to.                                                 |
-| `OPENOBSERVE_USER`      | _(empty)_ | Login for ingest requests (basic auth).                                        |
-| `OPENOBSERVE_PASSWORD`  | _(empty)_ | Password for `OPENOBSERVE_USER`.                                               |
+| Variable               | Default   | Used for                                                                               |
+| ---------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `OPENOBSERVE_URL`      | _(empty)_ | Base URL of the ingest API. Empty turns off log shipping; console logging still works. |
+| `OPENOBSERVE_ORG`      | `default` | Organization to ship logs to.                                                          |
+| `OPENOBSERVE_STREAM`   | `client`  | Stream this app ships logs to.                                                         |
+| `OPENOBSERVE_USER`     | _(empty)_ | Login for ingest requests (basic auth).                                                |
+| `OPENOBSERVE_PASSWORD` | _(empty)_ | Password for `OPENOBSERVE_USER`.                                                       |
 
 These are read on the server only — never as `NEXT_PUBLIC_` keys — and `logUtils` never sends a
 log from the browser. Running this app in Docker needs the same host-vs-`localhost` fix as the

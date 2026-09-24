@@ -50,7 +50,7 @@ check_env_files() {
   env_require_file "${REPO_ROOT}/apps/server/.env.${APP_ENV}"
   env_require_file "${REPO_ROOT}/apps/client/.env.${APP_ENV}"
   env_require_file "${REPO_ROOT}/apps/py-service/.env.${APP_ENV}"
-  ui_info "Under Compose, the client's API_URL must be the internal hostname http://server:3000/api — localhost cannot reach the server container from inside the client container."
+  ui_info "Under Compose, the client's API_URL must be the internal hostname http://server:3000 — localhost cannot reach the server container from inside the client container."
 }
 
 # ---------------------------------------------------------------------------

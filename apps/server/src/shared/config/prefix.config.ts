@@ -1,9 +1,15 @@
 import { INestApplication } from '@nestjs/common';
 
-/** Path prefix prepended to every route, e.g. `GET /api/health`. */
-export const GLOBAL_PREFIX = 'api';
+/**
+ * Path prefix prepended to every route. Empty means no prefix, e.g. `GET /health`.
+ * Set it to a value such as `'api'` to add one back.
+ */
+export const GLOBAL_PREFIX = '';
 
-/** Mount all routes under {@link GLOBAL_PREFIX}. The Swagger UI is registered separately. */
+/**
+ * Mount all routes under {@link GLOBAL_PREFIX}, skipped when it is empty.
+ * The Swagger UI is registered separately.
+ */
 export function handleGlobalPrefix(app: INestApplication): void {
-  app.setGlobalPrefix(GLOBAL_PREFIX);
+  if (GLOBAL_PREFIX) app.setGlobalPrefix(GLOBAL_PREFIX);
 }
