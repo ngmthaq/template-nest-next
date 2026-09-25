@@ -47,6 +47,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `APP_ENV`               | `development`                            | Set by the start script (not the file). Selects the `.env` file and gates dev-only behaviour.  |
 | `PORT`                  | `3000`                                   | HTTP server port.                                                                              |
 | `LOG_LEVEL`             | `debug`                                  | Minimum level emitted by the Winston logger.                                                   |
+| `LOG_REQUEST_DATA`      | `false`                                  | Add masked, size-limited request query and body JSON to the log line.                          |
 | `CACHE_TTL`             | `3600000`                                | Redis-backed cache entry TTL, in milliseconds.                                                 |
 | `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                        |
 | `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                 |

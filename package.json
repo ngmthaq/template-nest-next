@@ -1,6 +1,6 @@
 {
   "name": "template-nest-next",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "private": true,
   "license": "UNLICENSED",
   "packageManager": "pnpm@12.6.0",

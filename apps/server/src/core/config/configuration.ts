@@ -9,6 +9,7 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '3000', 10),
   log: {
     level: process.env.LOG_LEVEL ?? 'debug',
+    requestData: process.env.LOG_REQUEST_DATA === 'true',
     openobserve: {
       url: process.env.OPENOBSERVE_URL || undefined,
       org: process.env.OPENOBSERVE_ORG ?? 'default',

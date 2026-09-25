@@ -1,8 +1,11 @@
 import 'reflect-metadata';
 
+import type { MiddlewareConsumer } from '@nestjs/common';
+
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
 import { FeatureModule } from './feature/feature.module';
+import { RequestLoggerMiddleware } from './shared/middlewares/request-logger.middleware';
 
 // Jest can't resolve the generated client's `.js` imports, so stub it; importing
 // the module is enough to load it.
@@ -29,5 +32,20 @@ describe('AppModule', () => {
 
     // Assert
     expect(moduleExports ?? []).toHaveLength(0);
+  });
+
+  it('applies RequestLoggerMiddleware to every route on configure', () => {
+    // Arrange
+    const forRoutes = jest.fn();
+    const apply = jest.fn().mockReturnValue({ forRoutes });
+    const consumer = { apply } as unknown as MiddlewareConsumer;
+    const appModule = new AppModule();
+
+    // Act
+    appModule.configure(consumer);
+
+    // Assert
+    expect(apply).toHaveBeenCalledWith(RequestLoggerMiddleware);
+    expect(forRoutes).toHaveBeenCalledWith('{*splat}');
   });
 });
