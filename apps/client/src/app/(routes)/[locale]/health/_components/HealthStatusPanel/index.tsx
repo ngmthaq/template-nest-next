@@ -38,6 +38,7 @@ export function HealthStatusPanel(props: HealthStatusPanelProps) {
     server: t('indicatorsServer'),
     mysql: t('indicatorsMysql'),
     redis: t('indicatorsRedis'),
+    pyService: t('indicatorsPyService'),
   };
 
   return (

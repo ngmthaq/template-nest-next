@@ -1,8 +1,14 @@
+import { HttpService } from '@nestjs/axios';
 import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ApiProperty } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import type { Redis } from 'ioredis';
 import type { Pool } from 'mysql2/promise';
+import { firstValueFrom } from 'rxjs';
 
+import { PyServiceHealthDto } from './dto/py-service-health.dto';
 import { HEALTH_MYSQL_POOL, HEALTH_REDIS_CLIENT } from './health.constants';
 
 /** Liveness result for a single dependency. */
@@ -41,6 +47,7 @@ export class HealthResult {
       server: { status: 'up', uptime: 123.45 },
       mysql: { status: 'up' },
       redis: { status: 'up' },
+      pyService: { status: 'up' },
     },
     description: 'Per-dependency status, keyed by indicator name.',
   })
@@ -56,15 +63,23 @@ export class HealthService implements OnModuleDestroy {
   public constructor(
     @Inject(HEALTH_MYSQL_POOL) private readonly mysql: Pool,
     @Inject(HEALTH_REDIS_CLIENT) private readonly redis: Redis,
+    private readonly http: HttpService,
+    private readonly config: ConfigService,
   ) {}
 
   /** Run every indicator in parallel and fold them into one report. */
   public async check(): Promise<HealthResult> {
-    const [mysql, redis] = await Promise.all([this.checkMysql(), this.checkRedis()]);
+    const pyServiceUrl = this.config.get<string>('pyService.url');
+    const [mysql, redis, pyService] = await Promise.all([
+      this.checkMysql(),
+      this.checkRedis(),
+      pyServiceUrl ? this.checkPyService(pyServiceUrl) : undefined,
+    ]);
     const info: Record<string, IndicatorStatus> = {
       server: { status: 'up', uptime: process.uptime() },
       mysql,
       redis,
+      ...(pyService ? { pyService } : {}),
     };
     const healthy = Object.values(info).every((indicator) => indicator.status === 'up');
     return { status: healthy ? 'ok' : 'error', info };
@@ -89,6 +104,27 @@ export class HealthService implements OnModuleDestroy {
   private async checkRedis(): Promise<IndicatorStatus> {
     try {
       await this.redis.ping();
+      return { status: 'up' };
+    } catch (error) {
+      return { status: 'down', error: this.messageOf(error) };
+    }
+  }
+
+  /** `GET {url}/health` on py-service, validating the body against {@link PyServiceHealthDto}. */
+  private async checkPyService(url: string): Promise<IndicatorStatus> {
+    try {
+      const { data } = await firstValueFrom(
+        this.http.get<unknown>(`${url}/health`, { timeout: 3000 }),
+      );
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        return { status: 'down', error: 'Invalid py-service health response' };
+      }
+      const dto = plainToInstance(PyServiceHealthDto, data);
+      const errors = await validate(dto);
+      if (errors.length > 0) {
+        const properties = errors.map((error) => error.property).join(', ');
+        return { status: 'down', error: `Invalid py-service health response: ${properties}` };
+      }
       return { status: 'up' };
     } catch (error) {
       return { status: 'down', error: this.messageOf(error) };

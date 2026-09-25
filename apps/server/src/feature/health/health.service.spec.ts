@@ -1,5 +1,9 @@
+import type { HttpService } from '@nestjs/axios';
+import type { ConfigService } from '@nestjs/config';
+import { AxiosError } from 'axios';
 import type { Redis } from 'ioredis';
 import type { Pool } from 'mysql2/promise';
+import { of, throwError } from 'rxjs';
 
 import { HealthService } from './health.service';
 
@@ -13,9 +17,21 @@ interface RedisClientMock {
   quit: jest.Mock;
 }
 
+interface HttpServiceMock {
+  get: jest.Mock;
+}
+
+interface ConfigServiceMock {
+  get: jest.Mock;
+}
+
 describe('HealthService', () => {
+  const pyServiceUrl = 'http://py-service.internal:8000';
+
   let mysql: MysqlPoolMock;
   let redis: RedisClientMock;
+  let http: HttpServiceMock;
+  let config: ConfigServiceMock;
   let service: HealthService;
 
   beforeEach(() => {
@@ -24,7 +40,15 @@ describe('HealthService', () => {
       end: jest.fn().mockResolvedValue(undefined),
     };
     redis = { ping: jest.fn().mockResolvedValue('PONG'), quit: jest.fn().mockResolvedValue('OK') };
-    service = new HealthService(mysql as unknown as Pool, redis as unknown as Redis);
+    http = { get: jest.fn() };
+    // Default: pyService.url is not set, matching an environment without py-service configured.
+    config = { get: jest.fn().mockReturnValue(undefined) };
+    service = new HealthService(
+      mysql as unknown as Pool,
+      redis as unknown as Redis,
+      http as unknown as HttpService,
+      config as unknown as ConfigService,
+    );
   });
 
   it('reports ok with every indicator up when mysql and redis are healthy', async () => {
@@ -107,5 +131,173 @@ describe('HealthService', () => {
     // Assert
     expect(mysql.end).toHaveBeenCalledTimes(1);
     expect(redis.quit).toHaveBeenCalledTimes(1);
+  });
+
+  describe('pyService indicator', () => {
+    it('does not include a pyService key and does not call http.get when pyService.url is not set', async () => {
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService).toBeUndefined();
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('reports pyService up and the overall status ok when the body status is ok', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: { status: 'ok' } }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.status).toBe('ok');
+      expect(result.info.pyService).toEqual({ status: 'up' });
+    });
+
+    it('calls http.get with the health path and a 3 second timeout', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: { status: 'ok' } }));
+
+      // Act
+      await service.check();
+
+      // Assert
+      expect(http.get).toHaveBeenCalledWith(`${pyServiceUrl}/health`, { timeout: 3000 });
+    });
+
+    it('reports pyService up when the body has extra fields alongside a status of ok', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: { status: 'ok', version: '1.2.3' } }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService).toEqual({ status: 'up' });
+    });
+
+    it('reports pyService down and the overall status error when http.get rejects with a connection error', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(throwError(() => new Error('connect ECONNREFUSED 127.0.0.1:8000')));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.status).toBe('error');
+      expect(result.info.pyService).toEqual({
+        status: 'down',
+        error: 'connect ECONNREFUSED 127.0.0.1:8000',
+      });
+    });
+
+    it('reports pyService down when http.get rejects with a timeout error', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      const timeoutError = Object.assign(new Error('timeout of 3000ms exceeded'), {
+        code: 'ECONNABORTED',
+      });
+      http.get.mockReturnValue(throwError(() => timeoutError));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService?.status).toBe('down');
+      expect(result.info.pyService?.error).toBe('timeout of 3000ms exceeded');
+    });
+
+    it('reports pyService down when http.get rejects with a 500 AxiosError', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      const axiosError = new AxiosError('Request failed with status code 500');
+      http.get.mockReturnValue(throwError(() => axiosError));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService?.status).toBe('down');
+      expect(result.info.pyService?.error).toBe('Request failed with status code 500');
+    });
+
+    it('reports pyService down with a validation message when the body status is not ok', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: { status: 'error' } }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService).toEqual({
+        status: 'down',
+        error: 'Invalid py-service health response: status',
+      });
+    });
+
+    it('reports pyService down when the body is an empty object', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: {} }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService?.status).toBe('down');
+      expect(result.info.pyService?.error).toContain('Invalid py-service health response');
+    });
+
+    it('reports pyService down with the invalid-response message without throwing when the body is null', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: null }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.status).toBe('error');
+      expect(result.info.pyService).toEqual({
+        status: 'down',
+        error: 'Invalid py-service health response',
+      });
+    });
+
+    it('reports pyService down with the invalid-response message without throwing when the body is a plain string', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: 'not-json-shaped' }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService).toEqual({
+        status: 'down',
+        error: 'Invalid py-service health response',
+      });
+    });
+
+    it('reports pyService down with the invalid-response message without throwing when the body is an array', async () => {
+      // Arrange
+      config.get.mockReturnValue(pyServiceUrl);
+      http.get.mockReturnValue(of({ data: [{ status: 'ok' }] }));
+
+      // Act
+      const result = await service.check();
+
+      // Assert
+      expect(result.info.pyService).toEqual({
+        status: 'down',
+        error: 'Invalid py-service health response',
+      });
+    });
   });
 });

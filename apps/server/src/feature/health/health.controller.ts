@@ -24,7 +24,7 @@ export class HealthController {
    * the body is the full {@link HealthResult}.
    */
   @ApiOperation({
-    summary: 'Health check (server, MySQL, Redis)',
+    summary: 'Health check (server, MySQL, Redis, py-service)',
   })
   @ApiOkResponse({
     description: 'All dependencies are up.',

@@ -3,6 +3,7 @@
 import os
 from functools import lru_cache
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +18,13 @@ class Settings(BaseSettings):
     app_env: str = "development"
     host: str = "127.0.0.1"
     port: int = 8000
+
+    log_level: str = "INFO"
+    openobserve_url: str | None = None
+    openobserve_org: str = "default"
+    openobserve_stream: str = "py-service"
+    openobserve_user: str | None = None
+    openobserve_password: SecretStr | None = None
 
 
 @lru_cache

@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import Redis from 'ioredis';
@@ -32,6 +33,7 @@ async function buildHealthModule(config: TestConfig = {}): Promise<TestingModule
   return Test.createTestingModule({
     imports: [
       ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, load: [() => config] }),
+      HttpModule.register({ global: true }),
       HealthModule,
     ],
   }).compile();

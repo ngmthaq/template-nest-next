@@ -51,6 +51,7 @@ default in `src/core/configuration.ts` applies when it is unset.
 | `CACHE_MAX`             | `100`                                    | Desired max cache entries (not enforced by the cache-manager v7 store).                        |
 | `HTTP_TIMEOUT`          | `60000`                                  | Outbound `HttpService`/axios request timeout, in milliseconds.                                 |
 | `HTTP_MAX_REDIRECTS`    | `5`                                      | Outbound HTTP max redirects before failing.                                                    |
+| `PY_SERVICE_URL`        | _(empty)_                                | Base URL of py-service, checked by `GET /health`. Empty skips the check (no `pyService` key). Under Docker Compose, set this to `http://py-service:8000` in this env file (the service name), not `localhost`. |
 | `CORS_ORIGIN`           | `*`                                      | Allowed origins (`*` reflects any, or a comma-separated allow-list). REST + WebSocket.         |
 | `CORS_METHODS`          | `GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS` | Allowed HTTP methods.                                                                          |
 | `CORS_ALLOWED_HEADERS`  | _(empty)_                                | Allowed request headers; empty reflects the browser's requested headers.                       |

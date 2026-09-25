@@ -29,6 +29,7 @@
     "indicatorsServer": "伺服器",
     "indicatorsMysql": "MySQL",
     "indicatorsRedis": "Redis",
+    "indicatorsPyService": "Python 服務",
     "notAvailable": "—"
   },
   "cache": {

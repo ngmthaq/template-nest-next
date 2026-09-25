@@ -85,4 +85,19 @@ describe('HealthStatusPanel', () => {
     // Assert
     expect(screen.getByText('customIndicator')).toBeInTheDocument();
   });
+
+  it('shows the translated label for the pyService indicator instead of the raw key', () => {
+    // Arrange
+    const report: HealthResult = {
+      status: 'error',
+      info: { pyService: { status: 'down', error: 'connect ECONNREFUSED 127.0.0.1:8000' } },
+    };
+
+    // Act
+    renderPanel(report);
+
+    // Assert
+    expect(screen.getByText('Python service')).toBeInTheDocument();
+    expect(screen.queryByText('pyService')).not.toBeInTheDocument();
+  });
 });

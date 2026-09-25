@@ -29,6 +29,7 @@
     "indicatorsServer": "Server",
     "indicatorsMysql": "MySQL",
     "indicatorsRedis": "Redis",
+    "indicatorsPyService": "Python service",
     "notAvailable": "—"
   },
   "cache": {

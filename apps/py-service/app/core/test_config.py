@@ -55,3 +55,78 @@ def test_get_settings_returns_same_cached_instance() -> None:
     second = get_settings()
 
     assert first is second
+
+
+def test_settings_defaults_log_level_to_info() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.log_level == "INFO"
+
+
+def test_settings_defaults_openobserve_url_to_none() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_url is None
+
+
+def test_settings_defaults_openobserve_org_to_default() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_org == "default"
+
+
+def test_settings_defaults_openobserve_stream_to_py_service() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_stream == "py-service"
+
+
+def test_settings_defaults_openobserve_user_to_none() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_user is None
+
+
+def test_settings_defaults_openobserve_password_to_none() -> None:
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_password is None
+
+
+def test_settings_reads_log_level_override_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LOG_LEVEL", "DEBUG")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.log_level == "DEBUG"
+
+
+def test_settings_reads_openobserve_url_override_from_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENOBSERVE_URL", "http://openobserve.local")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_url == "http://openobserve.local"
+
+
+def test_settings_reads_openobserve_stream_override_from_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("OPENOBSERVE_STREAM", "custom-stream")
+
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_stream == "custom-stream"
+
+
+def test_settings_openobserve_password_is_secret_and_hidden_in_repr(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    raw_value = "hunter2"
+    monkeypatch.setenv("OPENOBSERVE_PASSWORD", raw_value)
+
+    settings = Settings(_env_file=None)
+
+    assert settings.openobserve_password is not None
+    assert settings.openobserve_password.get_secret_value() == raw_value
+    assert raw_value not in repr(settings.openobserve_password)

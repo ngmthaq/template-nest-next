@@ -52,14 +52,59 @@ the example file to make your own:
 cp .env.example .env.development
 ```
 
-| Key    | Default     | What it does                                                       |
-| ------ | ----------- | -------------------------------------------------------------------- |
-| `HOST` | `127.0.0.1` | Address the server binds to. Set to `0.0.0.0` in Docker/production so it accepts outside connections. |
-| `PORT` | `8000`      | HTTP server port.                                                   |
+| Key                     | Default     | What it does                                                       |
+| ----------------------- | ----------- | -------------------------------------------------------------------- |
+| `HOST`                  | `127.0.0.1` | Address the server binds to. Set to `0.0.0.0` in Docker/production so it accepts outside connections. |
+| `PORT`                  | `8000`      | HTTP server port.                                                   |
+| `LOG_LEVEL`             | `INFO`      | Minimum level emitted by the root logger (and, through it, `uvicorn`'s own loggers). |
+| `OPENOBSERVE_URL`       | _(empty)_   | Base URL of the OpenObserve ingest API. Empty turns off log shipping; console logging stays on. |
+| `OPENOBSERVE_ORG`       | `default`   | OpenObserve organization this app ships logs to.                    |
+| `OPENOBSERVE_STREAM`    | `py-service`| OpenObserve stream this app ships logs to.                          |
+| `OPENOBSERVE_USER`      | _(empty)_   | Login used to authenticate log ingest requests (basic auth).        |
+| `OPENOBSERVE_PASSWORD`  | _(empty)_   | Password for `OPENOBSERVE_USER`.                                    |
 
 `start:dev` and `start:debug` always use `uvicorn`'s own default (port 8000) and do not read
 `HOST`/`PORT`. `start:staging` and `start:prod` run `python -m app`, which reads both from
 settings.
+
+## Logging
+
+`app/core/logging.py` sets up the root logger with a console handler and, when
+`OPENOBSERVE_URL` is set, an `OpenObserveHandler` (a `logging.Handler` subclass) that ships
+logs to a self-hosted [OpenObserve](https://openobserve.ai), the same way `apps/server` does.
+`create_app()` calls `setup_logging()` once per app build, and it is idempotent: it removes the
+handlers it added on any earlier call, so calling `create_app()` more than once (as the tests
+do) never adds duplicate console lines or leaks background threads.
+
+- Uvicorn's own loggers (`uvicorn`, `uvicorn.error`, `uvicorn.access`) have their handlers
+  cleared and propagate to the root logger, so app and uvicorn logs go through the same
+  console/OpenObserve setup with no duplicate lines.
+- `OpenObserveHandler` buffers records as JSON dicts (`_timestamp`, `level`, `message`,
+  `logger`, and `exc_info` when present) and POSTs them as one batch to
+  `{OPENOBSERVE_URL}/api/{OPENOBSERVE_ORG}/{OPENOBSERVE_STREAM}/_json` using an `httpx2.Client`,
+  with basic auth when `OPENOBSERVE_USER` is set. It flushes once 20 records are buffered or
+  every 5 seconds from a daemon background thread — the same batch size and interval as the
+  server's Winston transport.
+- A failed send (OpenObserve down, wrong password) is swallowed — it never crashes the app,
+  never blocks the request path, and is not logged through the same handler (that would loop).
+  Records still in the buffer are flushed when the FastAPI lifespan closes the handler on
+  shutdown.
+
+> **Running in Docker?** `OPENOBSERVE_URL=http://localhost:5080` will not reach the OpenObserve
+> container from inside `py-service`'s own container — `localhost` there means the container
+> itself. Use the host instead, the same as `apps/server`'s README describes.
+
+## API Documentation (Swagger)
+
+`create_app()` in `app/main.py` configures FastAPI's built-in OpenAPI docs:
+
+- **UI:** `GET /swagger`
+- **OpenAPI JSON:** `GET /swagger-json`
+
+ReDoc (`/redoc`) is turned off.
+
+> **Disabled in production.** When `APP_ENV=production`, `docs_url` and `openapi_url` are both
+> `None`, so `/swagger`, `/swagger-json`, and `/docs` all return 404 — the same as `apps/server`.
 
 ## Docker
 

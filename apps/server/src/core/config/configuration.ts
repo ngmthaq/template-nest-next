@@ -25,6 +25,9 @@ export default () => ({
     timeout: parseInt(process.env.HTTP_TIMEOUT ?? '60000', 10),
     maxRedirects: parseInt(process.env.HTTP_MAX_REDIRECTS ?? '5', 10),
   },
+  pyService: {
+    url: process.env.PY_SERVICE_URL || undefined,
+  },
   mail: {
     host: process.env.MAIL_HOST ?? 'localhost',
     port: parseInt(process.env.MAIL_PORT ?? '1025', 10),
